@@ -1,0 +1,21 @@
+---
+- name: UpdateCache
+  apt:
+    update_cache: yes
+
+- name: proxmox-widget-toolkit
+  shell: apt --reinstall install proxmox-widget-toolkit
+  listen: Reinstall proxmox-widget-toolkit
+
+#- name: update initramfs
+#  command: update-initramfs -u -k all
+
+- name: restart cpu-governor service
+  ansible.builtin.systemd:
+    name: cpu-governor.service
+    state: restarted
+
+- name: Restart ksmtuned
+  service:
+    name: "{{ ksmtuned_pkg }}"
+    state: restarted        
