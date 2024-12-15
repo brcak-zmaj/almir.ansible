@@ -1,0 +1,33 @@
+# Ansible Managed
+
+# How long ksmtuned should sleep between tuning adjustments
+KSM_MONITOR_INTERVAL={{ ksm_monitor_interval | default(60) }}
+
+# Millisecond sleep between ksm scans for 16GB server.
+# Smaller servers sleep more, bigger servers sleep less.
+KSM_SLEEP_MSEC={{ ksm_sleep_msec | default(100) }}
+
+# KSM_NPAGES_BOOST controls the page boost factor.
+KSM_NPAGES_BOOST={{ ksm_npages_boost | default(300) }}
+
+# KSM_NPAGES_DECAY controls the page decay factor.
+KSM_NPAGES_DECAY={{ ksm_npages_decay | default(-50) }}
+
+# KSM_NPAGES_MIN is the minimum number of pages.
+KSM_NPAGES_MIN={{ ksm_npages_min | default(64) }}
+
+# KSM_NPAGES_MAX is the maximum number of pages.
+KSM_NPAGES_MAX={{ ksm_npages_max | default(1250) }}
+
+# KSM_THRES_COEF controls how aggressively KSM will share memory.
+KSM_THRES_COEF={{ ksm_threshold_coef | default(20) }}
+
+# KSM_THRES_CONST is the constant factor for KSM threshold calculation.
+KSM_THRES_CONST={{ ksm_threshold_const | default(2048) }}
+
+# The metric used to calculate how much memory is used by a QEMU process
+# The proportional set size (pss) or the residential (rsz) ones are good fits.
+KSM_PS_METRIC={{ ksm_ps_metric | default("pss") }}
+
+LOGFILE={{ ksm_logfile_path }}
+DEBUG={{ ksm_debug }}

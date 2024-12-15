@@ -1,0 +1,8 @@
+namespace: almir
+name: ansible
+version: 1.0.0
+readme: README.md
+author: almir ansible@th2h2f0rt1.33mail.com
+description: Ansible roles and collections for server management tasks
+license: #
+dependencies: []
