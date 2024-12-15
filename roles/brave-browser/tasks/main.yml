@@ -1,0 +1,4 @@
+---
+
+- name: Include "{{ ansible_os_family }}" Tasks for Brave Browser
+  include_tasks: "{{ ansible_os_family | lower }}.yml"
