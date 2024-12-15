@@ -1,0 +1,13 @@
+---
+
+- name: Install KSM Package
+  ansible.builtin.package:
+    name: "{{ ksmtuned_pkg }}"
+    state: present
+
+- name: Configure ksmtuned.conf using template
+  template:
+    src: ksmtuned.conf.j2
+    dest: /etc/ksmtuned.conf
+  notify:
+    - Restart ksmtuned
