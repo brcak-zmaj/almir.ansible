@@ -1,0 +1,19 @@
+---
+
+- name: Check if subscription fixes are needed
+  shell: dpkg -V proxmox-widget-toolkit | grep -q '/proxmoxlib\.js$'
+  register: subscription_fix_needed
+  changed_when: subscription_fix_needed.rc == 0
+
+- name: Create the cron for fixing subscription nag
+  file:
+  src: pve_subscribe_fix.sh
+  dest: /etc/cron.daily/pve_subscribe_fix.sh
+  mode: '0755'
+
+- name: Conf pve subscribe box
+  file:
+    source: pve-subscribe-box
+    dest: /etc/apt/apt.conf.d/pve-subscribe-box
+    mode: '0755'
+  notify: proxmox-widget-toolkit

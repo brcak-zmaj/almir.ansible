@@ -1,0 +1,35 @@
+---
+- name: "Check if ZFS has been tuned"
+  become: yes
+  lineinfile:
+    name: /usr/bin/local/zfs_snapshots_tuned
+    line: "done"
+    state: present
+  check_mode: yes
+  register: zfs_snapshot_conf
+
+- name: Update ZFS snapshots cron jobs
+  cron:
+    name: "Adjust {{ item.name }}"
+    minute: "{{ item.minute }}"
+    hour: "{{ item.hour }}"
+    day: "{{ item.day }}"
+    job: "/usr/bin/sed -i 's|--keep=[0-9]*|--keep={{ item.keep }}|g' {{ item.file }}"
+  loop:
+    - { name: 'zfs-auto-snapshot daily', minute: '0', hour: '0', day: '*', keep: '3', file: '/etc/cron.daily/zfs-auto-snapshot' }
+    - { name: 'zfs-auto-snapshot weekly', minute: '0', hour: '0', day: '7', keep: '3', file: '/etc/cron.weekly/zfs-auto-snapshot' }
+    - { name: 'zfs-auto-snapshot monthly', minute: '0', hour: '0', day: '1', keep: '3', file: '/etc/cron.monthly/zfs-auto-snapshot' }
+  when: zfs_check.rc == 0
+
+- name: Transfer the zfs arch script
+  template:
+    src: zfs-arc.sh.j2
+    dest: /tmp/zfs_arc.sh
+    mode: "0777"
+
+- name: Execute the snapshot script
+  shell: sh /tmp/zfs_auto_snapshot.sh
+  when: zfs_snapshot_conf.changed == False
+
+- name: Execute the zfs arch script
+  shell: sh /tmp/zfs_arc.sh
