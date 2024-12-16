@@ -1,0 +1,26 @@
+
+- name: Install necessary packages for managing locales (RedHat-based)
+  ansible.builtin.package:
+    name:
+      - glibc-common   # Needed for locale management on RedHat
+    state: present
+
+- name: Set locale in locale.conf (RedHat-based)
+  ansible.builtin.lineinfile:
+    path: "{{ locale_conf_path_redhat }}"
+    line: "LANG={{ locale_lang }}"
+    create: yes
+
+- name: Ensure English is set as the default system locale (RedHat-based)
+  ansible.builtin.shell: |
+    localectl set-locale LANG={{ locale_lang }}
+
+- name: Remove non-English locales (RedHat-based)
+  ansible.builtin.shell: |
+    for loc in $(localectl list-locales | grep -v en); do localectl reset-locale LANG={{ locale_lang }}; done
+
+- name: Remove packages for managing locales (RedHat-based)
+  ansible.builtin.package:
+    name:
+      - glibc-common
+    state: absent
