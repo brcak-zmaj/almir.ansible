@@ -1,0 +1,13 @@
+---
+
+backup_path: "/mnt/pve/Local-Backups/dump"
+
+vms:
+  146: # This example is if you want to restore with overrides..
+    snapshot_name: "vzdump-qemu-146.vma.zst"
+    cpus: 8
+    memory: 8192
+  139: # This example is if you want to restore without overrides... 
+    snapshot_name: "vzdump-qemu-139.zst"
+
+cleanup_unused_disks: true # Set to false if you dont want to delete unused disk.. 
