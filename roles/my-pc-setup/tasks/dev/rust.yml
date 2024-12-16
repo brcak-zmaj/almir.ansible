@@ -1,0 +1,6 @@
+
+- name: Install Rust and Cargo | Dev
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ rust_packages }}"

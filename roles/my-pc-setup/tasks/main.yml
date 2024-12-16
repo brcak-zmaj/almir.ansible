@@ -1,0 +1,45 @@
+---
+
+## Include additional Vars
+
+- name: Include workstation vars
+  ansible.builtin.include_vars:
+    file: workstation_vars.yml
+
+- name: Include package vars
+  ansible.builtin.include_vars:
+    file: packages.yml
+
+##########################################
+
+- name: Include debloat tasks
+  include_tasks: debloat/_main.yml
+
+- name: Include dev tasks
+  include_tasks: dev/_main.yml
+
+- name: Include games tasks
+  include_tasks: games/_main.yml
+
+- name: Include gnome tasks
+  include_tasks: gnome/_main.yml
+  when: gnome is defined and gnome == true
+
+- name: Include internet tasks
+  include_tasks: internet/_main.yml
+
+- name: Include multimedia tasks
+  include_tasks: multimedia/_main.yml
+
+- name: Include posix include_tasks
+  include_tasks: posix/_main.yml
+  tags: posix,fstab
+
+- name: Include prep tasks
+  include_tasks: prep/_main.yml
+
+- name: Include productivity tasks
+  include_tasks: productivity/_main.yml
+
+- name: Include virtualization tasks
+  include_tasks: virtualization/_main.yml

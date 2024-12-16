@@ -1,0 +1,13 @@
+---
+
+- name: Gnome | power | set AC Timeout
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-timeout"
+    value: "1800"
+
+- name: Gnome | power | set Battery Timeout
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-timeout"
+    value: "1800"

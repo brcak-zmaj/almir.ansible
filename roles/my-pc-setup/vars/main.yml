@@ -1,0 +1,26 @@
+---
+
+## Whoami
+user: almir
+home_dir: "/home/{{ user }}"
+
+## Locals
+locale: "en_US.UTF-8"
+locale_lang: "en_US.UTF-8"
+locale_conf_path_debian: "/etc/locale.gen"
+locale_conf_path_redhat: "/etc/locale.conf"
+timezone: "America/New_York"
+setup_dir: /tmp/ansible
+bin_dir: /usr/local/bin
+ansible_python_interpreter: /usr/bin/python3
+
+## Wallpaper
+wallpaper_src: "wallpaper.png"
+wallpaper_dest: "{{ home_dir }}"
+
+## Clutter
+home_dir_clutter:
+  - Music
+  - Public
+  - Templates
+  - Videos

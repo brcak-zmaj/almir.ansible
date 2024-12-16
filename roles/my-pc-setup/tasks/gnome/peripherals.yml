@@ -1,0 +1,13 @@
+---
+
+- name: Gnome | peripherals | Numlock state
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/peripherals/keyboard/numlock-state"
+    value: "true"
+
+- name: Gnome | peripherals | Numlock state
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/peripherals/touchpad/two-finger-scrolling-enabled"
+    value: "true"

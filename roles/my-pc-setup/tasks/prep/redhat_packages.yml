@@ -1,0 +1,6 @@
+
+- name: Installing RedHat Software | Prep
+  ansible.builtin.dnf:
+    pkg: "{{ item }}"
+    state: present
+  loop: "{{ redhat_packages }}"
