@@ -1,0 +1,10 @@
+---
+
+- name: Reload systemd
+  ansible.builtin.command:
+    cmd: systemctl daemon-reload
+
+- name: Restart Nvidia GPU Exporter
+  ansible.builtin.systemd:
+    name: "{{ nvidia_exporter_service_name }}"
+    state: restarted
