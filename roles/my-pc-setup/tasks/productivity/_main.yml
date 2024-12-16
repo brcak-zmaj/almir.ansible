@@ -1,0 +1,5 @@
+---
+
+- name: Include LibreOffice tasks
+  ansible.builtin.include_tasks: libreoffice.yml
+  when: libreoffice is defined and libreoffice == true

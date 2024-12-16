@@ -1,0 +1,24 @@
+
+- name: Remmina Packages | Internet
+  ansible.builtin.package:
+    name: "{{ remmina_pkgs }}"
+    state: present
+
+- name: Ensure Remmina directory exists | Internet
+  changed_when: false
+  file:
+    path: "{{ home_dir }}/.config/remmina"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0755'
+    recurse: yes
+ 
+- name: Copy over Remmina config | Internet
+  changed_when: false
+  ansible.builtin.template:
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    src: remmina.pref.j2
+    dest: "{{ home_dir }}/.config/remmina/remmina.pref"
+    mode: "0644"

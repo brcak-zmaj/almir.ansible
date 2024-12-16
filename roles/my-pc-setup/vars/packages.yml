@@ -1,0 +1,79 @@
+
+# Common system packages to be installed
+common_packages:
+# Version Control and Development Tools
+  - git            # Version control system
+  - curl           # Tool for transferring data with URLs
+  - unzip          # Extract ZIP archives
+  - wget           # Command-line file downloader
+  - ffmpeg         # Multimedia processing tool (audio/video)
+  - sqlitebrowser  # GUI editor for SQLite databases
+  - wine           # Compatibility layer for running Windows applications on Linux
+  - keepassxc      # Password manager
+
+# System Monitoring and Optimization
+  - htop           # Interactive process viewer
+  - iftop          # Network bandwidth usage monitor
+  - iotop          # Display I/O usage by processes
+  - bashtop        # Resource monitor for Linux
+  - stacer         # Linux system optimizer and monitoring tool
+  - neofetch       # Display system information
+  - tlp            # Advanced Linux power management
+
+# Network and Security Tools
+  - iperf          # Network performance testing tool
+  - nmap           # Network scanning tool
+  - net-tools      # Network configuration utilities (ifconfig, netstat, etc.)
+  - wireshark      # Network protocol analyzer for troubleshooting and analysis
+  - cifs-utils
+
+# Media and Audio Tools
+  - vlc            # Media player supporting various audio and video formats
+  - flac           # Free Lossless Audio Codec (audio compression tool)
+  - ffmpeg         # Multimedia processing tool (audio/video)
+  - kdenlive       # Non-linear video editor for Linux
+  - obs-studio     # Open source software for video recording and live streaming
+
+# Miscellaneous Utilities
+  - cowsay         # ASCII art generator with cows
+  - flameshot      # Screenshot tool with annotation features
+  - timeshift      # Backup and restore utility for Linux
+  - aria2          # High-speed download utility for HTTP, FTP, and BitTorrent
+  - gparted        # Graphical partition editor
+  - bleachbit      # Disk space cleaner and privacy manager
+  - discord        # Communication platform with text, voice, and video chat
+  - make           # Utility for building and compiling software
+
+##################################################################################################################  
+
+# Debian-Specific Development and Build Tools
+debian_packages:
+# Debian-Specific Development and Build Tools
+  - build-essential                   # Essential tools for building software
+  - gnupg-agent                       # GNU Privacy Guard agent for key management
+  - software-properties-common        # Manage software repositories
+  - apt-transport-https               # Transport for accessing HTTPS repositories
+
+# Debian-Specific Utilities and System Tools
+  - dialog                            # Utility for creating dialog boxes from shell scripts
+  - grc                               # Generic colorizer for command outputs
+  - ncdu                              # Disk usage analyzer
+  - iptraf                            # Real-time network monitoring tool
+
+##################################################################################################################
+
+# RedHat-Specific Development and Build Tools
+redhat_packages:
+# RedHat-Specific Development and Build Tools
+  - kernel-devel                      # Development files for building kernel modules
+  - kernel-headers                    # Header files for kernel development
+  - gcc                               # GNU C compiler
+  - dkms                              # Dynamic kernel module support framework
+  - pkgconfig                         # Tool for managing compiler and linker flags for libraries
+
+# RedHat-Specific System and Power Management Tools
+
+# RedHat-Specific Graphics and OpenGL Libraries
+  - libglvnd-glx                      # OpenGL client libraries for vendor-neutral support
+  - libglvnd-opengl                   # OpenGL libraries for vendor-neutral distribution
+  - libglvnd-devel                    # Development files for libglvnd

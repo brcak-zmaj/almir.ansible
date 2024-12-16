@@ -1,0 +1,21 @@
+
+- name: Install Konsole
+  ansible.builtin.package:
+    name: konsole
+    state: present
+
+- name: Ensure the user's .config directory exists
+  ansible.builtin.file:
+    path: "{{ home_dir }}/.config"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0755'
+
+- name: Copy over Konsole config
+  ansible.builtin.template:
+    src: konsolerc.j2
+    dest: "{{ home_dir }}/.config/konsolerc"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0644'

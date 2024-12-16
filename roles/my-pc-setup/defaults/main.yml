@@ -1,0 +1,237 @@
+---
+
+# Remmina
+remmina_pkgs:
+  - remmina                   # A remote desktop client supporting RDP, VNC, SPICE, and other protocols
+  - remmina-plugin-x2go       # Plugin for Remmina to support the X2Go remote desktop protocol
+  - remmina-plugin-spice      # Plugin for Remmina to support the SPICE remote desktop protocol
+  - remmina-plugin-exec       # Plugin for Remmina to execute commands over remote desktop sessions
+  - pyhoca-gui                # GUI for managing and accessing X2Go sessions (complementing Remmina)
+
+
+# Flatpak
+flatpak_repo: https://flathub.org/repo/flathub.flatpakrepo
+flatpak_packages:
+# Flatpak Packages for Utilities
+  - com.github.qarmin.czkawka          # Duplicate file cleaner
+  - org.fedoraproject.MediaWriter      # Tool for writing ISO images to USB
+  - fr.romainvigier.MetadataCleaner    # Tool to clean metadata from files
+  - com.belmoussaoui.Obfuscate         # Tool to hide sensitive information in screenshots
+
+# Flatpak Packages for Multimedia
+  - net.codeindustry.MasterPDFEditor    # PDF editor with annotation, creation, and form features
+  - org.clementine_player.Clementine    # Music player and library manager
+  - org.darktable.Darktable              # Photography workflow application
+  - com.github.weclaw1.ImageRoll        # Image management tool
+  - org.gnome.gitlab.YaLTeR.VideoTrimmer # Video trimming tool
+  - de.haeckerfelix.Shortwave            # Internet radio player
+
+# Flatpak Packages for Communication and Development
+  - com.slack.Slack                     # Team collaboration and messaging platform
+  - io.dbeaver.DBeaverCommunity         # Universal database management tool
+  - com.getpostman.Postman              # API development and testing tool
+  - com.github.artemanufrij.regextester  # Regular expression testing tool
+  - org.zealdocs.Zeal                   # Offline documentation browser
+  - com.usebottles.bottles              # Windows application manager for Linux
+
+
+## Java
+java_version: java-11-openjdk
+
+
+## Google Earth
+earth_repo: "deb [signed-by=/etc/apt/trusted.gpg.d/google.gpg arch=amd64] http://dl.google.com/linux/earth/deb/ stable main"
+earth_repo_name: "/etc/apt/sources.list.d/google-earth-pro.list"
+earth_gpg: "https://dl.google.com/linux/linux_signing_key.pub"
+earth_gpg_key: "/etc/apt/trusted.gpg.d/google.gpg"
+earth_pkg: "google-earth-pro-stable"
+
+
+## Virtualbox
+virtual_box_key_url: "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
+virtual_box_repo: "deb https://download.virtualbox.org/virtualbox/debian buster contrib"
+virtualbox_packages:
+  - virtualbox
+  - virtualbox-dkms
+
+
+## Libreoffice Additional Language Packs removal
+libreoffice_languages_to_remove:
+  - libreoffice-help-zh-tw
+  - libreoffice-help-zh-cn
+  - libreoffice-help-ru
+  - libreoffice-help-pt-br
+  - libreoffice-help-pt
+  - libreoffice-help-ja
+  - libreoffice-help-it
+  - libreoffice-help-fr
+  - libreoffice-help-es
+  - libreoffice-help-en-gb
+  - libreoffice-help-de
+  - libreoffice-l10n-zh-tw
+  - libreoffice-l10n-zh-cn
+  - libreoffice-l10n-ru
+  - libreoffice-l10n-pt-br
+  - libreoffice-l10n-pt
+  - libreoffice-l10n-ja
+  - libreoffice-l10n-it
+  - libreoffice-l10n-fr
+  - libreoffice-l10n-es
+  - libreoffice-l10n-de
+
+
+## Libvirt Packages
+libvirt_package: libvirtd
+virtualization_packages:
+  - bridge-utils              # Utilities for managing network bridges, required for virtual networking
+  - libvirt                   # API for managing virtualized platforms (e.g., KVM, QEMU, Xen)
+  - virt-install              # Command-line tool for installing virtual machines using libvirt
+  - qemu-kvm                  # Provides QEMU emulator with KVM support for virtualization
+  - virt-top                  # Monitoring tool for virtual machines running with libvirt
+  - libguestfs-tools          # Tools for accessing and modifying virtual machine disk images
+  - virt-manager              # GUI application for managing virtual machines and virtualization infrastructure
+
+
+## posix
+smb_mountpoint: [] # Your SMB Share.. ex: 10.123.123.123
+mount_point_directories:
+  - /mnt/example
+
+smb_mounts:
+  - { src: "//{{ smb_mountpoint }}/example", path: "/mnt/example" }
+
+smb_credentials: "username={{ smb_username }},password={{ smb_password }}"
+smb_mount_opts: "noperm,dir_mode=0777,file_mode=0777,iocharset=utf8,_netdev,{{ smb_credentials }}"
+smb_fstype: cifs
+
+
+## codecs
+gstreamer_debian_packages:
+  - gstreamer1.0-plugins-base      # Core plugins for GStreamer, providing essential functionalities
+  - gstreamer1.0-plugins-good      # Good quality plugins for GStreamer (e.g., audio/video decoders, filters)
+  - gstreamer1.0-plugins-bad       # Experimental and non-free plugins for GStreamer
+  - gstreamer1.0-plugins-ugly      # Plugins for GStreamer that are useful but may have licensing issues
+  - gstreamer1.0-plugins-base-apps # Additional apps for GStreamer plugins base (e.g., gst-launch-1.0)
+  - libavcodec-extra               # Extra codecs from FFmpeg for multimedia processing in GStreamer
+
+gstreamer_redhat_packages:
+  - gstreamer1-plugins-base        # Core plugins for GStreamer, providing essential functionalities
+  - gstreamer1-plugins-good        # Good quality plugins for GStreamer (e.g., audio/video decoders, filters)
+  - gstreamer1-plugins-bad-free    # Free, but not officially supported, plugins for GStreamer
+  - gstreamer1-plugins-ugly        # Plugins for GStreamer that may have licensing or quality concerns
+  - faac                           # AAC encoder plugin for GStreamer (Advanced Audio Codec)
+  - ffmpeg-libs                    # FFmpeg libraries required for multimedia operations with GStreamer
+
+
+## Dash to dock
+gnome_shell_extensions_packages:
+  - gnome-shell-extension-dash-to-dock
+  - gnome-shell-extensions
+gnome_shell_enable_extension_command: "gnome-extensions enable dash-to-dock@micxgx.gmail.com"
+
+
+## npm
+npm_global: true
+nodejs_npm_packages:
+  - nodejs
+  - npm
+global_npm_packages:
+  - "@gridsome/cli"                 # CLI for Gridsome, a static site generator for Vue.js
+  - "@semantic-release/changelog"   # Automates changelog generation for Semantic Release
+  - "@semantic-release/git"         # Automates Git operations during Semantic Release workflow
+  - "add-gitignore"                 # CLI tool to add a gitignore file to a project
+  - "cloudinary-cli"                # Command-line interface for Cloudinary (cloud-based media management)
+  - "commitizen"                    # Standardizes commit messages for better project documentation
+  - "conduct"                       # Helps manage a project's code of conduct
+  - "conventional-changelog-cli"    # CLI tool to generate changelogs based on conventional commits
+  - "create-nuxt-app"               # CLI tool for creating Nuxt.js apps (Vue.js framework)
+  - "create-react-app"              # CLI tool for creating React.js apps
+  - "eslint"                        # Linter for identifying and fixing JavaScript/TypeScript code issues
+  - "fauna-shell"                   # CLI interface for FaunaDB, a serverless database
+  - "fkill-cli"                     # CLI tool to kill processes by name, PID, or port
+  - "fx"                            # Command-line tool for working with JSON
+  - "gatsby-cli"                    # CLI for Gatsby, a React-based static site generator
+  - "get-port-cli"                  # Finds an available port on the local machine
+  - "localtunnel"                   # Exposes local servers to the internet via HTTP tunnel
+  - "hasha-cli"                     # CLI for hashing files and strings
+  - "mdless"                        # CLI to view Markdown files in terminal without formatting
+  - "mermaid.cli"                   # CLI for generating diagrams from Mermaid markdown syntax
+  - "mklicense"                     # CLI for generating project license files
+  - "nativefier"                    # Convert any web page into a desktop app
+  - "readme-md-generator"           # CLI for generating project README files in markdown format
+  - "semantic-release"              # Automates versioning and package publishing based on commit messages
+  - "serve"                         # Simple static file server
+  - "svgo"                          # CLI tool for optimizing SVG files
+  - "serverless"                    # Framework for building serverless applications
+  - "svg-term-cli"                  # CLI for rendering SVG animations from terminal output
+  - "tablemark-cli"                 # CLI for creating tables in Markdown format
+  - "trash-cli"                     # Command-line tool for moving files to trash
+  - "typescript"                    # TypeScript language tools for JavaScript development
+  - "vuepress"                      # Static site generator powered by Vue.js
+  - "weallcontribute"               # CLI tool to help contributors add their contributions to a project
+  - "yarn"                          # JavaScript package manager
+  - "plop"                          # Micro-generator framework for generating files based on templates
+  - "vercel"                        # CLI tool for deploying serverless applications on Vercel
+  - "@cloudflare/wrangler"          # CLI tool for developing, testing, and deploying Cloudflare Workers
+
+
+## php
+php_dev_packages:
+  - php-cli               # Command-line interface for PHP
+  - php-curl              # cURL support for PHP (used for making HTTP requests)
+  - php-intl              # Internationalization support for PHP
+  - php-pdo               # PHP Data Objects (database access abstraction layer)
+  - php-mysqlnd           # MySQL Native Driver for PHP (improves MySQL performance)
+  - php-json              # JSON support for PHP (encoding and decoding JSON data)
+  - composer              # Dependency manager for PHP
+
+
+## python
+python_packages:
+  - python3
+  - python3-pip
+pip_packages:
+  - requests              # Simple HTTP library for Python
+  - bandit                # Security linter for Python code
+  - flake8                # Tool for enforcing coding style in Python
+  - pyflakes              # Static analysis tool for Python code
+  - pycodestyle           # Style guide checker for Python
+  - yapf                  # Code formatter for Python
+  - pre-commit            # Framework for managing and maintaining multi-language pre-commit hooks
+  - mkdocs                # Documentation tool that generates static site from Markdown files
+  - glances               # Cross-platform system monitoring tool
+  - socli                 # Command line interface for StackOverflow
+  - lorem                 # Generates random Lorem Ipsum text
+  - algoliasearch         # Python client for Algolia search service
+  - pwgen                 # Password generator
+  - glob2                 # Enhanced version of the glob module (wildcard matching)
+  - python-gitlab         # GitLab API client for Python
+  - docker                # Python SDK for Docker
+  - memoization           # Memoization tools for Python functions
+  - PyGithub              # Python client for the GitHub API
+  - Cloudflare            # Cloudflare API client for Python
+  - ansible-lint          # Linter for Ansible playbooks
+  - brotab                # Generates browser tabs from a list of URLs
+  - dateparser            # Parsing dates from strings in multiple formats
+  - jinja2                # Template engine for Python
+  - python-frontmatter    # Parses front matter from files (e.g., Markdown, YAML)
+  - validator-collection  # Collection of validators for various data types
+  - invoke                # Python task execution library
+  - cachetools            # Extensible memoizing collections and decorators
+  - certifi               # Python package for providing Mozilla's root certificates
+  - chardet               # Universal character encoding detector
+  - greenlet              # Lightweight in-process concurrent programming
+  - idna                  # International Domain Names (IDN) library
+  - msgpack               # Efficient binary serialization format
+  - neovim                # Python client for Neovim editor
+  - prometheus-client     # Prometheus monitoring client for Python
+  - requests              # (Repeated) Simple HTTP library for Python
+  - urllib3               # HTTP library with connection pooling
+  - proxmoxer             # Python client for Proxmox API
+
+
+
+## rust
+rust_packages:
+  - rust
+  - cargo

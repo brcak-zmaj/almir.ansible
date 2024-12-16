@@ -1,0 +1,6 @@
+
+- name: Install GStreamer codecs for RedHat
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ gstreamer_redhat_packages }}"

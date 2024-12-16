@@ -1,0 +1,13 @@
+---
+
+- name: Set GNOME screensaver settings
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+  loop:
+    - { key: '/org/gnome/desktop/screensaver/color-shading-type', value: "'solid'" }
+    - { key: '/org/gnome/desktop/screensaver/picture-options', value: "'zoom'" }
+    - { key: '/org/gnome/desktop/screensaver/picture-uri', value: "'file:///{{ wallpaper_dest }}/wallpaper.png'" }
+    - { key: '/org/gnome/desktop/screensaver/primary-color', value: "'#000000'" }
+    - { key: '/org/gnome/desktop/screensaver/secondary-color', value: "'#000000'" }

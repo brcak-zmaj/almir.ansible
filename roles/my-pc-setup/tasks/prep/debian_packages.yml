@@ -1,0 +1,6 @@
+
+- name: Installing Software | Prep (Debian)
+  ansible.builtin.apt:
+    pkg: "{{ item }}"
+    state: present
+  loop: "{{ debian_packages }}"

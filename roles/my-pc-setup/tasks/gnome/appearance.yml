@@ -1,0 +1,13 @@
+---
+
+- name: Gnome | appearance | Gnome Control Center
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/control-center/last-panel"
+    value: "'desktop-appearance'"
+
+- name: Gnome | appearance | Enable Dark Mode
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/interface/color-scheme"
+    value: "'prefer-dark'"

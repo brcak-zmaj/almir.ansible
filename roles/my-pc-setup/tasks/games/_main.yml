@@ -1,0 +1,5 @@
+---
+
+- name: Install Steam
+  ansible.builtin.include_tasks: steam.yml
+  when: steam is defined and steam == true
