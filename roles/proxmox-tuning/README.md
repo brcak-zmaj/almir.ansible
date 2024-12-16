@@ -1,3 +1,6 @@
+<img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
+<img src="https://img.icons8.com/?size=100&id=GxnnEGl75yew&format=png&color=000000" width="250" height="156" alt="Proxmox Logo" />
+
 ## Ansible role - Proxmox Tuning
 
 This ansible role will configure and tune your proxmox instance and make it ready for production

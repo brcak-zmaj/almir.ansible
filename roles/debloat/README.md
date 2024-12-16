@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
+
 ## Ansible role - Debloat
 
 This ansible role will remove bloat (unneeded) packages that come preinstalled on a workstation/server
