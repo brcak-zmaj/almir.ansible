@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
+
 ## Ansible role - Brave Browser
 
 This ansible role will setup and install Brave Browser

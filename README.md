@@ -17,7 +17,7 @@ The collection is tested and supported with: `ansible >= 2.9`
 Before using the Grafana collection, you need to install it using the below command:
 
 ```shell
-ansible-galaxy collection install grafana.grafana
+ansible-galaxy collection install brcak-zmaj.almir.ansible
 ```
 
 ## Roles included in the collection
