@@ -1,0 +1,6 @@
+
+- name: PHP | Dev
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ php_dev_packages }}"

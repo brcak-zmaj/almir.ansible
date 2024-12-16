@@ -1,0 +1,12 @@
+
+- name: Install Node.js and npm | Dev
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ nodejs_npm_packages }}"
+
+- name: Installs Global NPM Packages | Dev
+  community.general.npm:
+    name: "{{ item }}"
+    global: "{{ npm_global }}"
+  loop: "{{ global_npm_packages }}"

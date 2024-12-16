@@ -1,0 +1,5 @@
+---
+
+- name: Include fstab Entries
+  ansible.builtin.include_tasks: fstab.yml
+  when: fstab is defined and fstab == true

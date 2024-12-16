@@ -1,0 +1,12 @@
+
+- name: Install LibreOffice | Productivity
+  ansible.builtin.package:
+    pkg: libreoffice
+    state: present
+
+- name: Remove unneeded LibreOffice languages | Productivity
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ libreoffice_languages_to_remove }}"
+  ignore_errors: true

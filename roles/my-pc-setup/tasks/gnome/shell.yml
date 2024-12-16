@@ -1,0 +1,41 @@
+---
+
+- name: Gnome | shell | Dash-to-Dock Icon Size
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size"
+    value: "36"
+
+- name: Gnome | shell | Dash-to-Dock Height
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/dash-to-dock/extend-height"
+    value: "false"
+
+- name: Gnome | shell | Dash-to-Dock Manual Hide
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/dash-to-dock/manualhide"
+    value: "false"
+
+- name: Gnome | shell | Icon Size
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/ding/icon-size"
+    value: "'small'"
+
+- name: Gnome | shell | Show Trash
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/ding/show-trash"
+    value: "true"
+
+- name: Gnome | shell | Set favorites
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+  loop:
+    - { key: '/org/gnome/shell/enabled-extensions', value: "['ding@rastersoft.com', 'pop-cosmic@system76.com', 'pop-shell@system76.com', 'system76-power@system76.com', 'ubuntu-appindicators@ubuntu.com', 'cosmic-dock@system76.com', 'cosmic-workspaces@system76.com', 'popx11gestures@system76.com', 'GPaste@gnome-shell-extensions.gnome.org', 'unredirect@vaina.lt']" }
+    - { key: '/org/gnome/shell/favorite-apps', value: "['gnome-control-center.desktop', 'google-chrome.desktop', 'brave-browser.desktop', 'org.gnome.Nautilus.desktop', 'io.elementary.appcenter.desktop', 'org.gnome.Geary.desktop', 'org.keepassxc.KeePassXC.desktop', 'org.kde.konsole.desktop', 'org.gnome.gedit.desktop', 'io.dbeaver.DBeaverCommunity.desktop', 'org.flameshot.Flameshot.desktop', 'fr.romainvigier.MetadataCleaner.desktop', 'org.remmina.Remmina.desktop', 'org.wireshark.Wireshark.desktop', 'libreoffice-writer.desktop', 'org.gnome.Calculator.desktop', 'libreoffice-calc.desktop', 'com.slack.Slack.desktop', 'kazam.desktop', 'virtualbox.desktop', 'microsoft-edge-beta.desktop', 'org.gnome.GPaste.Ui.desktop', 'firefox.desktop', 'google-earth-pro.desktop', 'discord.desktop', 'code.desktop']" }
+    - { key: '/org/gnome/shell/remember-mount-password', value: true }

@@ -1,0 +1,7 @@
+
+- name: Software | linode-cli | install package
+  become_user: "{{ user }}"
+  pip:
+    executable: /usr/bin/pip3
+    name: linode-cli
+  

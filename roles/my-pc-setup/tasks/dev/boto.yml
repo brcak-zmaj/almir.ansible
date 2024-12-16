@@ -1,0 +1,7 @@
+
+- name: Software | boto | install package
+  become_user: "{{ user }}"
+  ansible.builtin.pip:
+    executable: /usr/bin/pip3
+    state: latest
+    name: boto
