@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
+
 ## Ansible role - My PC Setup
 
 This ansible role will is intended to setup my development workstation
