@@ -1,19 +1,20 @@
 ---
 
+
 # vzdump vars
-tmpdir: "/mnt/backups"   # Overriding default tmpdir path
-dumpdir: "/mnt/backups/dumps"  # Enable dumpdir and set its path
-storage: "local-backup"  # Enable storage configuration
-mode: "snapshot"         # Enable backup mode
-bwlimit: 1024            # Set bandwidth limit (in KB)
-ionice: 2                # Set ionice class value
-lockwait: 5              # Enable lockwait (in minutes)
-stopwait: 10             # Enable stopwait (in minutes)
-stdexcludes: true        # Enable stdexcludes (exclude system directories)
-mailto: "admin@example.com"  # Enable mail notifications
-prune_backups: "keep-daily=7,keep-weekly=4,keep-monthly=12"  # Enable prune backups
-script: "/usr/local/bin/backup_script.sh"  # Specify pre/post backup script
-exclude_path: "/home/user/temp"  # Specify directories to exclude
+vzdump_tmpdir: "/mnt/backups"   # Overriding default tmpdir path
+vzdump_dumpdir: "/mnt/backups/dumps"  # Enable dumpdir and set its path
+vzdump_storage: "local-backup"  # Enable storage configuration
+vzdump_mode: "snapshot"         # Enable backup mode
+vzdump_bwlimit: 4096            # Set bandwidth limit (in KB)
+vzdump_ionice: 2                # Set ionice class value
+vzdump_lockwait: 5              # Enable lockwait (in minutes)
+vzdump_stopwait: 10             # Enable stopwait (in minutes)
+vzdump_stdexcludes: true        # Enable stdexcludes (exclude system directories)
+vzdump_mailto: "admin@example.com"  # Enable mail notifications
+vzdump_prune_backups: "keep-daily=7,keep-weekly=4,keep-monthly=12"  # Enable prune backups
+vzdump_script: []  # Specify pre/post backup script
+vzdump_exclude_path: "/home/user/temp"  # Specify directories to exclude
 
 # PVE
 pve_repo_type: no-subscription
