@@ -1,38 +1,37 @@
-Role Name
-=========
+## Ansible role - Proxmox Restore Snapshot
 
-A brief description of the role goes here.
+This ansible role will is intended to speed up testing, and give you quick way to include a way to restore a snapshot
 
-Requirements
-------------
+## Requirements
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ansible 2.13+
 
-Role Variables
---------------
+## Role Defaults
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable Name         | Description                                                          | Default Value                                                       |
+|-----------------------|----------------------------------------------------------------------|---------------------------------------------------------------------|
+| `backup_path`         | Location of where the snapshots are            | `/mnt/pve/Local-Backups/dump` |
+| `vms`                 | Add you VM's here for the tasks                | `146:, snapshot_name: "vzdump-qemu-146.vma.zst", cpus: 8,  memory: 8192` |
+| `cleanup_unused_disks`  | Specify if you want to do cleanup of unused disk  | `true` |
 
-Dependencies
-------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+## Dependencies
 
-Example Playbook
-----------------
+No Dependencies
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Playbook
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- name: Restore VM from Snapshot
+  hosts: proxmox
+  become: true
+  vars:
 
-License
--------
+  roles:
+    - role: almir.ansible.proxmox-restore_snapshot
+```
 
-BSD
+## Author Information
 
-Author Information
-------------------
+-   [Almir Zohorovic](https://github.com/brcak-zmaj)
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
