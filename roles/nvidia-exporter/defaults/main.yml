@@ -1,0 +1,7 @@
+
+gpu_exporter_url: "https://github.com/utkuozdemir/nvidia_gpu_exporter/archive/refs/tags/v1.2.1.tar.gz"
+nvidia_gpu_exporter_user: "nvidia_gpu_exporter"
+nvidia_gpu_exporter_group: "nvidia_gpu_exporter"
+nvidia_exporter_service_name: "nvidia_gpu_exporter"
+gpu_exporter_binary: "/usr/bin/{{ nvidia_exporter_service_name }}"
+gpu_exporter_service: "/etc/systemd/system/{{ nvidia_exporter_service_name }}.service"
