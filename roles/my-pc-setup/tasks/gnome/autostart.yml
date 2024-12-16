@@ -1,0 +1,29 @@
+---
+
+- name: Ensure .config/autostart directory exists
+  become_user: "{{ user }}"
+  ansible.builtin.file:
+    path: "{{ home_dir }}/.config/autostart"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"    
+    state: directory
+    mode: '0755'  
+
+- name: Overwrite Remmina Applet .desktop file
+  become_user: "{{ user }}"
+  ansible.builtin.copy:
+    src: remmina-applet.desktop
+    dest: "{{ home_dir }}/.config/autostart/remmina-applet.desktop"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  when: reminna is defined and reminna == true    
+
+- name: Create Flameshot .desktop file for Flatpak
+  become_user: "{{ user }}"
+  ansible.builtin.copy:
+    src: flameshot.desktop
+    dest: "{{ home_dir }}/.config/autostart/flameshot.desktop"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'

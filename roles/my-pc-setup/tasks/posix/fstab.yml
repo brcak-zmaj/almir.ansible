@@ -1,0 +1,17 @@
+
+- name: Create mount point directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0777'
+  loop: "{{ mount_point_directories }}"
+
+- name: Mount SMB volumes
+  ansible.posix.mount:
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
+    opts: "{{ smb_mount_opts }}"
+    fstype: "{{ smb_fstype }}"
+    state: present
+  loop: "{{ smb_mounts }}"
+  tags: fstab

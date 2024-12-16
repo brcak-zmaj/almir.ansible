@@ -1,0 +1,9 @@
+---
+
+- name: daemon reload
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: pkgcache
+  ansible.builtin.apt:
+    update_cache: yes

@@ -1,0 +1,11 @@
+
+- name: Install GNOME Shell Extensions (Ubuntu only)
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ gnome_shell_extensions_packages }}"
+
+- name: Enable Dash-to-Dock extension
+  become: "{{ user }}"
+  ansible.builtin.shell: "{{ gnome_shell_enable_extension_command }}"
+  changed_when: false

@@ -1,0 +1,29 @@
+---
+
+- name: Include Boto tasks
+  ansible.builtin.include_tasks: boto.yml
+  when: boto is defined and boto == true
+
+- name: Include Java tasks
+  ansible.builtin.include_tasks: java.yml
+  when: java is defined and java == true
+
+- name: Include Linode CLI tasks
+  ansible.builtin.include_tasks: linode_cli.yml
+  when: linode_cli is defined and linode_cli == true
+
+- name: Include Node tasks
+  ansible.builtin.include_tasks: node.yml
+  when: node is defined and node == true
+
+- name: Include PHP tasks
+  ansible.builtin.include_tasks: php.yml
+  when: php is defined and php == true
+
+- name: Include Python tasks
+  ansible.builtin.include_tasks: python.yml
+  when: python is defined and python == true
+
+- name: Include Rust tasks
+  ansible.builtin.include_tasks: rust.yml
+  when: rust is defined and rust == true

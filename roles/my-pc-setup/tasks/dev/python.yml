@@ -1,0 +1,12 @@
+
+- name: Install Python 3 and pip3
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ python_packages }}"
+
+- name: Python Install PIP packages | Dev
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ pip_packages }}"

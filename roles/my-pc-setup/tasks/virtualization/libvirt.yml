@@ -1,0 +1,24 @@
+
+- name: Install required virtualization packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ virtualization_packages }}"
+
+- name: Configure libvirt for non-root user
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/libvirt/qemu.conf
+    regexp: "^{{ item.key }} ="
+    line: "{{ item.key }} = {{ item.value }}"
+  loop:
+    - { key: 'user', value: '{{ user }}' }
+    - { key: 'group', value: '{{ group }}' }
+
+- name: Enable libvirtd service
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ libvirt_package }}"
+    state: started
+    enabled: yes

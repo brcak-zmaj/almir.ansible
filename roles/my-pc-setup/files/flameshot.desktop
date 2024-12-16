@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Flameshot
+Comment=Screenshot tool
+Icon=flameshot
+Exec=flameshot &
+Terminal=false
+Type=Application
+Categories=Graphics;Screenshot;
+StartupNotify=true
