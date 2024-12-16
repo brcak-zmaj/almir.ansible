@@ -1,0 +1,5 @@
+
+# Define variables for locale settings
+locale_lang: "en_US.UTF-8"
+locale_conf_path_debian: "/etc/locale.gen"
+locale_conf_path_redhat: "/etc/locale.conf"

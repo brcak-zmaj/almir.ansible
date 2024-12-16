@@ -1,0 +1,38 @@
+---
+
+- name: Removing Unneeded Language Packs | Debloat
+  ignore_errors: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ language_packs }}"
+
+- name: Debloat Common Packages | Debloat
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ common_debloat }}"
+  ignore_errors: yes
+
+- name: Debloat non EN-Locales
+  include_tasks: "{{ ansible_os_family | lower }}_locales.yml"
+  tags: debloat
+
+- name: Removing Misc Software | Debloat
+  ignore_errors: true
+  when: ansible_os_family == "RedHat"
+  loop: "{{ redhat_debloat }}"
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: absent
+
+- name: Removing Misc Software | Debloat
+  when: ansible_os_family == "Debian"
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: absent
+    purge: yes
+    autoclean: yes
+    autoremove: yes
+  ignore_errors: yes
+  loop: "{{ debian_debloat }}"
