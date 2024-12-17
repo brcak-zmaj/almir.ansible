@@ -1,0 +1,7 @@
+---
+## Google Earth
+earth_repo: "deb [signed-by=/etc/apt/trusted.gpg.d/google.gpg arch=amd64] http://dl.google.com/linux/earth/deb/ stable main"
+earth_repo_name: "/etc/apt/sources.list.d/google-earth-pro.list"
+earth_gpg: "https://dl.google.com/linux/linux_signing_key.pub"
+earth_gpg_key: "/etc/apt/trusted.gpg.d/google.gpg"
+earth_pkg: "google-earth-pro-stable"
