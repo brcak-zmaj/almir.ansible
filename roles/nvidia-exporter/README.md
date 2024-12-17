@@ -12,7 +12,7 @@ This ansible role will setup the nvidia exporter agent on a target that has an n
 
 | Variable Name         | Description                                                          | Default Value                                                       |
 |-----------------------|----------------------------------------------------------------------|---------------------------------------------------------------------|
-| `gpu_exporter_url`              | nvidia exporter version.                                         | `https://github.com/utkuozdemir/nvidia_gpu_exporter/archive/refs/tags/v1.2.1.tar.gz` |
+| `gpu_exporter_url`              | nvidia exporter version.                                         | `https://github.com/utkuozdemir/nvidia_gpu_exporter/releases/download/v1.2.1/nvidia-gpu-exporter_1.2.1_linux_amd64.deb` |
 | `nvidia_gpu_exporter_user`      | This is where you set the user you want running this exporter.   | `nvidia_gpu_exporter` |
 | `nvidia_gpu_exporter_group`     | This is where you set the group you want running this exporter.  | `nvidia_gpu_exporter` |
 | `nvidia_exporter_service_name`  | This is where you set the service name.                          | `nvidia_gpu_exporter` |
@@ -31,7 +31,7 @@ No Dependencies
 ![Grafana dashboard](https://raw.githubusercontent.com/utkuozdemir/nvidia_gpu_exporter/master/grafana/dashboard.png)
 
 ## Metrics
-See https://github.com/utkuozdemir/nvidia_gpu_exporter/blob/master/METRICS.md 
+See ![Metrics](https://github.com/utkuozdemir/nvidia_gpu_exporter/blob/master/METRICS.md)
 
 ## Playbook
 
