@@ -1,5 +1,5 @@
 
-gpu_exporter_url: "https://github.com/utkuozdemir/nvidia_gpu_exporter/archive/refs/tags/v1.2.1.tar.gz"
+gpu_exporter_url: "https://github.com/utkuozdemir/nvidia_gpu_exporter/releases/download/v1.2.1/nvidia-gpu-exporter_1.2.1_linux_amd64.deb"
 nvidia_gpu_exporter_user: "nvidia_gpu_exporter"
 nvidia_gpu_exporter_group: "nvidia_gpu_exporter"
 nvidia_exporter_service_name: "nvidia_gpu_exporter"
