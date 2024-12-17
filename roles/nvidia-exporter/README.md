@@ -48,3 +48,4 @@ See https://github.com/utkuozdemir/nvidia_gpu_exporter/blob/master/METRICS.md
 ## Author Information
 
 -   [Almir Zohorovic](https://github.com/brcak-zmaj)
+-   [Utku Ozdemir] (https://github.com/utkuozdemir)
