@@ -1,0 +1,35 @@
+---
+- name: Apply RHEL-specific kernel parameters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: no
+  loop: "{{ rhel_sysctl_settings }}"
+  notify: reload sysctl
+  tags: [sysctl]
+
+- name: Configure user limits
+  lineinfile:
+    path: /etc/security/limits.conf
+    regexp: "^{{ item.user }}"
+    line: "{{ item.user }} soft {{ item.type }} {{ item.value }}"
+    create: yes
+  loop: "{{ rhel_user_limits }}"
+  tags: [limits]
+
+- name: Persist system-wide sysctl settings
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "{{ item.name }} = {{ item.value }}"
+    regexp: "^#?{{ item.name }}"
+    state: present
+  loop: "{{ common_sysctl_settings + rhel_sysctl_settings }}"
+  tags: [sysctl]
+
+- name: Install required packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ rhel_packages }}"
+  tags: [packages]

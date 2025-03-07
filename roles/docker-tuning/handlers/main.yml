@@ -1,0 +1,7 @@
+---
+
+- name: reload sysctl
+  command: /sbin/sysctl --system
+  args:
+    warn: false
+  listen: reload sysctl
