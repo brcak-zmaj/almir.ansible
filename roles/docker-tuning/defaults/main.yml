@@ -1,0 +1,53 @@
+---
+# Universal Container-Optimized Defaults
+sysctl_fs_file_max: 2097152
+sysctl_fs_nr_open: 2097152
+sysctl_net_core_netdev_max_backlog: 16384
+sysctl_net_ipv4_tcp_rmem: "4096 87380 16777216"
+sysctl_net_ipv4_tcp_wmem: "4096 65536 16777216"
+sysctl_kernel_shmmax: 68719476736
+sysctl_kernel_shmall: 4294967296
+sysctl_net_ipv4_tcp_max_syn_backlog: 3240000
+sysctl_net_core_somaxconn: 32768
+sysctl_kernel_pid_max: 4194304
+sysctl_vm_swappiness: 1
+sysctl_net_ipv4_ip_local_port_range: "1024 65535"
+sysctl_fs_inotify_max_user_watches: 1048576
+sysctl_kernel_sem: "250 32000 100 128"
+
+# RHEL-specific
+sysctl_net_core_rmem_max: 16777216
+sysctl_net_core_wmem_max: 16777216
+rhel_user_limits:
+  - { user: 'root', type: 'nofile', value: 2097152 }
+  - { user: 'root', type: 'nproc', value: 131072 }
+rhel_packages:
+  - kernel-modules-extra
+  - container-selinux
+
+# Debian-specific
+sysctl_fs_inotify_max_user_instances: 8192
+
+# System Groups
+common_sysctl_settings:
+  - { name: fs.file-max, value: "{{ sysctl_fs_file_max }}" }
+  - { name: fs.nr_open, value: "{{ sysctl_fs_nr_open }}" }
+  - { name: net.core.netdev_max_backlog, value: "{{ sysctl_net_core_netdev_max_backlog }}" }
+  - { name: net.ipv4.tcp_rmem, value: "{{ sysctl_net_ipv4_tcp_rmem }}" }
+  - { name: net.ipv4.tcp_wmem, value: "{{ sysctl_net_ipv4_tcp_wmem }}" }
+  - { name: kernel.shmmax, value: "{{ sysctl_kernel_shmmax }}" }
+  - { name: kernel.shmall, value: "{{ sysctl_kernel_shmall }}" }
+  - { name: net.ipv4.tcp_max_syn_backlog, value: "{{ sysctl_net_ipv4_tcp_max_syn_backlog }}" }
+  - { name: net.core.somaxconn, value: "{{ sysctl_net_core_somaxconn }}" }
+  - { name: kernel.pid_max, value: "{{ sysctl_kernel_pid_max }}" }
+  - { name: vm.swappiness, value: "{{ sysctl_vm_swappiness }}" }
+  - { name: net.ipv4.ip_local_port_range, value: "{{ sysctl_net_ipv4_ip_local_port_range }}" }
+  - { name: fs.inotify.max_user_watches, value: "{{ sysctl_fs_inotify_max_user_watches }}" }
+  - { name: kernel.sem, value: "{{ sysctl_kernel_sem }}" }
+
+rhel_sysctl_settings:
+  - { name: net.core.rmem_max, value: "{{ sysctl_net_core_rmem_max }}" }
+  - { name: net.core.wmem_max, value: "{{ sysctl_net_core_wmem_max }}" }
+
+debian_sysctl_settings:
+  - { name: fs.inotify.max_user_instances, value: "{{ sysctl_fs_inotify_max_user_instances }}" }
