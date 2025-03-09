@@ -1,0 +1,44 @@
+---
+- name: Calculate effective memory parameters for PostgreSQL on Debian
+  set_fact:
+    postgresql_effective_shmmax: "{{ (ansible_memtotal_mb * 1024 * 1024 * 0.75) | int }}"
+    postgresql_effective_shmall: "{{ ((ansible_memtotal_mb * 1024 * 1024 * 0.75) / 4096) | int }}"
+  when: ansible_memtotal_mb is defined
+  tags: [sysctl]
+
+- name: Apply Debian-specific kernel parameters for PostgreSQL
+  sysctl:
+    name: "{{ item.name }}"
+    value: >-
+      {{ postgresql_effective_shmmax if item.name == 'kernel.shmmax'
+         else (postgresql_effective_shmall if item.name == 'kernel.shmall'
+         else item.value) }}
+    state: present
+    reload: no
+  loop: "{{ postgresql_debian_sysctl_settings }}"
+  notify: reload sysctl
+  tags: [sysctl]
+
+- name: Persist all PostgreSQL sysctl settings on Debian
+  lineinfile:
+    path: /etc/sysctl.d/99-postgresql.conf
+    line: >-
+      {{ item.name }} = {{
+         postgresql_effective_shmmax if item.name == 'kernel.shmmax'
+         else (postgresql_effective_shmall if item.name == 'kernel.shmall'
+         else item.value)
+      }}
+    regexp: "^#?{{ item.name }}"
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ postgresql_common_sysctl_settings + postgresql_debian_sysctl_settings }}"
+  tags: [sysctl]
+
+- name: Ensure required kernel modules/packages on Debian
+  apt:
+    name: "linux-modules-extra-{{ ansible_kernel }}"
+    state: present
+  tags: [packages]

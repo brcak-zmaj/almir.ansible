@@ -1,0 +1,14 @@
+---
+- name: Configure common kernel parameters for MySQL
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: no
+  loop: "{{ mysql_common_sysctl_settings }}"
+  notify: reload sysctl
+  tags: [sysctl]
+
+- name: Include OS-specific MySQL tuning tasks
+  include_tasks: "{{ ansible_os_family }}.yml"
+  when: ansible_os_family in ['RedHat', 'Debian']

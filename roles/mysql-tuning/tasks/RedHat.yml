@@ -1,0 +1,52 @@
+---
+- name: Calculate effective memory parameters for MySQL on RHEL
+  set_fact:
+    mysql_effective_shmmax: "{{ (ansible_memtotal_mb * 1024 * 1024 * 0.75) | int }}"
+    mysql_effective_shmall: "{{ ((ansible_memtotal_mb * 1024 * 1024 * 0.75) / 4096) | int }}"
+  when: ansible_memtotal_mb is defined
+  tags: [sysctl]
+
+- name: Apply RHEL-specific kernel parameters for MySQL
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ mysql_effective_shmmax if item.name == 'kernel.shmmax' else (mysql_effective_shmall if item.name == 'kernel.shmall' else item.value) }}"
+    state: present
+    reload: no
+  loop: "{{ mysql_rhel_sysctl_settings }}"
+  notify: reload sysctl
+  tags: [sysctl]
+
+- name: Persist all MySQL sysctl settings on RHEL
+  lineinfile:
+    path: /etc/sysctl.d/99-mysql.conf
+    line: "{{ item.name }} = {{ mysql_effective_shmmax if item.name == 'kernel.shmmax' else (mysql_effective_shmall if item.name == 'kernel.shmall' else item.value) }}"
+    regexp: "^#?{{ item.name }}"
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ mysql_common_sysctl_settings + mysql_rhel_sysctl_settings }}"
+  tags: [sysctl]
+
+- name: Adjust user limits for MySQL on RHEL
+  lineinfile:
+    path: /etc/security/limits.d/mysql.conf
+    line: "{{ item.user }} {{ item.type }} {{ item.value }}"
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ mysql_user_limits }}"
+  tags: [limits]
+
+- name: Create systemd override for MySQL service on RHEL
+  copy:
+    dest: /etc/systemd/system/mysqld.service.d/override.conf
+    content: |
+      [Service]
+      LimitNOFILE=65535
+      LimitNPROC=16384
+  notify:
+    - reload systemd
+  tags: [systemd, limits]

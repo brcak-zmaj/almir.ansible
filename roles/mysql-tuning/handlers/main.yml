@@ -1,0 +1,9 @@
+---
+- name: reload sysctl
+  command: sysctl --system
+  become: yes
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+  become: yes
