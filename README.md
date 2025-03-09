@@ -29,6 +29,9 @@ This collection includes the following roles to help set up and manage Brave Bro
 - **my-pc-setup**: This is intended to configure and setup my development machine. Installs all packages I need, sets up mountpoints and configures the appearance.
 - **proxmox-restore_snapshot**: Developed to make it easy to include into playbooks for restoring snapshots when nessesary.
 - **proxmox-tuning**: Configures a vanilla proxmox server to a production and tuned server
+- **docker-tuning**: Configures various sysctl parameters to bulletproof a server that's running docker containers
+- **mysql-tuning**: Configures various sysctl parameters to bulletproof a server that's running MySQL
+- **postgresql-tuning**: Configures various sysctl parameters to bulletproof a server that's running PostgreSQL
 
 ## Contributing
 
