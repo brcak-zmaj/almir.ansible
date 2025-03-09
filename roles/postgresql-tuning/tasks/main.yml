@@ -1,0 +1,14 @@
+---
+- name: Configure common kernel parameters for PostgreSQL
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: no
+  loop: "{{ postgresql_common_sysctl_settings }}"
+  notify: reload sysctl
+  tags: [sysctl]
+
+- name: Include OS-specific PostgreSQL tuning tasks
+  include_tasks: "{{ ansible_os_family }}.yml"
+  when: ansible_os_family in ['RedHat', 'Debian']
