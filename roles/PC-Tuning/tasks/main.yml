@@ -1,0 +1,57 @@
+
+- name: Ensure sysctl.d directory exists
+  file:
+    path: /etc/sysctl.d
+    state: directory
+    mode: '0755'
+
+- name: Apply system tuning via sysctl
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop: "{{ workstation_sysctl_settings }}"
+
+- name: Persist workstation sysctl settings
+  lineinfile:
+    path: /etc/sysctl.d/99-workstation-tuning.conf
+    line: "{{ item.name }} = {{ item.value }}"
+    regexp: "^#?{{ item.name }}"
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ workstation_sysctl_settings }}"
+
+- name: Set limits for user sessions
+  copy:
+    dest: /etc/security/limits.d/99-workstation.conf
+    content: |
+      * soft nofile {{ user_nofile }}
+      * hard nofile {{ user_nofile }}
+      * soft nproc 65535
+      * hard nproc 65535
+      * soft memlock unlimited
+      * hard memlock unlimited
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable BBR if available
+  shell: |
+    modprobe tcp_bbr
+  args:
+    warn: false
+  register: bbr_modprobe
+  failed_when: false
+  changed_when: bbr_modprobe.rc == 0
+
+- name: Verify BBR is enabled
+  shell: sysctl net.ipv4.tcp_congestion_control
+  register: bbr_status
+
+- name: Print BBR status
+  debug:
+    msg: "TCP Congestion Control is: {{ bbr_status.stdout }}"

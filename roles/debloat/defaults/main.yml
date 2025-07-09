@@ -1,69 +1,120 @@
----
+
+uninstall_flatpak_packages: []
+
 language_packs:
-  - "language-pack-gnome-ar*"
-  - "language-pack-gnome-de*"
-  - "language-pack-gnome-es*"
-  - "language-pack-gnome-fr*"
-  - "language-pack-gnome-it*"
-  - "language-pack-gnome-ja*"
-  - "language-pack-gnome-pt*"
-  - "language-pack-gnome-ru*"
-  - "language-pack-gnome-zh*"
+  - language-pack-gnome-ar*
+  - language-pack-gnome-de*
+  - language-pack-gnome-es*
+  - language-pack-gnome-fr*
+  - language-pack-gnome-it*
+  - language-pack-gnome-ja*
+  - language-pack-gnome-pt*
+  - language-pack-gnome-ru*
+  - language-pack-gnome-zh*
 
-redhat_debloat: # Redhat Specific
-  - "cheese-common*"
-  - "ristretto*"
-  - "simple-scan*"
-  - "whoopsie*"
-  - "transmission*"
-  - "pidgin*"
-  - "hyperv*"
-  - "thunderbird*"
+redhat_debloat:  # RedHat Specific
+  - cheese-common*
+  - ffmpeg-free
+  - hyperv*
+  - podman
+  - simple-scan*
+  - toolbox
+  - whoopsie*
 
-debian_debloat: # Debian Specific
-  - "gpodder"
-  - "thunderbird*"
-  - "ristretto*"
-  - "*transmission*"
+debian_debloat:  # Debian Specific
+  - ristretto*
+  - transmission*
 
-common_debloat: # Common
-  # Packages
-  - "gnome-boxes"
-  - "gnome-weather"
-  - "sgt-puzzles"
-  - "gnome-mines"
-  - "gnome-sudoku"
-  - "podman"
-  - "libqqwing2v5"
-  - "boxes"
-  - "rhythmbox"
-  - "evolution"
-  - "hexchat"
-  - "xfburn"
-  - "claws-mail"
-  - "banshee"
-  - "pidgin-otr"
-  - "pidgin-data"
-  - "gpodder"
-  # Libre office language packs
-  - "libreoffice-help-zh-tw"
-  - "libreoffice-help-zh-cn"
-  - "libreoffice-help-ru"
-  - "libreoffice-help-pt-br"
-  - "libreoffice-help-pt"
-  - "libreoffice-help-ja"
-  - "libreoffice-help-it"
-  - "libreoffice-help-fr"
-  - "libreoffice-help-es"
-  - "libreoffice-help-en-gb"
-  - "libreoffice-help-de"
-  - "libreoffice-l10n-zh-tw"
-  - "libreoffice-l10n-zh-cn"
-  - "libreoffice-l10n-ru"
-  - "libreoffice-l10n-pt-br"
-  - "libreoffice-l10n-pt"
-  - "libreoffice-l10n-ja"
-  - "libreoffice-l10n-it"
-  - "libreoffice-l10n-fr"
-  - "libreoffice-l10n-es"
-  - "libreoffice-l10n-de"
+common_debloat:
+  # GNOME/GTK apps
+  - akregator
+  - akregator-libs
+  - dragon
+  - dragonplayer
+  - elisa-player
+  - emoji-picker
+  - kamoso
+  - kmahjongg
+  - kmines
+  - kmouth
+  - kolourpaint
+  - kontact
+  - kontact-libs
+  - krdc
+  - kwalletmanager
+  - neochat
+  - parole
+  - qrca
+  - skanpage
+  - spectacle
+  - timeshift
+  - totem
+  - cockpit
+  - cockpit-dashboard
+  - cockpit-file-sharing
+  - cockpit-machines
+  - cockpit-ostree
+  - cockpit-packagekit
+  - cockpit-podman
+  - cockpit-selinux
+  - cockpit-subscription  
+  - banshee
+  - brasero
+  - claws-mail
+  - empathy
+  - evolution
+  - gnome-boxes
+  - gnome-calendar
+  - gnome-characters
+  - gnome-clocks
+  - gnome-contacts
+  - gnome-maps
+  - gnome-mines
+  - gnome-music
+  - gnome-photos
+  - gnome-sudoku
+  - gnome-tour
+  - gnome-weather
+  - gpodder
+  - hexchat
+  - libqqwing2v5
+  - pidgin
+  - pidgin-data
+  - pidgin-otr
+  - rhythmbox
+  - sgt-puzzles
+  - sound-juicer
+  - tali
+  - telepathy-*
+  - xfburn
+  - aisleriot
+  - boxes
+  - iagno
+  - ristretto*
+  - thunderbird*
+  - transmission*
+
+  # LibreOffice help packs
+  - libreoffice-help-de
+  - libreoffice-help-en-gb
+  - libreoffice-help-es
+  - libreoffice-help-fr
+  - libreoffice-help-it
+  - libreoffice-help-ja
+  - libreoffice-help-pt
+  - libreoffice-help-pt-br
+  - libreoffice-help-ru
+  - libreoffice-help-zh-cn
+  - libreoffice-help-zh-tw
+
+  # LibreOffice localization packs
+  - libreoffice-l10n-de
+  - libreoffice-l10n-es
+  - libreoffice-l10n-fr
+  - libreoffice-l10n-it
+  - libreoffice-l10n-ja
+  - libreoffice-l10n-pt
+  - libreoffice-l10n-pt-br
+  - libreoffice-l10n-ru
+  - libreoffice-l10n-zh-cn
+  - libreoffice-l10n-zh-tw
