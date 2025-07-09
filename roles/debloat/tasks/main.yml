@@ -1,33 +1,25 @@
 ---
 
-- name: Removing Unneeded Language Packs | Debloat
-  ignore_errors: true
-  ansible.builtin.package:
-    name: "{{ item }}"
-    state: absent
-  loop: "{{ language_packs }}"
-
 - name: Debloat Common Packages | Debloat
+  become: true
   ansible.builtin.package:
     name: "{{ item }}"
     state: absent
   loop: "{{ common_debloat }}"
   ignore_errors: yes
 
-- name: Debloat non EN-Locales
-  include_tasks: "{{ ansible_os_family | lower }}_locales.yml"
-  tags: debloat
-
-- name: Removing Misc Software | Debloat
+- name: Removing RedHat-specific Software | Debloat
   ignore_errors: true
+  become: true
   when: ansible_os_family == "RedHat"
   loop: "{{ redhat_debloat }}"
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
 
-- name: Removing Misc Software | Debloat
+- name: Removing Debian-specific Software | Debloat
   when: ansible_os_family == "Debian"
+  become: true
   ansible.builtin.apt:
     name: "{{ item }}"
     state: absent
@@ -36,3 +28,28 @@
     autoremove: yes
   ignore_errors: yes
   loop: "{{ debian_debloat }}"
+
+- name: Remove Language Packs | Debloat
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ language_packs }}"
+  ignore_errors: yes
+
+- name: Remove Language Packs | Debloat
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ language_packs }}"
+  ignore_errors: yes
+
+- name: Uninstall specified Flatpak packages
+  become: true
+  ignore_errors: yes
+  community.general.flatpak:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ uninstall_flatpak_packages }}"
+  when: uninstall_flatpak_packages | length > 0
