@@ -1,0 +1,22 @@
+
+   # Calculate 75% of RAM for tuning purposes
+user_shmmax: "{{ (ansible_memtotal_mb * 1024 * 1024 * 0.75) | int }}"
+user_shmall: "{{ ((ansible_memtotal_mb * 1024 * 1024 * 0.75) / 4096) | int }}"
+user_nr_open: 1048576
+user_nofile: 1048576
+
+workstation_sysctl_settings:
+  - { name: net.core.rmem_max, value: "67108864" }
+  - { name: net.core.wmem_max, value: "67108864" }
+  - { name: net.core.netdev_max_backlog, value: "250000" }
+  - { name: net.ipv4.tcp_rmem, value: "4096 87380 67108864" }
+  - { name: net.ipv4.tcp_wmem, value: "4096 65536 67108864" }
+  - { name: net.ipv4.tcp_congestion_control, value: "bbr" }
+  - { name: net.ipv4.tcp_fastopen, value: "3" }
+  - { name: net.ipv4.tcp_mtu_probing, value: "1" }
+  - { name: vm.swappiness, value: "10" }
+  - { name: vm.dirty_ratio, value: "10" }
+  - { name: vm.dirty_background_ratio, value: "5" }
+  - { name: fs.file-max, value: "{{ user_nr_open }}" }
+  - { name: kernel.shmmax, value: "{{ user_shmmax }}" }
+  - { name: kernel.shmall, value: "{{ user_shmall }}" }
