@@ -4,7 +4,7 @@
     path: "{{ earth_gpg_key }}"
   register: google_key_file
 
-- name: Download Sublime Text GPG key and convert it | Internet
+- name: Download earth_gpg GPG key and convert it | Internet
   ansible.builtin.command: >
     bash -c "wget -q -O - {{ earth_gpg }} | gpg --dearmor | tee {{ earth_gpg_key }}"
   when: not google_key_file.stat.exists

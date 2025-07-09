@@ -1,8 +1,0 @@
-
-- name: Copy over ansible config
-  ansible.builtin.template:
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    src: ansible.cfg.j2
-    dest: "{{ home_dir }}/ansible.cfg"
-    mode: "0644"

@@ -6,4 +6,7 @@
 
 - name: Include Google Earth tasks
   ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}_google_earth.yml"
-  when: earth is defined and earth == true
+  when:
+    - ansible_distribution in ["Debian", "Pop!_OS", "Ubuntu"]
+    - earth is defined
+    - earth == true  

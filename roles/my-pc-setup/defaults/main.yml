@@ -1,45 +1,30 @@
 ---
 
-# Remmina
-remmina_pkgs:
+## Wireless Interface ----------------------------------------------
+
+wifi_interface: wlp4s0
+
+## Remmina ---------------------------------------------------------
+remmina_debian_pkgs:
   - remmina                   # A remote desktop client supporting RDP, VNC, SPICE, and other protocols
   - remmina-plugin-x2go       # Plugin for Remmina to support the X2Go remote desktop protocol
   - remmina-plugin-spice      # Plugin for Remmina to support the SPICE remote desktop protocol
   - remmina-plugin-exec       # Plugin for Remmina to execute commands over remote desktop sessions
   - pyhoca-gui                # GUI for managing and accessing X2Go sessions (complementing Remmina)
 
+remmina_redhat_pkgs:
+  - remmina
+  - remmina-plugins-rdp
+  - remmina-plugins-spice
+  - remmina-plugins-vnc
+  - remmina-plugins-www
+  - remmina-plugins-x2go
 
-# Flatpak
-flatpak_repo: https://flathub.org/repo/flathub.flatpakrepo
-flatpak_packages:
-# Flatpak Packages for Utilities
-  - com.github.qarmin.czkawka          # Duplicate file cleaner
-  - org.fedoraproject.MediaWriter      # Tool for writing ISO images to USB
-  - fr.romainvigier.MetadataCleaner    # Tool to clean metadata from files
-  - com.belmoussaoui.Obfuscate         # Tool to hide sensitive information in screenshots
-
-# Flatpak Packages for Multimedia
-  - net.codeindustry.MasterPDFEditor    # PDF editor with annotation, creation, and form features
-  - org.clementine_player.Clementine    # Music player and library manager
-  - org.darktable.Darktable              # Photography workflow application
-  - com.github.weclaw1.ImageRoll        # Image management tool
-  - org.gnome.gitlab.YaLTeR.VideoTrimmer # Video trimming tool
-  - de.haeckerfelix.Shortwave            # Internet radio player
-
-# Flatpak Packages for Communication and Development
-  - com.slack.Slack                     # Team collaboration and messaging platform
-  - io.dbeaver.DBeaverCommunity         # Universal database management tool
-  - com.getpostman.Postman              # API development and testing tool
-  - com.github.artemanufrij.regextester  # Regular expression testing tool
-  - org.zealdocs.Zeal                   # Offline documentation browser
-  - com.usebottles.bottles              # Windows application manager for Linux
-
-
-## Java
+## Java ---------------------------------------------------------
 java_version: java-11-openjdk
 
 
-## Google Earth
+## Google Earth ---------------------------------------------------------
 earth_repo: "deb [signed-by=/etc/apt/trusted.gpg.d/google.gpg arch=amd64] http://dl.google.com/linux/earth/deb/ stable main"
 earth_repo_name: "/etc/apt/sources.list.d/google-earth-pro.list"
 earth_gpg: "https://dl.google.com/linux/linux_signing_key.pub"
@@ -47,7 +32,7 @@ earth_gpg_key: "/etc/apt/trusted.gpg.d/google.gpg"
 earth_pkg: "google-earth-pro-stable"
 
 
-## Virtualbox
+## Virtualbox ---------------------------------------------------------
 virtual_box_key_url: "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
 virtual_box_repo: "deb https://download.virtualbox.org/virtualbox/debian buster contrib"
 virtualbox_packages:
@@ -55,32 +40,7 @@ virtualbox_packages:
   - virtualbox-dkms
 
 
-## Libreoffice Additional Language Packs removal
-libreoffice_languages_to_remove:
-  - libreoffice-help-zh-tw
-  - libreoffice-help-zh-cn
-  - libreoffice-help-ru
-  - libreoffice-help-pt-br
-  - libreoffice-help-pt
-  - libreoffice-help-ja
-  - libreoffice-help-it
-  - libreoffice-help-fr
-  - libreoffice-help-es
-  - libreoffice-help-en-gb
-  - libreoffice-help-de
-  - libreoffice-l10n-zh-tw
-  - libreoffice-l10n-zh-cn
-  - libreoffice-l10n-ru
-  - libreoffice-l10n-pt-br
-  - libreoffice-l10n-pt
-  - libreoffice-l10n-ja
-  - libreoffice-l10n-it
-  - libreoffice-l10n-fr
-  - libreoffice-l10n-es
-  - libreoffice-l10n-de
-
-
-## Libvirt Packages
+## Libvirt Packages ---------------------------------------------------------
 libvirt_package: libvirtd
 virtualization_packages:
   - bridge-utils              # Utilities for managing network bridges, required for virtual networking
@@ -92,7 +52,7 @@ virtualization_packages:
   - virt-manager              # GUI application for managing virtual machines and virtualization infrastructure
 
 
-## posix
+## posix ---------------------------------------------------------
 smb_mountpoint: [] # Your SMB Share.. ex: 10.123.123.123
 mount_point_directories:
   - /mnt/example
@@ -105,13 +65,14 @@ smb_mount_opts: "noperm,dir_mode=0777,file_mode=0777,iocharset=utf8,_netdev,{{ s
 smb_fstype: cifs
 
 
-## codecs
+## codecs ---------------------------------------------------------
 gstreamer_debian_packages:
   - gstreamer1.0-plugins-base      # Core plugins for GStreamer, providing essential functionalities
   - gstreamer1.0-plugins-good      # Good quality plugins for GStreamer (e.g., audio/video decoders, filters)
   - gstreamer1.0-plugins-bad       # Experimental and non-free plugins for GStreamer
   - gstreamer1.0-plugins-ugly      # Plugins for GStreamer that are useful but may have licensing issues
   - gstreamer1.0-plugins-base-apps # Additional apps for GStreamer plugins base (e.g., gst-launch-1.0)
+  - gstreamer1-plugins-bad-freeworld  
   - libavcodec-extra               # Extra codecs from FFmpeg for multimedia processing in GStreamer
 
 gstreamer_redhat_packages:
@@ -119,18 +80,13 @@ gstreamer_redhat_packages:
   - gstreamer1-plugins-good        # Good quality plugins for GStreamer (e.g., audio/video decoders, filters)
   - gstreamer1-plugins-bad-free    # Free, but not officially supported, plugins for GStreamer
   - gstreamer1-plugins-ugly        # Plugins for GStreamer that may have licensing or quality concerns
+  - gstreamer1-plugin-openh264      # GStreamer plugin for H.264 video
+  - gstreamer1-plugins-ugly-free    # Ugly quality GStreamer plugins (free license)
+  - gstreamer1-libav                # GStreamer plugin for libav (FFmpeg backend)  
   - faac                           # AAC encoder plugin for GStreamer (Advanced Audio Codec)
   - ffmpeg-libs                    # FFmpeg libraries required for multimedia operations with GStreamer
 
-
-## Dash to dock
-gnome_shell_extensions_packages:
-  - gnome-shell-extension-dash-to-dock
-  - gnome-shell-extensions
-gnome_shell_enable_extension_command: "gnome-extensions enable dash-to-dock@micxgx.gmail.com"
-
-
-## npm
+## npm ---------------------------------------------------------
 npm_global: true
 nodejs_npm_packages:
   - nodejs
@@ -175,7 +131,7 @@ global_npm_packages:
   - "@cloudflare/wrangler"          # CLI tool for developing, testing, and deploying Cloudflare Workers
 
 
-## php
+## php ---------------------------------------------------------
 php_dev_packages:
   - php-cli               # Command-line interface for PHP
   - php-curl              # cURL support for PHP (used for making HTTP requests)
@@ -185,53 +141,30 @@ php_dev_packages:
   - php-json              # JSON support for PHP (encoding and decoding JSON data)
   - composer              # Dependency manager for PHP
 
-
-## python
-python_packages:
-  - python3
-  - python3-pip
-pip_packages:
-  - requests              # Simple HTTP library for Python
-  - bandit                # Security linter for Python code
-  - flake8                # Tool for enforcing coding style in Python
-  - pyflakes              # Static analysis tool for Python code
-  - pycodestyle           # Style guide checker for Python
-  - yapf                  # Code formatter for Python
-  - pre-commit            # Framework for managing and maintaining multi-language pre-commit hooks
-  - mkdocs                # Documentation tool that generates static site from Markdown files
-  - glances               # Cross-platform system monitoring tool
-  - socli                 # Command line interface for StackOverflow
-  - lorem                 # Generates random Lorem Ipsum text
-  - algoliasearch         # Python client for Algolia search service
-  - pwgen                 # Password generator
-  - glob2                 # Enhanced version of the glob module (wildcard matching)
-  - python-gitlab         # GitLab API client for Python
-  - docker                # Python SDK for Docker
-  - memoization           # Memoization tools for Python functions
-  - PyGithub              # Python client for the GitHub API
-  - Cloudflare            # Cloudflare API client for Python
-  - ansible-lint          # Linter for Ansible playbooks
-  - brotab                # Generates browser tabs from a list of URLs
-  - dateparser            # Parsing dates from strings in multiple formats
-  - jinja2                # Template engine for Python
-  - python-frontmatter    # Parses front matter from files (e.g., Markdown, YAML)
-  - validator-collection  # Collection of validators for various data types
-  - invoke                # Python task execution library
-  - cachetools            # Extensible memoizing collections and decorators
-  - certifi               # Python package for providing Mozilla's root certificates
-  - chardet               # Universal character encoding detector
-  - greenlet              # Lightweight in-process concurrent programming
-  - idna                  # International Domain Names (IDN) library
-  - msgpack               # Efficient binary serialization format
-  - neovim                # Python client for Neovim editor
-  - prometheus-client     # Prometheus monitoring client for Python
-  - requests              # (Repeated) Simple HTTP library for Python
-  - urllib3               # HTTP library with connection pooling
-  - proxmoxer             # Python client for Proxmox API
-
-
-
-## rust
+## rust ---------------------------------------------------------
 rust_packages:
   - rust
   - cargo
+
+## Cron ---------------------------------------------------------
+cron_jobs:
+  - name: "Update all flatpaks"
+    user: "root"
+    minute: "0"
+    hour: "6"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "flatpak update -y"
+    state: "present"
+
+  # Example: Another cron job a user could define
+  # - name: "Clear temp files"
+  #   user: "root"
+  #   minute: "30"
+  #   hour: "2"
+  #   day: "*"
+  #   month: "*"
+  #   weekday: "*"
+  #   job: "rm -rf /tmp/*"
+  #   state: "present"

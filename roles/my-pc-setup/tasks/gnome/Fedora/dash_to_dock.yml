@@ -1,0 +1,69 @@
+
+- name: Ensure GNOME extensions and tools are installed | Dash to Dock
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - gnome-shell-extension-dash-to-dock
+    state: present
+
+- name: Enable Dash-to-Dock extension | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  ansible.builtin.shell: |
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+    gnome-extensions enable dash-to-dock@micxgx.gmail.com
+  changed_when: false
+  failed_when: false
+
+- name: Configure Dash-to-Dock via gsettings | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  ansible.builtin.shell: |
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
+    gsettings set org.gnome.shell.extensions.dash-to-dock autohide false
+    gsettings set org.gnome.shell.extensions.dash-to-dock intellihide false
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
+  changed_when: false
+
+- name: Set Dash-to-Dock max icon size via dconf | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size
+    value: 36
+    state: present
+
+- name: Set Dash-to-Dock extend height via dconf | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/dash-to-dock/extend-height"
+    value: "false"
+
+- name: Set Dash-to-Dock manual hide via dconf | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/dash-to-dock/manualhide"
+    value: "false"
+
+- name: Set Ding icon size via dconf | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/ding/icon-size"
+    value: "'small'"
+
+- name: Enable Ding show-trash via dconf | Dash to Dock
+  become: true
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/ding/show-trash"
+    value: "true"
+
+- name: Disable GNOME Tweaks extensions notice
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/tweaks/show-extensions-notice
+    value: "false"

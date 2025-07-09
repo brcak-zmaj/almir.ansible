@@ -1,8 +1,15 @@
 
-- name: Remmina Packages | Internet
+- name: Remmina Debian Packages | Internet
   ansible.builtin.package:
-    name: "{{ remmina_pkgs }}"
+    name: "{{ remmina_debian_pkgs }}"
     state: present
+  when: ansible_os_family == "Debian"
+
+- name: Remmina Redhat Packages | Internet
+  ansible.builtin.package:
+    name: "{{ remmina_redhat_pkgs }}"
+    state: present
+  when: ansible_os_family == "RedHat"
 
 - name: Ensure Remmina directory exists | Internet
   changed_when: false

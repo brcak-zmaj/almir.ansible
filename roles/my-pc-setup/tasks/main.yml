@@ -1,45 +1,57 @@
 ---
 
-## Include additional Vars
+# ---------------------------------------------------
 
-- name: Include workstation vars
+      ## Include additional Vars
+
+- name: Include all vars files
   ansible.builtin.include_vars:
-    file: workstation_vars.yml
+    file: "{{ item }}"
+    name: null  # <-- This makes vars global
+  loop:
+    - workstation_vars.yml
+    - packages.yml
+    - python_packages.yml
+    - flatpak_vars.yml
+    - bash_alias.yml
+# ---------------------------------------------------
 
-- name: Include package vars
-  ansible.builtin.include_vars:
-    file: packages.yml
+      ## Check desktop env
 
-##########################################
+- name: Check for KDE/GNOME packages
+  ansible.builtin.shell: |
+    if rpm -q gnome-shell &>/dev/null; then echo GNOME;
+    elif rpm -q plasma-desktop &>/dev/null; then echo KDE;
+    else echo NONE; fi
+  register: de_detect
+  changed_when: false
+  when: ansible_os_family == "RedHat"
 
-- name: Include debloat tasks
-  include_tasks: debloat/_main.yml
+- name: Set fact for desktop environment
+  ansible.builtin.set_fact:
+    desktop_environment: "{{ de_detect.stdout | trim }}"
 
-- name: Include dev tasks
-  include_tasks: dev/_main.yml
+# ---------------------------------------------------
 
-- name: Include games tasks
-  include_tasks: games/_main.yml
+      # Include Tasks
 
-- name: Include gnome tasks
-  include_tasks: gnome/_main.yml
-  when: gnome is defined and gnome == true
+- name: Include grouped task files
+  include_tasks: "{{ item.file }}"
+  tags: "{{ item.tags | default(omit) }}"
+  loop:
+#    - { file: "debloat/_main.yml", tags: "package_mgmt" }
+    - { file: "prep/_main.yml", tags: "package_mgmt" }
+    - { file: "dev/_main.yml" }
+    - { file: "games/_main.yml" }
+    - { file: "internet/_main.yml" }
+    - { file: "multimedia/_main.yml" }
+    - { file: "posix/_main.yml", tags: "posix,fstab" }
+    - { file: "virtualization/_main.yml" }
 
-- name: Include internet tasks
-  include_tasks: internet/_main.yml
+# ---------------------------------------------------
 
-- name: Include multimedia tasks
-  include_tasks: multimedia/_main.yml
+      # Desktop Environment Tasks
 
-- name: Include posix include_tasks
-  include_tasks: posix/_main.yml
-  tags: posix,fstab
-
-- name: Include prep tasks
-  include_tasks: prep/_main.yml
-
-- name: Include productivity tasks
-  include_tasks: productivity/_main.yml
-
-- name: Include virtualization tasks
-  include_tasks: virtualization/_main.yml
+- name: Include GNOME tasks
+  ansible.builtin.include_tasks: gnome/_main.yml
+  when: desktop_environment == "GNOME"

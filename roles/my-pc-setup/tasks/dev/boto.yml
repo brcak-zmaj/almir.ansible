@@ -3,5 +3,5 @@
   become_user: "{{ user }}"
   ansible.builtin.pip:
     executable: /usr/bin/pip3
-    state: latest
     name: boto
+    state: "{{ 'present' if boto else 'absent' }}"

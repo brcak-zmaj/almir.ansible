@@ -12,7 +12,7 @@
 - name: Software | steam | enable multilib (arch)
   tags: steam, multilib
   ansible.builtin.blockinfile:
-    state: present
+    state: "{{ 'present' if steam else 'absent' }}"
     backup: yes
     path: /etc/pacman.conf
     marker: '# {mark} ANSIBLE MANAGED BLOCK MULTILIB'
@@ -67,20 +67,9 @@
   tags: steam,steam
   become: true
   ansible.builtin.package:
-    state: latest
+    state: "{{ 'present' if steam else 'absent' }}"
     name: steam
   when:
-    - steam is defined
-    - steam == true
-
-- name: Software | steam | install steam-devices package (debian, ubuntu, etc)
-  tags: steam,steam
-  become: true
-  ansible.builtin.package:
-    state: latest
-    name: steam-devices
-  when:
-    - ansible_distribution in ["Debian", "Pop!_OS", "Ubuntu"]
     - steam is defined
     - steam == true
 
@@ -88,7 +77,7 @@
   tags: drivers,steam
   become: true
   ansible.builtin.package:
-    state: latest
+    state: "{{ 'present' if steam else 'absent' }}"
     name: mesa-vulkan-drivers
   when:
     - ansible_distribution in ["Debian", "Pop!_OS", "Ubuntu"]
