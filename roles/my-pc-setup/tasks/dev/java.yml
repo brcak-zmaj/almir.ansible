@@ -2,4 +2,4 @@
 - name: Install Java | Dev
   ansible.builtin.package:
     name: "{{ java_version }}"
-    state: present
+    state: "{{ 'present' if java else 'absent' }}"

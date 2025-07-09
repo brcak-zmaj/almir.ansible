@@ -1,4 +1,15 @@
 
+- name: Install Common Packages | Prep
+  tags: [package_mgmt]
+  ignore_errors: true
+  ansible.builtin.package:
+    pkg: "{{ common_pkg }}"
+    state: present
+  loop: "{{ common_packages }}"
+  when: utilities is defined and utilities == true
+  loop_control:
+    loop_var: common_pkg
+
 - name: Installing Software | Prep (Debian)
   ansible.builtin.apt:
     pkg: "{{ item }}"

@@ -1,0 +1,12 @@
+
+- name: Install virtualbox | Virtualization
+  ignore_errors: true
+  ansible.builtin.package:
+    name: 
+      - VirtualBox
+      - libvirt-daemon-vbox
+      - kmod-VirtualBox
+      - akmod-VirtualBox
+  when:
+    - virtualbox is defined
+    - virtualbox == true

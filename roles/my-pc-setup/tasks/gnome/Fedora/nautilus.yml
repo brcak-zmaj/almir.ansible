@@ -1,0 +1,36 @@
+
+- name: Set default column order in Nautilus list view | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/list-view/default-column-order
+    value: "['name', 'size', 'type', 'owner', 'group', 'permissions', 'date_modified', 'date_accessed', 'date_created', 'recency', 'detailed_type']"
+
+- name: Set default visible columns in Nautilus list view | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/list-view/default-visible-columns
+    value: "['name', 'size', 'date_modified', 'date_created', 'detailed_type']"
+
+- name: Set default folder viewer to list view in Nautilus | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/preferences/default-folder-viewer
+    value: "'list-view'"
+
+- name: Confirm GTK settings migration in Nautilus | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/preferences/migrated-gtk-settings
+    value: "true"
+
+- name: Set search filter time type in Nautilus | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/preferences/search-filter-time-type
+    value: "'last_modified'"
+
+- name: Enable permanent delete in Nautilus | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/preferences/show-delete-permanently
+    value: "true"

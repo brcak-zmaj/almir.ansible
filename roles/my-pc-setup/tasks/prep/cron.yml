@@ -1,0 +1,15 @@
+
+- name: Set up cron jobs | Cron
+  ansible.builtin.cron:
+    name: "{{ cronjob.name }}"
+    user: "{{ cronjob.user }}"
+    minute: "{{ cronjob.minute }}"
+    hour: "{{ cronjob.hour }}"
+    day: "{{ cronjob.day }}"
+    month: "{{ cronjob.month }}"
+    weekday: "{{ cronjob.weekday }}"
+    job: "{{ cronjob.job }}"
+    state: "{{ cronjob.state }}"
+  loop: "{{ cron_jobs }}"
+  loop_control:
+    loop_var: cronjob

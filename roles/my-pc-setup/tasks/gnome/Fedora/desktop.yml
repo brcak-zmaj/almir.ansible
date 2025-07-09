@@ -1,0 +1,126 @@
+
+- name: GNOME Interface | Set color scheme
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/color-scheme
+    value: "'prefer-dark'"
+
+- name: GNOME Interface | Show battery percentage (conditional by hostname)
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/show-battery-percentage
+    value: "true"
+
+- name: GNOME Interface | Disable toolkit accessibility
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/toolkit-accessibility
+    value: "false"
+
+- name: GNOME Notifications | Set application-children
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application-children
+    value: "['org-gnome-nautilus', 'gnome-power-panel']"
+
+- name: GNOME Notifications | Nautilus application ID
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application/org-gnome-nautilus/application-id
+    value: "'org.gnome.Nautilus.desktop'"
+
+- name: GNOME Notifications | Power panel application ID
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application/gnome-power-panel/application-id
+    value: "'gnome-power-panel.desktop'"
+
+- name: GNOME Keyboard | Enable NumLock
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/peripherals/keyboard/numlock-state
+    value: "true"
+
+- name: GNOME Touchpad | Enable two-finger scrolling
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/peripherals/touchpad/two-finger-scrolling-enabled
+    value: "true"
+
+- name: GNOME Privacy | Set recent files max age
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/recent-files-max-age
+    value: "30"
+
+- name: GNOME Privacy | Remove old temp files
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/remove-old-temp-files
+    value: "true"
+
+- name: GNOME Privacy | Remove old trash files
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/remove-old-trash-files
+    value: "true"
+
+- name: GNOME Privacy | Report technical problems
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/report-technical-problems
+    value: "true"
+
+- name: GNOME Screensaver | Set background shading
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/screensaver/color-shading-type
+    value: "'solid'"
+
+- name: GNOME Screensaver | Set picture options
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/screensaver/picture-options
+    value: "'zoom'"
+
+- name: GNOME Screensaver | Set wallpaper image path
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/screensaver/picture-uri
+    value: "'file:////home/almir/wallpaper.png'"
+
+- name: GNOME Screensaver | Set primary color
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/screensaver/primary-color
+    value: "'#000000'"
+
+- name: GNOME Screensaver | Set secondary color
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/screensaver/secondary-color
+    value: "'#000000'"
+
+- name: GNOME Search Providers | Set sort order
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/search-providers/sort-order
+    value: "['org.gnome.Settings.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Nautilus.desktop']"
+
+- name: GNOME Session | Set idle delay (15 minutes)
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/session/idle-delay
+    value: "uint32 900"
+
+- name: GNOME Window Manager | Set button layout
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/wm/preferences/button-layout
+    value: "'appmenu:minimize,maximize,close'"
+
+- name: GNOME Window Manager | Set number of workspaces
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/wm/preferences/num-workspaces
+    value: "1"

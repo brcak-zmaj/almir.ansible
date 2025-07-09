@@ -1,10 +1,10 @@
 
-- name: Prep | Add flatpak support
+- name: Add flatpak support | Prep
   ansible.builtin.package:
     name: flatpak
     state: present
 
-- name: Prep | Add flathub remote
+- name: Add flathub remote | Prep
   tags: packages,flatpak,workstation-packages
   become_user: "{{ user }}"
   community.general.flatpak_remote:
@@ -13,10 +13,22 @@
     method: user
     state: present
 
-- name: Install flatpak packages
+- name: Install flatpak packages | Prep
   become_user: "{{ user }}"
   community.general.flatpak:
     method: user
-    name: "{{ item }}"
+    name: "{{ flatpak_pkg }}"
     state: present
   loop: "{{ flatpak_packages }}"
+  loop_control:
+    loop_var: flatpak_pkg
+
+- name: Uninstall flatpak packages | Prep
+  become_user: "{{ user }}"
+  community.general.flatpak:
+    method: user
+    name: "{{ flatpak_pkg }}"
+    state: absent
+  loop: "{{ uninstall_flatpak_packages }}"
+  loop_control:
+    loop_var: flatpak_pkg

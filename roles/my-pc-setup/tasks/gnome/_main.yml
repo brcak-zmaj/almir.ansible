@@ -1,55 +1,54 @@
 ---
 
-- name: Include Ansible tasks | gnome
-  ansible.builtin.include_tasks: ansible.yml
-  
-- name: Include App Folders tasks | gnome
-  ansible.builtin.include_tasks: app_folders.yml
+# ----------------------------------------------------------------------------
 
-- name: Include Appearance tasks | gnome
-  ansible.builtin.include_tasks: appearance.yml
+- name: Install Gnome Packages | Gnome
+  ansible.builtin.package:
+    pkg: "{{ gnome_pkg }}"
+    state: present
+  loop: "{{ gnome_packages }}"
+  loop_control:
+    loop_var: gnome_pkg
 
-- name: Include Autostart tasks | gnome
-  ansible.builtin.include_tasks: autostart.yml
-  when: autostart_tweaks is defined and autostart_tweaks == true
+# ----------------------------------------------------------------------------
 
-- name: Include Background tasks | gnome
-  ansible.builtin.include_tasks: background.yml
+# Fedora Specific
 
-- name: Include File Chooser tasks | gnome
-  ansible.builtin.include_tasks: file_chooser.yml
+- name: Include Fedora configuration tasks | Gnome
+  ansible.builtin.include_tasks: "Fedora/{{ item }}"
+  loop:
+    - dash_to_dock.yml
+    - app_folders.yml
+    - background.yml
+    - desktop.yml
+    - nautilus.yml
+    - shell.yml
+    - screensaver.yml
+    - gtk4.yml
+  when: ansible_distribution == 'Fedora'
 
-- name: Include GPaste tasks | gnome
-  ansible.builtin.include_tasks: gpaste.yml
-  when: gpaste is defined and gpaste == true
+# ----------------------------------------------------------------------------
 
-- name: Include Interface tasks | gnome
-  ansible.builtin.include_tasks: interface.yml
+# POP OS Specific
 
-- name: Include Nautilus tasks | gnome
-  ansible.builtin.include_tasks: nautilus.yml
+- name: Include Pop!_OS GNOME configuration tasks | Gnome
+  ansible.builtin.include_tasks: "PopOS/{{ item }}"
+  loop:
+    - pop-os_app_folders.yml
+    - peripherals.yml
+    - nautilus.yml
+    - appearance.yml
+    - autostart.yml
+    - background.yml
+    - file_chooser.yml
+    - gpaste.yml
+    - interface.yml
+    - power.yml
+    - preferences.yml
+    - privacy.yml
+    - screensaver.yml
+    - shell.yml
+    - weather.yml
+  when: ansible_distribution == 'Pop!_OS'
 
-- name: Include Peripherals tasks | gnome
-  ansible.builtin.include_tasks: peripherals.yml
-
-- name: Include Power tasks | gnome
-  ansible.builtin.include_tasks: power.yml
-
-- name: Include Preferences tasks | gnome
-  ansible.builtin.include_tasks: preferences.yml
-
-- name: Include Privacy tasks | gnome
-  ansible.builtin.include_tasks: privacy.yml
-
-- name: Include Screensaver tasks | gnome
-  ansible.builtin.include_tasks: screensaver.yml
-
-- name: Include Shell tasks | gnome
-  ansible.builtin.include_tasks: shell.yml
-
-- name: Include Weather tasks | gnome
-  ansible.builtin.include_tasks: weather.yml
-
-- name: Include Dash to Dock tasks | gnome
-  ansible.builtin.include_tasks: ubuntu_dash_to_dock.yml
-  when: ansible_facts['distribution'] != 'Pop!_OS' # Dont run on PopOS
+# ----------------------------------------------------------------------------

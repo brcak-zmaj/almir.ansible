@@ -7,3 +7,10 @@
 - name: pkgcache
   ansible.builtin.apt:
     update_cache: yes
+
+- name: Install NPM Packges # Converted to handler..
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: "{{ 'present' if node else 'absent' }}"
+  loop: "{{ global_npm_packages }}"

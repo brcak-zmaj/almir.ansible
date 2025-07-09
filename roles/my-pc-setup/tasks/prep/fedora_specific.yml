@@ -1,0 +1,17 @@
+
+- name: Enable RPM Fusion repositories
+  become: true
+  ansible.builtin.shell: |
+    dnf -y install \
+      https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+      https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+  args:
+    creates: /etc/yum.repos.d/rpmfusion-free.repo
+
+- name: Install ffmpeg
+  ansible.builtin.dnf:
+    name: ffmpeg
+    state: present
+    allow_downgrade: yes
+    install_weak_deps: yes
+    allowerasing: true

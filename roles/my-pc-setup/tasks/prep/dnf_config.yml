@@ -1,0 +1,22 @@
+
+- name: Install dnf-automatic
+  become: true
+  ansible.builtin.dnf:
+    name: dnf-automatic
+    state: present
+
+- name: Copy preconfigured dnf-automatic config
+  become: true
+  ansible.builtin.copy:
+    src: automatic.conf
+    dest: /etc/dnf/automatic.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable and start dnf-automatic.timer
+  become: true
+  ansible.builtin.systemd:
+    name: dnf-automatic.timer
+    enabled: true
+    state: started
