@@ -1,4 +1,5 @@
 
+
 - name: Ensure sysctl.d directory exists
   file:
     path: /etc/sysctl.d
@@ -40,18 +41,8 @@
     mode: '0644'
 
 - name: Enable BBR if available
-  shell: |
+  ansible.builtin.shell: |
     modprobe tcp_bbr
-  args:
-    warn: false
   register: bbr_modprobe
   failed_when: false
   changed_when: bbr_modprobe.rc == 0
-
-- name: Verify BBR is enabled
-  shell: sysctl net.ipv4.tcp_congestion_control
-  register: bbr_status
-
-- name: Print BBR status
-  debug:
-    msg: "TCP Congestion Control is: {{ bbr_status.stdout }}"
