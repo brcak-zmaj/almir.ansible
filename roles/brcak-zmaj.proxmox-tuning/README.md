@@ -59,7 +59,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir-ansible.proxmox-tuning
+    - role: almir_ansible.proxmox-tuning
 ```
 
 ## Author Information

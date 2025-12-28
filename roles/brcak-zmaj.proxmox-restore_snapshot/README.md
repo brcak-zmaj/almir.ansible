@@ -30,7 +30,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir-ansible.proxmox-restore_snapshot
+    - role: almir_ansible.proxmox-restore_snapshot
 ```
 
 ## Author Information
