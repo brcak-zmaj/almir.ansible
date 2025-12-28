@@ -105,17 +105,17 @@ cd almir.ansible/roles/almir.RaspberryPi
 
 ### Using in a Collection
 
-If you're using this role as part of the `brcak-zmaj.almiransible` collection:
+If you're using this role as part of the `brcakzmaj.almiransible` collection:
 
 ```bash
-ansible-galaxy collection install brcak-zmaj.almiransible
+ansible-galaxy collection install brcakzmaj.almiransible
 ```
 
 Then reference it in your playbook as:
 
 ```yaml
 roles:
-  - role: brcak-zmaj.almiransible.raspberry_pi
+  - role: brcakzmaj.almiransible.raspberry_pi
 ```
 
 ## Quick Start
@@ -648,7 +648,7 @@ GPL-3.0-or-later
 
 ## Author Information
 
-This role is part of the `brcak-zmaj.almiransible` Ansible collection.
+This role is part of the `brcakzmaj.almiransible` Ansible collection.
 
 **GitHub**: [brcak-zmaj/almir.ansible](https://github.com/brcak-zmaj/almir.ansible)
 
