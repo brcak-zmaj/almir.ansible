@@ -1,0 +1,38 @@
+- name: Ensure ISO directory exists
+  ansible.builtin.file:
+    path: "{{ proxmox_iso_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download required ISOs
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "{{ proxmox_iso_dir }}/{{ item | basename }}"
+    mode: '0644'
+  loop: "{{ proxmox_iso_urls | default([]) }}"
+
+- name: Remove manually specified ISOs
+  ansible.builtin.file:
+    path: "{{ proxmox_iso_dir }}/{{ item }}"
+    state: absent
+  loop: "{{ proxmox_iso_remove | default([]) }}"
+  when: proxmox_iso_remove is defined and proxmox_iso_remove | length > 0
+
+- name: Update pveam template list
+  ansible.builtin.command: pveam update
+  changed_when: false
+  failed_when: false
+
+- name: Download required LXC templates using pveam
+  ansible.builtin.command: "pveam download {{ proxmox_lxc_storage }} {{ item }}"
+  loop: "{{ proxmox_lxc_templates | default([]) }}"
+  register: lxc_download_result
+  changed_when: "'already exists' not in lxc_download_result.stdout | default('') and lxc_download_result.rc == 0"
+  failed_when: lxc_download_result.rc != 0 and "'not found' not in lxc_download_result.stderr | default('')"
+  ignore_errors: yes
+
+- name: Remove manually specified LXC templates
+  ansible.builtin.command: "pveam remove {{ proxmox_lxc_storage }}:template/{{ item }}"
+  loop: "{{ proxmox_lxc_remove | default([]) }}"
+  when: proxmox_lxc_remove is defined and proxmox_lxc_remove | length > 0
+  ignore_errors: yes

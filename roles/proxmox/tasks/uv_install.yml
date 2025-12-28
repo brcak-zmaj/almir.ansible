@@ -1,0 +1,55 @@
+---
+- name: Check if uv binary exists
+  ansible.builtin.stat:
+    path: /root/.local/bin/uv
+  register: uv_binary
+
+- name: Install uv using official installer
+  ansible.builtin.shell: |
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: /root/.local/bin/uv
+  when: not uv_binary.stat.exists
+  register: uv_install_result
+  changed_when: uv_install_result.rc == 0
+
+- name: Verify uv installation
+  ansible.builtin.command: /root/.local/bin/uv --version
+  register: uv_version_check
+  changed_when: false
+  failed_when: false
+  when: uv_binary.stat.exists or uv_install_result.changed | default(false)
+
+- name: Ensure .local/bin/env is sourced in .bashrc (installer adds this, but ensure it exists)
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    regexp: '\. "\$HOME/\.local/bin/env"'
+    line: '. "$HOME/.local/bin/env"'
+    insertafter: EOF
+    create: yes
+
+- name: Add uv shell completion to root's .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    regexp: 'eval "\$\(uv generate-shell-completion bash\)"'
+    line: 'eval "$(uv generate-shell-completion bash)"'
+    insertafter: EOF
+    create: yes
+
+- name: Add uvx shell completion to root's .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    regexp: 'eval "\$\(uvx --generate-shell-completion bash\)"'
+    line: 'eval "$(uvx --generate-shell-completion bash)"'
+    insertafter: EOF
+    create: yes
+
+- name: Create weekly cron job for uv self update
+  ansible.builtin.cron:
+    name: "Update uv weekly"
+    minute: "0"
+    hour: "2"
+    weekday: "0"
+    job: '. "$HOME/.local/bin/env" && uv self update'
+    user: root
+

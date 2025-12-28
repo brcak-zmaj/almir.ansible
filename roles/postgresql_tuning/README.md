@@ -10,12 +10,20 @@ None
 
 See `defaults/main.yml` for available variables.
 
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
+
 ## Example Playbook
 
 ```yaml
 - hosts: servers
   roles:
-    - postgresql_tuning
+    - role: brcak_zmaj.almir_ansible.postgresql_tuning
 ```
 
 ## License

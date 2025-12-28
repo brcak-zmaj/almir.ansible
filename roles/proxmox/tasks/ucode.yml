@@ -1,0 +1,26 @@
+---
+- name: Debian repository configuration is present (Debian 12+ .sources format)
+  ansible.builtin.template:
+    src: templates/debian.sources.j2
+    dest: /etc/apt/sources.list.d/debian.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Proxmox VE repository configuration is present
+  ansible.builtin.template:
+    src: templates/proxmox.sources.j2
+    dest: /etc/apt/sources.list.d/proxmox.sources
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Get processor vendor
+  ansible.builtin.set_fact:
+    processor_vendor: "{{ ansible_processor[0] if ansible_processor[0] in pve_ucode_package.keys() else (ansible_processor[1] if ansible_processor[1] in pve_ucode_package.keys() else 'GenuineIntel') }}"
+
+- name: Microcode package is installed
+  ansible.builtin.apt:
+    name: "{{ pve_ucode_package[processor_vendor] }}"
+    update_cache: yes
+  when: pve_install_ucode | default(true)

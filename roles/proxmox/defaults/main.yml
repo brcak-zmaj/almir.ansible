@@ -1,0 +1,103 @@
+---
+# Ansible Managed Header (timestamp will be added when template is rendered)
+ansible_managed: "ansible managed"
+
+# VZDump Configuration
+tmpdir: /dev/shm
+bwlimit: 35000
+ionice: 5
+
+# PVE Repository Configuration
+pve_repo_type: no-subscription
+pve_install_ucode: true
+pve_reboot_for_ucode: false
+
+# CPU Configuration
+pve_set_cpu: no
+pve_cpu_governor: performance
+
+# ZFS ARC Configuration
+# ARC values are calculated automatically based on RAM size
+# Formula: min = RAM/16, max = RAM/8 (with minimums enforced)
+# These values will be calculated in the zfs-tune.yml task
+
+# ZFS Scrub Schedule Configuration
+# Default: Second Sunday of every month at 00:24 (12:24 AM)
+# Format: minute hour day-of-month month day-of-week
+# The cron job runs between days 8-14 to catch the second Sunday
+# Safe values:
+#   - minute: 0-59 (default: 0)
+#   - hour: 0-23 (default: 0 = midnight)
+#   - day range: 1-7 (first week), 8-14 (second week), 15-21 (third week), 22-28 (fourth week)
+#   - Recommended: Keep on second Sunday (8-14) to avoid first Sunday conflicts
+#   - Can change hour to off-peak times (e.g., 2 = 2 AM, 3 = 3 AM)
+pve_zfs_scrub_enable: true
+pve_zfs_scrub_minute: "24"         # Minute (0-59) - default: 24 (matches Debian/Proxmox default)
+pve_zfs_scrub_hour: "0"            # Hour (0-23) - default: 0 (midnight), safe: 0-6 (off-peak)
+pve_zfs_scrub_day_start: "8"       # Day range start (1-31) - default: 8 (second week start)
+pve_zfs_scrub_day_end: "14"        # Day range end (1-31) - default: 14 (second week end)
+# Note: The cron job checks if it's Sunday, so it only runs on the Sunday within the day range
+
+# GPU Passthrough Configuration
+pve_gpu_passthrough_enable: true
+
+# IOMMU GRUB Parameters (for GPU passthrough)
+pve_iommu_grub_params:
+  - "intel_iommu=on"              # Enable Intel IOMMU
+  - "iommu=pt"                    # Pass-through mode (better performance)
+  - "pcie_acs_override=downstream,multifunction"  # Override ACS for GPU passthrough
+  - "nofb"                        # Disable framebuffer
+  - "nomodeset"                   # Disable kernel mode setting
+  - "video=vesafb:off,efifb:off"  # Disable VESA and EFI framebuffer
+
+# VM/LXC Configuration Deployment
+pve_deploy_vm_configs: false         # Set to true to deploy VM/LXC configs from files/vm_configs/ and files/lxc_configs/
+
+# System Packages
+pve_system_packages:
+  # Download utilities
+  - aria2                    # Multi-protocol download utility with resume support
+  - wget                     # Command-line file downloader
+  - curl                     # Command-line tool for transferring data (used by many scripts)
+  - unzip                    # Extract ZIP archives
+  - zip                      # Create ZIP archives
+  
+  # Network utilities and monitoring
+  - ipset                    # IP set administration (for firewall rules)
+  - iperf                    # Network performance testing tool
+  - iftop                    # Real-time network bandwidth monitoring
+  - iotop                    # Real-time I/O monitoring (disk usage per process)
+  - htop                     # Interactive process viewer (better than top)
+  
+  # System utilities
+  - nano                     # Simple text editor
+  - build-essential          # Essential build tools (gcc, make, etc.) - needed for compiling
+  
+  # Network configuration
+  
+  # Security and encryption
+  - haveged                  # Entropy daemon (improves random number generation)
+  
+  # Package management
+  
+  # Time synchronization
+  
+  # Storage
+  - zfsutils-linux          # ZFS utilities (zfs, zpool commands)
+  - cifs-utils              # SMB/CIFS client utilities (for mounting network shares)
+
+# ISO Configuration
+proxmox_iso_dir: /var/lib/vz/template/iso
+proxmox_iso_urls: 
+  - 'https://releases.ubuntu.com/24.04.3/ubuntu-24.04.3-live-server-amd64.iso'
+
+proxmox_iso_remove: []  # List of ISO filenames to manually remove (e.g., ['old-iso.iso'])
+
+# LXC Template Configuration
+proxmox_lxc_storage: local  # Storage ID where LXC templates are stored (check with: pveam list <storage>)
+proxmox_lxc_templates: 
+  - 'system/debian-12-standard_12.12-1_amd64.tar.zst'
+  - 'system/ubuntu-22.04-standard_22.04-1_amd64.tar.zst'
+   
+proxmox_lxc_remove: []  # List of LXC template filenames to manually remove (just the filename, e.g., ['debian-12-standard_12.12-1_amd64.tar.zst'])
+

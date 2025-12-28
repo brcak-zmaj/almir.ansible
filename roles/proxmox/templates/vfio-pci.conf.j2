@@ -1,0 +1,5 @@
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# VFIO PCI configuration for GPU passthrough
+# GPU: {{ pve_gpu_vendor_id }}
+# Audio: {{ pve_gpu_audio_id }}
+options vfio-pci ids={{ pve_gpu_vendor_id }},{{ pve_gpu_audio_id }} disable_vga=1

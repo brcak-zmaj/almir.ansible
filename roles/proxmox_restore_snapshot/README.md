@@ -21,6 +21,14 @@ This ansible role will is intended to speed up testing, and give you quick way t
 
 No Dependencies
 
+
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
 ## Playbook
 
 ```yaml
@@ -30,7 +38,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir_ansible.proxmox-restore_snapshot
+    - role: brcak_zmaj.almir_ansible.proxmox-restore_snapshot
 ```
 
 ## Author Information

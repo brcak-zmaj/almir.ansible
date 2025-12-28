@@ -1,0 +1,8 @@
+---
+- name: Install common system utilities (one at a time)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: "{{ not loop.first }}"
+  loop: "{{ pve_system_packages }}"
+  ignore_errors: yes

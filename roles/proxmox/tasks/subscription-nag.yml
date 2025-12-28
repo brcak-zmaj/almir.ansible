@@ -1,0 +1,19 @@
+---
+- name: Check if subscription fixes are needed
+  ansible.builtin.shell: dpkg -V proxmox-widget-toolkit | grep -q '/proxmoxlib\.js$'
+  register: subscription_fix_needed
+  changed_when: subscription_fix_needed.rc == 0
+  failed_when: false
+
+- name: Create the cron job for subscription nag fix
+  ansible.builtin.template:
+    src: pve-subscribe-fix.j2
+    dest: /etc/cron.daily/pve-subscribe-fix
+    mode: '0755'
+
+- name: Configure APT to remove subscription nag
+  ansible.builtin.template:
+    src: pve-subscribe-box.j2
+    dest: /etc/apt/apt.conf.d/pve-subscribe-box
+    mode: '0755'
+  notify: proxmox-widget-toolkit

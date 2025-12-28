@@ -64,6 +64,14 @@ This ansible role will is intended to setup my development workstation
 - geerlingguy.ansible
 - ecgalaxy.vscode
 
+
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
 ## Playbook
 
 ```yaml
@@ -73,7 +81,7 @@ This ansible role will is intended to setup my development workstation
   vars:
 
   roles:
-    - role: almir_ansible.my-pc-setup
+    - role: brcak_zmaj.almir_ansible.my-pc-setup
 ```
 
 ## Author Information

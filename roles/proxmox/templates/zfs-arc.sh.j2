@@ -1,0 +1,94 @@
+#!/bin/bash
+# {{ ansible_managed }}
+
+# RAM size in GB (passed from Ansible gathered facts)
+RAM_SIZE_GB={{ ram_size_gb }}
+
+# Check if zfs command is available
+if [ "$(command -v zfs)" != "" ] ; then
+  # Check if config file exists and is already correct
+  CONFIG_FILE="/etc/modprobe.d/99-xs-zfsarc.conf"
+  CONFIG_EXISTS=0
+  CONFIG_CORRECT=0
+  
+  if [ -f "$CONFIG_FILE" ]; then
+    CONFIG_EXISTS=1
+    # Check if config already has the correct RAM size comment
+    if grep -q "RAM Size: ${RAM_SIZE_GB}GB" "$CONFIG_FILE" 2>/dev/null; then
+      CONFIG_CORRECT=1
+    fi
+  fi
+  
+  # Check if a previous RAM size file exists
+  if [ -f "/var/tmp/prev_ram_size.txt" ]; then
+    # Read the previous RAM size from the file
+    PREV_RAM_SIZE_GB=$(cat /var/tmp/prev_ram_size.txt)
+    
+    # Compare with the current RAM size
+    if [ "$PREV_RAM_SIZE_GB" -ne "$RAM_SIZE_GB" ] || [ "$CONFIG_CORRECT" -eq 0 ]; then
+      # RAM size has changed or config is incorrect, update ZFS ARC parameters
+      update_zfs_arc_params
+      echo "$RAM_SIZE_GB" > /var/tmp/prev_ram_size.txt
+      exit 0  # Config was changed
+    else
+      exit 0  # Config is already correct, no changes needed
+    fi
+  else
+    # First run, create the file and update ZFS ARC parameters
+    echo "$RAM_SIZE_GB" > /var/tmp/prev_ram_size.txt
+    update_zfs_arc_params
+    exit 0  # Config was created
+  fi
+fi
+
+# Function to update ZFS ARC parameters
+update_zfs_arc_params() {
+  if [[ $RAM_SIZE_GB -le 16 ]] ; then
+    MY_ZFS_ARC_MIN=536870911
+    MY_ZFS_ARC_MAX=536870912
+  elif [[ $RAM_SIZE_GB -le 32 ]] ; then
+    # 1GB/1GB
+    MY_ZFS_ARC_MIN=1073741823
+    MY_ZFS_ARC_MAX=1073741824
+  else
+    # Calculate: 1/16 of RAM for min, 1/8 of RAM for max
+    MY_ZFS_ARC_MIN=$((RAM_SIZE_GB * 1073741824 / 16))
+    MY_ZFS_ARC_MAX=$((RAM_SIZE_GB * 1073741824 / 8))
+  fi
+  
+  # Enforce the minimum, in case of calculation issues
+  if [[ $MY_ZFS_ARC_MIN -lt 536870911 ]] ; then
+    MY_ZFS_ARC_MIN=536870911
+  fi
+  if [[ $MY_ZFS_ARC_MAX -lt 536870912 ]] ; then
+    MY_ZFS_ARC_MAX=536870912
+  fi
+  
+  cat <<EOF > /etc/modprobe.d/99-xs-zfsarc.conf
+# ZFS ARC tuning - Auto-generated
+# RAM Size: ${RAM_SIZE_GB}GB
+# ARC Min: ${MY_ZFS_ARC_MIN} bytes ($((MY_ZFS_ARC_MIN / 1073741824))GB)
+# ARC Max: ${MY_ZFS_ARC_MAX} bytes ($((MY_ZFS_ARC_MAX / 1073741824))GB)
+
+# Use 1/16 RAM for MIN cache, 1/8 RAM for MAX cache
+options zfs zfs_arc_min=$MY_ZFS_ARC_MIN
+options zfs zfs_arc_max=$MY_ZFS_ARC_MAX
+
+# Use the prefetch method
+options zfs l2arc_noprefetch=0
+
+# Max write speed to l2arc
+# Tradeoff between write/read and durability of SSD
+# Default: 8 * 1024 * 1024 (8MB/s)
+# Setting: 500 * 1024 * 1024 (500MB/s)
+options zfs l2arc_write_max=524288000
+
+# Transaction group timeout (seconds)
+options zfs zfs_txg_timeout=60
+EOF
+  
+  # Update initramfs if the config changed
+  if [ -f "/etc/modprobe.d/99-xs-zfsarc.conf" ]; then
+    update-initramfs -u -k all 2>/dev/null || true
+  fi
+}

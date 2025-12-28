@@ -1,0 +1,47 @@
+
+tmpdir: {{ tmpdir }}
+# Temporary directory for storing data while processing the backup
+
+# dumpdir: DIR
+# Directory to store backup dump files
+
+# storage: STORAGE_ID
+# Specify a storage ID to use for backup storage
+
+# mode: snapshot|suspend|stop
+# Backup mode:
+# - snapshot: Take a snapshot of the VM
+# - suspend: Suspend the VM during backup
+# - stop: Stop the VM before backup
+
+bwlimit: {{ bwlimit }}
+# Bandwidth limit for backup (in kilobytes per second)
+
+ionice: {{ ionice }}
+# Ionice class value for the backup process (0-7)
+
+# lockwait: MINUTES
+# Wait time for acquiring lock before the backup starts
+
+# stopwait: MINUTES
+# Wait time for stopping the VM before backup starts
+
+# stdexcludes: BOOLEAN
+# Whether to exclude standard system directories from backup
+
+# mailto: ADDRESSLIST
+# List of email addresses to send backup status notifications
+
+# prune-backups: keep-INTERVAL=N[,...]
+# Specify how many backups to keep based on an INTERVAL:
+# - keep-hourly
+# - keep-daily
+# - keep-weekly
+# - keep-monthly
+# - keep-yearly
+
+# script: FILENAME
+# Specify a script to run before and after backup
+
+# exclude-path: PATHLIST
+# List of paths to exclude from the backup
