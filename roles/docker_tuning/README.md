@@ -42,6 +42,14 @@ This Ansible role applies optimized system settings for servers running Docker, 
 
 No external dependencies.
 
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
+
 ## Example Playbook
 
 ```yaml
@@ -49,7 +57,7 @@ No external dependencies.
   hosts: all
   become: true
   roles:
-    - role: almir_ansible.docker_tuning
+    - role: brcak_zmaj.almir_ansible.docker_tuning
 ```
 
 ## Author Information

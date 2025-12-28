@@ -22,6 +22,14 @@ This ansible role will setup and install Brave Browser
 
 No Dependencies
 
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
+
 ## Playbook
 
 ```yaml
@@ -31,7 +39,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir_ansible.brave-browser
+    - role: brcak_zmaj.almir_ansible.brave_browser
 ```
 
 ## Author Information

@@ -24,6 +24,14 @@ This ansible role will setup the nvidia exporter agent on a target that has an n
 
 No Dependencies
 
+
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
 ## Official Grafana Dashboard
 [Grafana dashboard](https://grafana.com/grafana/dashboards/14574)
 
@@ -42,7 +50,7 @@ See ![Metrics](https://github.com/utkuozdemir/nvidia_gpu_exporter/blob/master/ME
   vars:
 
   roles:
-    - role: almir_ansible.nvidia-exporter
+    - role: brcak_zmaj.almir_ansible.nvidia-exporter
 ```
 
 ## Author Information

@@ -1,0 +1,21 @@
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# ZFS ARC tuning - Auto-generated
+# RAM Size: {{ ram_size_gb }}GB
+# ARC Min: {{ zfs_arc_min }} bytes ({{ (zfs_arc_min | int / 1073741824) | int }}GB)
+# ARC Max: {{ zfs_arc_max }} bytes ({{ (zfs_arc_max | int / 1073741824) | int }}GB)
+
+# Use 1/16 RAM for MIN cache, 1/8 RAM for MAX cache
+options zfs zfs_arc_min={{ zfs_arc_min }}
+options zfs zfs_arc_max={{ zfs_arc_max }}
+
+# Use the prefetch method
+options zfs l2arc_noprefetch=0
+
+# Max write speed to l2arc
+# Tradeoff between write/read and durability of SSD
+# Default: 8 * 1024 * 1024 (8MB/s)
+# Setting: 500 * 1024 * 1024 (500MB/s)
+options zfs l2arc_write_max=524288000
+
+# Transaction group timeout (seconds)
+options zfs zfs_txg_timeout=60

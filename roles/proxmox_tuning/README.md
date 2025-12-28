@@ -50,6 +50,14 @@ This ansible role will configure and tune your proxmox instance and make it read
 
 No Dependencies
 
+
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
 ## Playbook
 
 ```yaml
@@ -59,7 +67,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir_ansible.proxmox-tuning
+    - role: brcak_zmaj.almir_ansible.proxmox-tuning
 ```
 
 ## Author Information

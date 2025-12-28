@@ -19,6 +19,14 @@ This ansible role will Install cifs-utils on targets
 
 No Dependencies
 
+
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
 ## Playbook
 
 ```yaml

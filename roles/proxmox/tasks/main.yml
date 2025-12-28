@@ -1,0 +1,43 @@
+---
+# Repository and Package Management
+- name: "Configure repositories and install microcode"
+  ansible.builtin.include_tasks: ucode.yml
+
+- name: "Install system packages"
+  ansible.builtin.include_tasks: packages.yml
+
+# System Tuning (CPU Governor and KSM)
+- name: "Configure system tuning (CPU governor and KSM)"
+  ansible.builtin.include_tasks: system_config.yml
+
+# ZFS Tuning
+- name: "Configure ZFS tuning"
+  ansible.builtin.include_tasks: zfs-tune.yml
+
+# GPU Passthrough Configuration
+- name: "Configure PCIe passthrough for GPU"
+  ansible.builtin.include_tasks: pcie_passthrough.yml
+  when: pve_gpu_passthrough_enable | default(false)
+
+# Backup Configuration
+- name: "Configure VZDump backup settings"
+  ansible.builtin.include_tasks: vzdump.yml
+
+# Subscription Nag Removal
+- name: "Remove subscription nag"
+  ansible.builtin.include_tasks: subscription-nag.yml
+
+# UV (Python package manager) Installation
+- name: "Install and configure uv"
+  ansible.builtin.include_tasks: uv_install.yml
+
+# ISO and LXC Template Management
+- name: "Manage ISO and LXC templates"
+  ansible.builtin.include_tasks: proxmox_ISO_manager.yml
+  tags: ISOs
+
+# VM/LXC Configuration Deployment
+- name: "Deploy VM and LXC configurations"
+  ansible.builtin.include_tasks: vm_config_deploy.yml
+  tags: vm_configs
+  when: pve_deploy_vm_configs | default(false)

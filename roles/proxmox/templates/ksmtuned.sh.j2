@@ -1,0 +1,50 @@
+#!/bin/bash
+# {{ ansible_managed }}
+
+# RAM size in GB (passed from Ansible gathered facts)
+RAM_SIZE={{ ram_size_gb }}
+
+flag_file="/var/tmp/ksm_tuned"
+ksmtuned_conf="/etc/ksmtuned.conf"
+
+# Install ksm-control-daemon if not present
+if ! command -v ksmtuned >/dev/null 2>&1; then
+    /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::='--force-confdef' install ksm-control-daemon
+fi
+
+# Check if already tuned and RAM size matches
+if [ -f "$flag_file" ]; then
+    PREV_RAM_SIZE=$(grep "RAM_SIZE=" "$flag_file" | cut -d'=' -f2)
+    if [ "$PREV_RAM_SIZE" = "$RAM_SIZE" ] && grep -q "#tuned" "$ksmtuned_conf"; then
+        exit 0
+    fi
+fi
+
+# Calculate KSM parameters based on RAM size
+if [[ $RAM_SIZE -le 16 ]]; then
+    KSM_THRES_COEF=50
+    KSM_SLEEP_MSEC=80
+elif [[ $RAM_SIZE -le 32 ]]; then
+    KSM_THRES_COEF=40
+    KSM_SLEEP_MSEC=60
+elif [[ $RAM_SIZE -le 64 ]]; then
+    KSM_THRES_COEF=30
+    KSM_SLEEP_MSEC=40
+elif [[ $RAM_SIZE -le 128 ]]; then
+    KSM_THRES_COEF=20
+    KSM_SLEEP_MSEC=20
+else
+    KSM_THRES_COEF=10
+    KSM_SLEEP_MSEC=10
+fi
+
+# Update ksmtuned.conf if not already tuned
+if ! grep -q "#tuned" "$ksmtuned_conf"; then
+    sed -i -e "s/\# KSM_THRES_COEF=.*/KSM_THRES_COEF=${KSM_THRES_COEF}/g" "$ksmtuned_conf"
+    sed -i -e "s/\# KSM_SLEEP_MSEC=.*/KSM_SLEEP_MSEC=${KSM_SLEEP_MSEC}/g" "$ksmtuned_conf"
+    echo "#tuned" >> "$ksmtuned_conf"
+fi
+
+# Save flag file with RAM size for future comparison
+echo "RAM_SIZE=$RAM_SIZE" > "$flag_file"
+echo "Script executed at $(date)" >> "$flag_file"

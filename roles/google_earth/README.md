@@ -23,6 +23,14 @@ This ansible role will Install google-earth on targets
 
 No Dependencies
 
+
+## Installation
+
+This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+
+```bash
+ansible-galaxy collection install brcak_zmaj.almir_ansible
+```
 ## Playbook
 
 ```yaml
@@ -32,7 +40,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir_ansible.google-earth
+    - role: brcak_zmaj.almir_ansible.google-earth
 ```
 
 ## Author Information
