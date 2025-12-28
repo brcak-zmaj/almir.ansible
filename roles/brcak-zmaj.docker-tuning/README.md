@@ -49,7 +49,7 @@ No external dependencies.
   hosts: all
   become: true
   roles:
-    - role: almir-ansible.docker_tuning
+    - role: almir_ansible.docker_tuning
 ```
 
 ## Author Information

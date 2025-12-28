@@ -30,7 +30,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir-ansible.virtualbox
+    - role: almir_ansible.virtualbox
 ```
 
 ## Author Information
