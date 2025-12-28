@@ -1,0 +1,113 @@
+---
+# Swap Configuration Management
+# Manages swap file creation, size, and swappiness settings
+
+- name: Check current swap status
+  ansible.builtin.command: swapon --show
+  register: swap_status
+  changed_when: false
+  failed_when: false
+
+- name: Get current swap file if exists
+  ansible.builtin.stat:
+    path: "{{ rpi_swap_file }}"
+  register: swap_file_check
+  changed_when: false
+
+- name: Disable swap if it exists and should be disabled
+  ansible.builtin.command: swapoff "{{ item }}"
+  loop: "{{ swap_status.stdout_lines | map('regex_replace', '^.*?\\s+(\\S+)$', '\\1') | list | select('match', '^/') | list }}"
+  when:
+    - not rpi_swap_enable | default(true)
+    - swap_status.rc == 0
+    - item is defined
+    - item != ""
+  ignore_errors: yes
+
+- name: Remove swap file if swap is disabled
+  ansible.builtin.file:
+    path: "{{ rpi_swap_file }}"
+    state: absent
+  when:
+    - not rpi_swap_enable | default(true)
+    - swap_file_check.stat.exists
+
+- name: Remove swap entry from /etc/fstab if swap is disabled
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: "^{{ rpi_swap_file | regex_escape() }}"
+    state: absent
+  when: not rpi_swap_enable | default(true)
+
+- name: Create swap file if enabled and doesn't exist
+  ansible.builtin.command:
+    cmd: fallocate -l {{ rpi_swap_size_mb }}M "{{ rpi_swap_file }}"
+    creates: "{{ rpi_swap_file }}"
+  when:
+    - rpi_swap_enable | default(true)
+    - not swap_file_check.stat.exists
+
+- name: Set swap file permissions
+  ansible.builtin.file:
+    path: "{{ rpi_swap_file }}"
+    mode: "0600"
+    owner: root
+    group: root
+  when:
+    - rpi_swap_enable | default(true)
+    - swap_file_check.stat.exists or rpi_swap_enable | default(true)
+
+- name: Format swap file
+  ansible.builtin.command: mkswap "{{ rpi_swap_file }}"
+  when:
+    - rpi_swap_enable | default(true)
+    - not swap_file_check.stat.exists or swap_status.rc != 0
+  args:
+    creates: "{{ rpi_swap_file }}"
+  changed_when: true
+
+- name: Enable swap
+  ansible.builtin.command: swapon "{{ rpi_swap_file }}"
+  when:
+    - rpi_swap_enable | default(true)
+    - swap_status.rc != 0 or rpi_swap_file not in (swap_status.stdout | default(''))
+  changed_when: true
+
+- name: Add swap to /etc/fstab if enabled
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: "^{{ rpi_swap_file | regex_escape() }}"
+    line: "{{ rpi_swap_file }} none swap sw 0 0"
+    state: present
+  when: rpi_swap_enable | default(true)
+
+- name: Configure swappiness
+  ansible.builtin.sysctl:
+    name: vm.swappiness
+    value: "{{ rpi_swap_swappiness }}"
+    state: present
+    sysctl_set: true
+    reload: true
+
+- name: Configure VFS cache pressure
+  ansible.builtin.sysctl:
+    name: vm.vfs_cache_pressure
+    value: "{{ rpi_swap_vfs_cache_pressure }}"
+    state: present
+    sysctl_set: true
+    reload: true
+
+- name: Make swappiness persistent
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    regexp: "^vm.swappiness="
+    line: "vm.swappiness={{ rpi_swap_swappiness }}"
+    state: present
+
+- name: Make VFS cache pressure persistent
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    regexp: "^vm.vfs_cache_pressure="
+    line: "vm.vfs_cache_pressure={{ rpi_swap_vfs_cache_pressure }}"
+    state: present
+

@@ -1,0 +1,39 @@
+---
+# SSH Configuration
+
+- name: Ensure SSH is installed
+  ansible.builtin.apt:
+    name: openssh-server
+    state: present
+
+- name: Configure SSH password authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication"
+    line: "PasswordAuthentication {{ 'yes' if rpi_ssh_password_auth | default(false) else 'no' }}"
+    state: present
+  notify: restart ssh
+
+- name: Configure SSH root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin {{ 'yes' if rpi_ssh_root_login | default(false) else 'no' }}"
+    state: present
+  notify: restart ssh
+
+- name: Configure SSH port
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?Port"
+    line: "Port {{ rpi_ssh_port }}"
+    state: present
+  when: rpi_ssh_port | default(22) != 22
+  notify: restart ssh
+
+- name: Enable SSH service
+  ansible.builtin.systemd:
+    name: ssh
+    enabled: yes
+    state: started
+

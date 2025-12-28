@@ -1,0 +1,24 @@
+---
+# Boot Options Configuration
+
+- name: Configure boot delay
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?boot_delay="
+    line: "boot_delay={{ rpi_boot_delay }}"
+    state: present
+
+- name: Configure boot wait
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?boot_wait="
+    line: "boot_wait={{ 1 if rpi_boot_wait | default(false) else 0 }}"
+    state: "{{ 'present' if rpi_boot_wait | default(false) else 'absent' }}"
+
+- name: Configure boot splash
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?disable_splash="
+    line: "disable_splash={{ 1 if not rpi_boot_splash | default(true) else 0 }}"
+    state: present
+

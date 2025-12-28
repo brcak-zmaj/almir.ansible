@@ -1,0 +1,35 @@
+#!/bin/bash
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# Raspberry Pi Temperature Monitor
+
+TEMP_LOG="/var/log/rpi-temp/temperature.log"
+WARNING_TEMP={{ rpi_temp_warning }}
+CRITICAL_TEMP={{ rpi_temp_critical }}
+THROTTLE_TEMP={{ rpi_temp_throttle }}
+
+# Get CPU temperature
+if command -v vcgencmd >/dev/null 2>&1; then
+    TEMP=$(vcgencmd measure_temp | grep -oE '[0-9]+\.[0-9]+')
+    TEMP_INT=${TEMP%.*}
+    
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$TIMESTAMP] CPU Temperature: ${TEMP}°C" >> "$TEMP_LOG"
+    
+    # Check thresholds
+    if [ "$TEMP_INT" -ge "$THROTTLE_TEMP" ]; then
+        echo "[$TIMESTAMP] CRITICAL: Temperature ${TEMP}°C exceeds throttle threshold ${THROTTLE_TEMP}°C" >> "$TEMP_LOG"
+        logger -p crit "RPi Temperature CRITICAL: ${TEMP}°C"
+    elif [ "$TEMP_INT" -ge "$CRITICAL_TEMP" ]; then
+        echo "[$TIMESTAMP] WARNING: Temperature ${TEMP}°C exceeds critical threshold ${CRITICAL_TEMP}°C" >> "$TEMP_LOG"
+        logger -p warn "RPi Temperature WARNING: ${TEMP}°C"
+    elif [ "$TEMP_INT" -ge "$WARNING_TEMP" ]; then
+        echo "[$TIMESTAMP] NOTICE: Temperature ${TEMP}°C exceeds warning threshold ${WARNING_TEMP}°C" >> "$TEMP_LOG"
+        logger -p notice "RPi Temperature: ${TEMP}°C"
+    fi
+fi
+
+# Keep log file size manageable (last 1000 lines)
+if [ -f "$TEMP_LOG" ]; then
+    tail -n 1000 "$TEMP_LOG" > "$TEMP_LOG.tmp" && mv "$TEMP_LOG.tmp" "$TEMP_LOG"
+fi
+

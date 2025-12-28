@@ -1,0 +1,281 @@
+---
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# Raspberry Pi Comprehensive Configuration Role
+# Supports: Raspberry Pi 3, 4, and 5
+# All variables can be overridden in playbooks
+
+# ============================================================================
+# RASPBERRY PI MODEL DETECTION
+# ============================================================================
+# Auto-detected from /proc/device-tree/model
+# Options: pi3, pi4, pi5, auto (auto-detect)
+rpi_model: auto  # auto, pi3, pi4, pi5
+
+# ============================================================================
+# SWAP CONFIGURATION
+# ============================================================================
+rpi_swap_enable: true               # Enable/disable swap
+rpi_swap_size_mb: 100               # Swap file size in MB (default: 100MB)
+rpi_swap_file: /var/swap            # Swap file location
+rpi_swap_swappiness: 10             # Swappiness value (0-100, lower = less swap usage)
+                                    # Recommended: 10 for SD card longevity
+rpi_swap_vfs_cache_pressure: 50     # VFS cache pressure (1-100, lower = keep more cache)
+                                    # Recommended: 50 (default) or lower for SD cards
+
+# ============================================================================
+# LOGGING CONFIGURATION (SD Card Wear Reduction)
+# ============================================================================
+rpi_logging_manage: true               # Enable logging management
+
+# Systemd Journal Configuration
+rpi_journald_enable: true              # Enable journald management
+rpi_journald_storage: volatile         # persistent, volatile, auto, none
+                                       # volatile = RAM only (best for SD cards)
+rpi_journald_max_use: 50M              # Maximum disk space for journal
+rpi_journald_max_file_size: 10M        # Maximum size per journal file
+rpi_journald_max_retention_days: 3     # Maximum days to retain logs
+rpi_journald_forward_to_syslog: false  # Forward to syslog
+rpi_journald_compress: true            # Compress old journal files
+
+# Syslog Configuration
+rpi_syslog_manage: true             # Enable syslog management
+rpi_syslog_rotate: true             # Enable log rotation
+rpi_syslog_max_size: 10M            # Maximum log file size before rotation
+rpi_syslog_rotate_count: 3          # Number of rotated logs to keep
+rpi_syslog_compress: true           # Compress rotated logs
+
+# Logrotate Configuration
+rpi_logrotate_enable: true          # Enable logrotate management
+rpi_logrotate_weekly: true          # Rotate logs weekly
+rpi_logrotate_rotate: 4             # Keep 4 rotated logs
+rpi_logrotate_compress: true        # Compress old logs
+rpi_logrotate_delaycompress: true   # Delay compression by one rotation
+
+# ============================================================================
+# POWER MANAGEMENT
+# ============================================================================
+rpi_power_manage: true              # Enable power management
+
+# Power Settings
+rpi_power_led_enable: true          # Enable power LED (Pi 4/5)
+rpi_power_led_trigger: default      # LED trigger: default, heartbeat, none
+rpi_activity_led_enable: true       # Enable activity LED
+rpi_activity_led_trigger: mmc0      # LED trigger: mmc0, cpu0, default, none
+
+# Power Saving
+rpi_power_save_enable: false        # Enable power saving mode
+rpi_power_save_wifi: false          # Enable WiFi power saving
+rpi_power_save_usb: false           # Enable USB power saving (auto-suspend)
+
+# Undervolting (Pi 4/5)
+rpi_undervolt_enable: false         # Enable undervolting (advanced)
+rpi_undervolt_value: 0              # Undervolt value (mV, negative = undervolt)
+
+# ============================================================================
+# BOOT CONFIGURATION (/boot/config.txt)
+# ============================================================================
+rpi_boot_config_manage: true        # Enable config.txt management
+
+# GPU Memory Split
+rpi_gpu_mem: 128                    # GPU memory in MB (64, 128, 256, 512)
+                                    # Pi 3: 64-128, Pi 4: 128-512, Pi 5: 128-512
+
+# Overclocking (Pi 3/4)
+rpi_overclock_enable: false         # Enable overclocking
+rpi_overclock_arm_freq: 1500        # ARM CPU frequency (MHz)
+                                    # Pi 3: 1200-1400, Pi 4: 1500-2147
+rpi_overclock_arm_freq_min: 600     # Minimum ARM frequency
+rpi_overclock_gpu_freq: 500         # GPU frequency (MHz)
+rpi_overclock_sdram_freq: 500       # SDRAM frequency (MHz)
+rpi_overclock_voltage: 0            # Overvoltage (0-6, 0.025V steps, max 1.4V)
+rpi_overclock_force_turbo: false    # Force turbo mode (may void warranty)
+
+# Pi 5 Specific
+rpi5_overclock_enable: false        # Enable Pi 5 overclocking
+rpi5_arm_freq: 2400                 # Pi 5 ARM frequency (MHz, default: 2400)
+rpi5_gpu_freq: 800                  # Pi 5 GPU frequency (MHz, default: 800)
+
+# Display Configuration
+rpi_display_enable: true            # Enable display output
+rpi_hdmi_group: 2                   # HDMI group (1=CEA, 2=DMT)
+rpi_hdmi_mode: 82                   # HDMI mode (82=1920x1080 60Hz)
+rpi_hdmi_force_hotplug: false       # Force HDMI hotplug detection
+rpi_hdmi_ignore_edid: false         # Ignore EDID (Extended Display Identification Data)
+rpi_hdmi_drive: 2                   # HDMI drive (1=DVI, 2=HDMI)
+rpi_hdmi_ignore_cec: false          # Ignore CEC (Consumer Electronics Control)
+
+# Audio Configuration
+rpi_audio_enable: true              # Enable audio
+rpi_audio_driver: "vc4-kms-v3d"     # Audio driver (Pi 4/5: vc4-kms-v3d, Pi 3: on)
+rpi_audio_pwm_mode: 2               # PWM audio mode (0=auto, 1=stereo, 2=quad)
+
+# Camera Configuration
+rpi_camera_enable: false            # Enable camera module
+rpi_camera_disable_led: false       # Disable camera LED
+
+# GPIO Configuration
+rpi_gpio_enable: true               # Enable GPIO
+rpi_gpio_pull: "up"                 # GPIO pull (up, down, off)
+
+# USB Configuration
+rpi_usb_max_current: 1              # USB max current (amps, Pi 4: 1.2A default)
+rpi_usb_power_mode: "default"       # USB power mode (default, on, off)
+
+# Boot Options
+rpi_boot_delay: 1                   # Boot delay (seconds)
+rpi_boot_wait: false                # Wait for network before boot
+rpi_boot_splash: true               # Enable boot splash screen
+rpi_boot_quiet: false               # Quiet boot (suppress messages)
+
+# ============================================================================
+# NETWORK CONFIGURATION
+# ============================================================================
+rpi_network_manage: true            # Enable network management
+
+# WiFi Configuration
+rpi_wifi_enable: true               # Enable WiFi
+rpi_wifi_country: "US"              # WiFi country code (US, GB, etc.)
+rpi_wifi_power_management: false    # WiFi power management (disable for stability)
+
+# Bluetooth Configuration
+rpi_bluetooth_enable: true          # Enable Bluetooth
+rpi_bluetooth_pairable: false       # Make Bluetooth pairable by default
+
+# ============================================================================
+# SYSTEM OPTIMIZATION
+# ============================================================================
+rpi_system_optimize: true           # Enable system optimizations
+
+# File System
+rpi_fs_trim_enable: true            # Enable TRIM for SD cards (weekly)
+rpi_fs_noatime: true                # Mount with noatime (reduce writes)
+rpi_fs_commit: 5                    # Ext4 commit interval (seconds, default: 5)
+
+# CPU Governor
+rpi_cpu_governor: "ondemand"        # CPU governor: ondemand, performance, powersave, conservative
+rpi_cpu_min_freq: 600               # Minimum CPU frequency (MHz)
+rpi_cpu_max_freq: 0                 # Maximum CPU frequency (0=auto, MHz)
+
+# I/O Scheduler
+rpi_io_scheduler: "mq-deadline"     # I/O scheduler: mq-deadline, bfq, none, kyber
+                                    # mq-deadline recommended for SD cards
+
+# ============================================================================
+# HARDWARE FEATURES
+# ============================================================================
+rpi_hardware_manage: true           # Enable hardware interface management
+
+# Watchdog
+rpi_watchdog_enable: false          # Enable hardware watchdog
+rpi_watchdog_timeout: 15            # Watchdog timeout (seconds)
+
+# I2C
+rpi_i2c_enable: false               # Enable I2C interface
+rpi_i2c_baudrate: 100000            # I2C baudrate
+
+# SPI
+rpi_spi_enable: false               # Enable SPI interface
+
+# UART
+rpi_uart_enable: false              # Enable UART (serial console)
+rpi_uart_console: false             # Enable UART console
+
+# 1-Wire
+rpi_onewire_enable: false           # Enable 1-Wire interface
+
+# ============================================================================
+# SECURITY CONFIGURATION
+# ============================================================================
+rpi_security_manage: true           # Enable security management
+
+# SSH
+rpi_ssh_enable: true                # Enable SSH
+rpi_ssh_password_auth: false        # Allow password authentication
+rpi_ssh_root_login: false           # Allow root login
+rpi_ssh_port: 22                    # SSH port
+
+# Firewall (UFW)
+rpi_firewall_enable: false          # Enable UFW firewall
+rpi_firewall_default_policy: "deny" # Default policy: allow, deny
+rpi_firewall_rules: []              # List of firewall rules
+                                    # Example: ["22/tcp", "80/tcp", "443/tcp"]
+
+# ============================================================================
+# PACKAGE MANAGEMENT
+# ============================================================================
+rpi_packages_install: true           # Install packages
+rpi_packages_update: true            # Update package lists
+
+# System Packages
+rpi_system_packages:
+  - htop                    # Interactive process viewer
+  - vim                     # Text editor
+  - git                     # Version control
+  - curl                    # HTTP client
+  - wget                    # File downloader
+  - build-essential         # Build tools
+  - python3-pip             # Python package manager
+  - python3-dev             # Python development headers
+
+# Optional Packages
+rpi_optional_packages: []           # Additional packages to install
+
+# ============================================================================
+# TIMEZONE AND LOCALE
+# ============================================================================
+rpi_locale_manage: true             # Enable locale management
+rpi_timezone: "America/New_York"    # Timezone (use tzdata format)
+rpi_locale: "en_US.UTF-8"           # Locale
+rpi_keyboard_layout: "us"           # Keyboard layout
+
+# ============================================================================
+# TEMPERATURE MONITORING
+# ============================================================================
+rpi_temp_monitor_enable: false      # Enable temperature monitoring
+rpi_temp_warning: 70                # Warning temperature (°C)
+rpi_temp_critical: 80               # Critical temperature (°C)
+rpi_temp_throttle: 85               # Throttle temperature (°C)
+
+# ============================================================================
+# ADVANCED CONFIGURATION
+# ============================================================================
+
+# Custom config.txt options (key=value pairs)
+rpi_config_custom: []               # Custom config.txt options
+                                    # Example: ["dtparam=i2c_arm=on", "dtparam=spi=on"]
+
+# Custom cmdline.txt options
+rpi_cmdline_custom: []              # Custom cmdline.txt options
+                                    # Example: ["cgroup_enable=cpuset", "cgroup_memory=1"]
+
+# Custom systemd overrides
+rpi_systemd_overrides: {}           # Systemd service overrides
+                                    # Example: {"ssh.service": {"CPUQuota": "50%"}}
+
+# ============================================================================
+# RASPBERRY PI MODEL SPECIFIC DEFAULTS
+# ============================================================================
+# These are auto-set based on detected model, but can be overridden
+
+# Pi 3 Defaults
+rpi3_gpu_mem: 128
+rpi3_arm_freq_max: 1400
+rpi3_overclock_safe: true
+
+# Pi 4 Defaults
+rpi4_gpu_mem: 128
+rpi4_arm_freq_max: 1800
+rpi4_overclock_safe: true
+rpi4_usb_max_current: 1.2
+
+# Pi 5 Defaults
+rpi5_gpu_mem: 128
+rpi5_arm_freq_default: 2400
+rpi5_arm_freq_max: 3000
+rpi5_overclock_safe: false          # Pi 5 overclocking requires active cooling
+
+# ============================================================================
+# META CONFIGURATION
+# ============================================================================
+ansible_managed: "ansible managed"  # Template header
+

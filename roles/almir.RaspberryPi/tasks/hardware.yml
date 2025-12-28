@@ -1,0 +1,70 @@
+---
+# Hardware Interfaces Configuration
+
+- name: Configure watchdog
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtparam=watchdog="
+    line: "dtparam=watchdog={{ 'on' if rpi_watchdog_enable | default(false) else 'off' }}"
+    state: "{{ 'present' if rpi_watchdog_enable | default(false) else 'absent' }}"
+
+- name: Enable watchdog service
+  ansible.builtin.systemd:
+    name: watchdog
+    enabled: "{{ 'yes' if rpi_watchdog_enable | default(false) else 'no' }}"
+    state: "{{ 'started' if rpi_watchdog_enable | default(false) else 'stopped' }}"
+  when: rpi_watchdog_enable | default(false)
+
+- name: Configure watchdog timeout
+  ansible.builtin.lineinfile:
+    path: /etc/watchdog.conf
+    regexp: "^watchdog-timeout="
+    line: "watchdog-timeout={{ rpi_watchdog_timeout }}"
+    state: present
+  when: rpi_watchdog_enable | default(false)
+  failed_when: false
+
+- name: Enable I2C
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtparam=i2c_arm="
+    line: "dtparam=i2c_arm={{ 'on' if rpi_i2c_enable | default(false) else 'off' }}"
+    state: "{{ 'present' if rpi_i2c_enable | default(false) else 'absent' }}"
+
+- name: Configure I2C baudrate
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtparam=i2c_arm_baudrate="
+    line: "dtparam=i2c_arm_baudrate={{ rpi_i2c_baudrate }}"
+    state: "{{ 'present' if rpi_i2c_enable | default(false) and rpi_i2c_baudrate != 100000 else 'absent' }}"
+  when: rpi_i2c_enable | default(false)
+
+- name: Enable SPI
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtparam=spi="
+    line: "dtparam=spi={{ 'on' if rpi_spi_enable | default(false) else 'off' }}"
+    state: "{{ 'present' if rpi_spi_enable | default(false) else 'absent' }}"
+
+- name: Enable UART
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?enable_uart="
+    line: "enable_uart={{ 1 if rpi_uart_enable | default(false) else 0 }}"
+    state: "{{ 'present' if rpi_uart_enable | default(false) else 'absent' }}"
+
+- name: Enable UART console
+  ansible.builtin.lineinfile:
+    path: /boot/cmdline.txt
+    regexp: "console=serial0"
+    line: "console=serial0,115200"
+    state: "{{ 'present' if rpi_uart_console | default(false) else 'absent' }}"
+  when: rpi_uart_console | default(false)
+
+- name: Enable 1-Wire
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtoverlay=w1-gpio"
+    line: "dtoverlay=w1-gpio"
+    state: "{{ 'present' if rpi_onewire_enable | default(false) else 'absent' }}"
+

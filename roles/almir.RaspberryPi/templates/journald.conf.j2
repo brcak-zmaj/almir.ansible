@@ -1,0 +1,28 @@
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# Systemd Journal Configuration for Raspberry Pi
+# Optimized to reduce SD card wear
+
+[Journal]
+# Storage location: volatile = RAM only (best for SD cards)
+# Options: persistent, volatile, auto, none
+Storage={{ rpi_journald_storage | default('volatile') }}
+
+# Maximum disk space for journal
+SystemMaxUse={{ rpi_journald_max_use | default('50M') }}
+
+# Maximum size per journal file
+SystemMaxFileSize={{ rpi_journald_max_file_size | default('10M') }}
+
+# Maximum days to retain logs
+MaxRetentionSec={{ (rpi_journald_max_retention_days | default(3) | int) * 86400 }}
+
+# Forward to syslog
+ForwardToSyslog={{ 'yes' if rpi_journald_forward_to_syslog | default(false) else 'no' }}
+
+# Compress old journal files
+Compress={{ 'yes' if rpi_journald_compress | default(true) else 'no' }}
+
+# Rate limiting (reduce I/O)
+RateLimitIntervalSec=30s
+RateLimitBurst=1000
+

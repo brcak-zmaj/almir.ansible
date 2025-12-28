@@ -1,0 +1,85 @@
+---
+# System Optimizations
+
+- name: Configure filesystem mount options
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: "^(/dev/.*\s+/\s+ext4)"
+    backrefs: true
+    line: '\1 defaults,noatime 0 1'
+  when: rpi_fs_noatime | default(true)
+  failed_when: false
+
+- name: Configure ext4 commit interval
+  ansible.builtin.sysctl:
+    name: vm.dirty_writeback_centisecs
+    value: "{{ rpi_fs_commit | int * 100 }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: rpi_fs_commit is defined
+
+- name: Make ext4 commit persistent
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    regexp: "^vm.dirty_writeback_centisecs="
+    line: "vm.dirty_writeback_centisecs={{ rpi_fs_commit | int * 100 }}"
+    state: present
+  when: rpi_fs_commit is defined
+
+- name: Configure CPU governor
+  ansible.builtin.apt:
+    name: cpufrequtils
+    state: present
+  when: rpi_cpu_governor is defined
+
+- name: Set CPU governor
+  ansible.builtin.lineinfile:
+    path: /etc/default/cpufrequtils
+    regexp: "^GOVERNOR="
+    line: "GOVERNOR={{ rpi_cpu_governor }}"
+    state: present
+  when: rpi_cpu_governor is defined
+
+- name: Configure CPU min frequency
+  ansible.builtin.lineinfile:
+    path: /etc/default/cpufrequtils
+    regexp: "^MIN_SPEED="
+    line: "MIN_SPEED={{ rpi_cpu_min_freq }}"
+    state: present
+  when: rpi_cpu_min_freq is defined
+
+- name: Configure CPU max frequency
+  ansible.builtin.lineinfile:
+    path: /etc/default/cpufrequtils
+    regexp: "^MAX_SPEED="
+    line: "MAX_SPEED={{ rpi_cpu_max_freq if rpi_cpu_max_freq | int > 0 else '' }}"
+    state: present
+  when: rpi_cpu_max_freq is defined and rpi_cpu_max_freq | int > 0
+
+- name: Configure I/O scheduler
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*elevator="
+    backrefs: true
+    line: '\1 elevator={{ rpi_io_scheduler }}'
+  when: rpi_io_scheduler is defined
+  failed_when: false
+
+- name: Update GRUB after I/O scheduler change
+  ansible.builtin.command: update-grub
+  when:
+    - rpi_io_scheduler is defined
+    - ansible_pkg_mgr == 'apt'
+  changed_when: true
+  failed_when: false
+
+- name: Configure TRIM for SD cards (weekly cron)
+  ansible.builtin.cron:
+    name: "SD Card TRIM"
+    minute: "0"
+    hour: "3"
+    weekday: "0"
+    job: "/sbin/fstrim -av"
+    state: "{{ 'present' if rpi_fs_trim_enable | default(true) else 'absent' }}"
+

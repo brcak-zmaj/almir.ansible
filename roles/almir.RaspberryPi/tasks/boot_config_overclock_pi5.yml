@@ -1,0 +1,22 @@
+---
+# Pi 5 Overclocking Configuration
+
+- name: Configure Pi 5 ARM frequency
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?arm_freq="
+    line: "arm_freq={{ rpi5_arm_freq }}"
+    state: present
+
+- name: Configure Pi 5 GPU frequency
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?gpu_freq="
+    line: "gpu_freq={{ rpi5_gpu_freq }}"
+    state: present
+
+- name: Warn about Pi 5 overclocking requirements
+  ansible.builtin.debug:
+    msg: "WARNING: Pi 5 overclocking requires active cooling. Ensure proper cooling is in place."
+  when: rpi5_overclock_enable | default(false)
+

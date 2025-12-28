@@ -1,0 +1,29 @@
+---
+# Syslog Configuration
+
+- name: Check if rsyslog is installed
+  ansible.builtin.command: which rsyslogd
+  register: rsyslog_check
+  changed_when: false
+  failed_when: false
+
+- name: Configure rsyslog rotation
+  ansible.builtin.template:
+    src: rsyslog.conf.j2
+    dest: /etc/rsyslog.d/99-rpi-optimize.conf
+    mode: '0644'
+    owner: root
+    group: root
+  when: rsyslog_check.rc == 0
+  register: rsyslog_config
+  notify: restart rsyslog
+
+- name: Create logrotate config for syslog
+  ansible.builtin.template:
+    src: logrotate_syslog.j2
+    dest: /etc/logrotate.d/rpi-syslog
+    mode: '0644'
+    owner: root
+    group: root
+  when: rsyslog_check.rc == 0
+
