@@ -28,7 +28,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir.ansible.cifs-utils
+    - role: almir-ansible.cifs-utils
 ```
 
 ## Author Information

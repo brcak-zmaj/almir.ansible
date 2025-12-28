@@ -31,7 +31,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir.ansible.debloat
+    - role: almir-ansible.debloat
 ```
 
 ## Author Information

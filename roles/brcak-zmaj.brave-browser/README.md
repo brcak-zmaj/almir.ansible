@@ -31,7 +31,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir.ansible.brave-browser
+    - role: almir-ansible.brave-browser
 ```
 
 ## Author Information

@@ -42,7 +42,7 @@ See ![Metrics](https://github.com/utkuozdemir/nvidia_gpu_exporter/blob/master/ME
   vars:
 
   roles:
-    - role: almir.ansible.nvidia-exporter
+    - role: almir-ansible.nvidia-exporter
 ```
 
 ## Author Information

@@ -2,7 +2,7 @@
 
 # Ansible Collection for Brcak Zmaj - Almir 
 
-[![Ansible Collection](https://img.shields.io/badge/brcak.zmaj-brightgreen)](https://galaxy.ansible.com/ui/repo/published/brcak-zmaj/almir.ansible)
+[![Ansible Collection](https://img.shields.io/badge/brcak.zmaj-brightgreen)](https://galaxy.ansible.com/ui/repo/published/brcak-zmaj/almir-ansible)
 [![GitHub tag](https://img.shields.io/github/tag/brcak-zmaj/brcak-zmaj-ansible-collection.svg)](https://github.com/brcak-zmaj/almir.ansible/tags)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/brcak-zmaj/almir.ansible)](https://github.com/brcak-zmaj/almir.ansible/tags)
 [![GitHub Contributors](https://img.shields.io/github/contributors/brcak-zmaj/almir.ansible)](https://github.com/brcak-zmaj/almir.ansible/tags)
@@ -17,7 +17,7 @@ The collection is tested and supported with: `ansible >= 2.9`
 Before using the Grafana collection, you need to install it using the below command:
 
 ```shell
-ansible-galaxy collection install brcak-zmaj.almir.ansible
+ansible-galaxy collection install brcak-zmaj.almir-ansible
 ```
 
 ## Roles included in the collection
