@@ -1,8 +1,10 @@
-namespace: almir
-name: ansible
+namespace: brcak-zmaj
+name: almir.ansible
 version: 1.0.0
 readme: README.md
-author: almir ansible@th2h2f0rt1.33mail.com
+authors:
+  - almir
 description: Ansible roles and collections for server management tasks
-license: #
-dependencies: []
+license:
+  - GPL-3.0-or-later
+dependencies: {}
