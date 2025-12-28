@@ -1,0 +1,25 @@
+---
+# Package Management
+
+- name: Update package cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: rpi_packages_update | default(true)
+
+- name: Install system packages
+  ansible.builtin.apt:
+    name: "{{ rpi_system_packages | default([]) }}"
+    state: present
+  when:
+    - rpi_packages_install | default(true)
+    - rpi_system_packages | default([]) | length > 0
+
+- name: Install optional packages
+  ansible.builtin.apt:
+    name: "{{ rpi_optional_packages | default([]) }}"
+    state: present
+  when:
+    - rpi_packages_install | default(true)
+    - rpi_optional_packages | default([]) | length > 0
+

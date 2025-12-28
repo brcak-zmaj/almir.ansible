@@ -1,0 +1,51 @@
+---
+# Raspberry Pi Comprehensive Configuration Role
+# Main task file - orchestrates all configuration tasks
+
+- name: Detect Raspberry Pi model
+  ansible.builtin.include_tasks: detect_model.yml
+
+- name: Configure swap
+  ansible.builtin.include_tasks: swap.yml
+  when: rpi_swap_manage | default(true)
+
+- name: Configure logging and journald
+  ansible.builtin.include_tasks: logging.yml
+  when: rpi_logging_manage | default(true)
+
+- name: Configure power management
+  ansible.builtin.include_tasks: power.yml
+  when: rpi_power_manage | default(true)
+
+- name: Configure boot settings (config.txt)
+  ansible.builtin.include_tasks: boot_config.yml
+  when: rpi_boot_config_manage | default(true)
+
+- name: Configure network settings
+  ansible.builtin.include_tasks: network.yml
+  when: rpi_network_manage | default(true)
+
+- name: Configure system optimizations
+  ansible.builtin.include_tasks: system_optimize.yml
+  when: rpi_system_optimize | default(true)
+
+- name: Configure hardware interfaces
+  ansible.builtin.include_tasks: hardware.yml
+  when: rpi_hardware_manage | default(true)
+
+- name: Configure security settings
+  ansible.builtin.include_tasks: security.yml
+  when: rpi_security_manage | default(true)
+
+- name: Install system packages
+  ansible.builtin.include_tasks: packages.yml
+  when: rpi_packages_install | default(true)
+
+- name: Configure timezone and locale
+  ansible.builtin.include_tasks: locale.yml
+  when: rpi_locale_manage | default(true)
+
+- name: Configure temperature monitoring
+  ansible.builtin.include_tasks: temperature.yml
+  when: rpi_temp_monitor_enable | default(false)
+

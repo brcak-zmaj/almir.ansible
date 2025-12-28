@@ -1,0 +1,26 @@
+---
+# Audio Configuration
+
+- name: Configure audio driver (Pi 4/5)
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtoverlay="
+    line: "dtoverlay={{ rpi_audio_driver }}"
+    state: present
+  when: rpi_model in ['pi4', 'pi5']
+
+- name: Configure audio driver (Pi 3)
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtparam=audio="
+    line: "dtparam=audio={{ 'on' if rpi_audio_enable | default(true) else 'off' }}"
+    state: present
+  when: rpi_model == 'pi3'
+
+- name: Configure PWM audio mode
+  ansible.builtin.lineinfile:
+    path: /boot/config.txt
+    regexp: "^#?dtparam=audio_pwm_mode_output="
+    line: "dtparam=audio_pwm_mode_output={{ rpi_audio_pwm_mode }}"
+    state: present
+

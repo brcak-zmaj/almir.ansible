@@ -1,0 +1,22 @@
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# Logrotate Configuration for Raspberry Pi
+# General log rotation settings
+
+/var/log/*.log {
+    {% if rpi_logrotate_weekly | default(true) %}
+    weekly
+    {% else %}
+    daily
+    {% endif %}
+    rotate {{ rpi_logrotate_rotate | default(4) }}
+    {% if rpi_logrotate_compress | default(true) %}
+    compress
+    {% endif %}
+    {% if rpi_logrotate_delaycompress | default(true) %}
+    delaycompress
+    {% endif %}
+    missingok
+    notifempty
+    create 0644 root root
+}
+

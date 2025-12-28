@@ -1,0 +1,40 @@
+---
+# Network Configuration
+
+- name: Configure WiFi country code
+  ansible.builtin.lineinfile:
+    path: /etc/wpa_supplicant/wpa_supplicant.conf
+    regexp: "^country="
+    line: "country={{ rpi_wifi_country }}"
+    state: present
+    insertafter: "^ctrl_interface="
+  when: rpi_wifi_enable | default(true)
+  failed_when: false
+
+- name: Configure WiFi power management
+  ansible.builtin.lineinfile:
+    path: /etc/NetworkManager/conf.d/99-rpi-wifi-power.conf
+    regexp: "^wifi.powersave="
+    line: "wifi.powersave={{ 2 if rpi_wifi_power_management | default(false) else 3 }}"
+    create: true
+    mode: '0644'
+  when: rpi_wifi_enable | default(true)
+
+- name: Configure Bluetooth
+  ansible.builtin.lineinfile:
+    path: /etc/bluetooth/main.conf
+    regexp: "^AutoEnable="
+    line: "AutoEnable={{ 'true' if rpi_bluetooth_enable | default(true) else 'false' }}"
+    state: present
+  when: rpi_bluetooth_enable is defined
+  failed_when: false
+
+- name: Configure Bluetooth pairable
+  ansible.builtin.lineinfile:
+    path: /etc/bluetooth/main.conf
+    regexp: "^Pairable="
+    line: "Pairable={{ 'true' if rpi_bluetooth_pairable | default(false) else 'false' }}"
+    state: present
+  when: rpi_bluetooth_enable is defined
+  failed_when: false
+

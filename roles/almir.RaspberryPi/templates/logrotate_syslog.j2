@@ -1,0 +1,47 @@
+# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# Logrotate Configuration for Syslog
+
+/var/log/syslog {
+    {% if rpi_syslog_rotate | default(true) %}
+    rotate {{ rpi_syslog_rotate_count | default(3) }}
+    size {{ rpi_syslog_max_size | default('10M') }}
+    {% if rpi_syslog_compress | default(true) %}
+    compress
+    {% endif %}
+    missingok
+    notifempty
+    create 0644 syslog adm
+    sharedscripts
+    postrotate
+        /usr/lib/rsyslog/rsyslog-rotate
+    endscript
+    {% endif %}
+}
+
+/var/log/mail.info
+/var/log/mail.warn
+/var/log/mail.err
+/var/log/mail.log
+/var/log/daemon.log
+/var/log/kern.log
+/var/log/auth.log
+/var/log/user.log
+/var/log/lpr.log
+/var/log/cron.log
+/var/log/debug
+/var/log/messages
+{
+    rotate {{ rpi_syslog_rotate_count | default(3) }}
+    size {{ rpi_syslog_max_size | default('10M') }}
+    {% if rpi_syslog_compress | default(true) %}
+    compress
+    {% endif %}
+    missingok
+    notifempty
+    create 0644 syslog adm
+    sharedscripts
+    postrotate
+        /usr/lib/rsyslog/rsyslog-rotate
+    endscript
+}
+

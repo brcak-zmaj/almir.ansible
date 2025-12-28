@@ -1,0 +1,34 @@
+---
+# Temperature Monitoring Configuration
+
+- name: Install temperature monitoring tools
+  ansible.builtin.apt:
+    name:
+      - vcgencmd
+      - lm-sensors
+    state: present
+  failed_when: false
+
+- name: Create temperature monitoring script
+  ansible.builtin.template:
+    src: temp_monitor.sh.j2
+    dest: /usr/local/bin/rpi-temp-monitor.sh
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create temperature monitoring cron job
+  ansible.builtin.cron:
+    name: "Raspberry Pi Temperature Monitor"
+    minute: "*/5"
+    job: "/usr/local/bin/rpi-temp-monitor.sh"
+    state: present
+
+- name: Create temperature log directory
+  ansible.builtin.file:
+    path: /var/log/rpi-temp
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+

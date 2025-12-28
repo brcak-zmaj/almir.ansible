@@ -1,0 +1,26 @@
+---
+# Firewall Configuration (UFW)
+
+- name: Install UFW
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: Set UFW default policy
+  ansible.builtin.command: ufw default {{ rpi_firewall_default_policy }} {{ item }}
+  loop:
+    - incoming
+    - outgoing
+  changed_when: true
+
+- name: Add firewall rules
+  ansible.builtin.command: ufw allow {{ item }}
+  loop: "{{ rpi_firewall_rules | default([]) }}"
+  changed_when: true
+  failed_when: false
+
+- name: Enable UFW
+  ansible.builtin.command: ufw --force enable
+  changed_when: true
+  when: rpi_firewall_enable | default(false)
+

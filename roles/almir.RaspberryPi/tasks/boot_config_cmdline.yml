@@ -1,0 +1,30 @@
+---
+# cmdline.txt Configuration
+
+- name: Read current cmdline.txt
+  ansible.builtin.slurp:
+    src: /boot/cmdline.txt
+  register: cmdline_current
+  changed_when: false
+  failed_when: false
+
+- name: Parse cmdline.txt
+  ansible.builtin.set_fact:
+    cmdline_params: "{{ cmdline_current.content | b64decode | trim | split(' ') | list }}"
+  when: cmdline_current.content is defined
+
+- name: Add custom cmdline parameters
+  ansible.builtin.set_fact:
+    cmdline_params: "{{ cmdline_params | default([]) + [item] }}"
+  loop: "{{ rpi_cmdline_custom | default([]) }}"
+  when:
+    - rpi_cmdline_custom | default([]) | length > 0
+    - item not in (cmdline_params | default([]))
+
+- name: Write cmdline.txt
+  ansible.builtin.copy:
+    content: "{{ cmdline_params | default([]) | join(' ') }}\n"
+    dest: /boot/cmdline.txt
+    mode: '0644'
+  when: cmdline_params is defined and cmdline_params | length > 0
+

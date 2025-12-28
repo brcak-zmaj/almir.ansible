@@ -1,0 +1,46 @@
+---
+# Detect Raspberry Pi model from device tree
+
+- name: Check if running on Raspberry Pi
+  ansible.builtin.stat:
+    path: /proc/device-tree/model
+  register: rpi_model_file
+  changed_when: false
+
+- name: Read Raspberry Pi model
+  ansible.builtin.slurp:
+    src: /proc/device-tree/model
+  register: rpi_model_raw
+  when: rpi_model_file.stat.exists
+  changed_when: false
+
+- name: Parse Raspberry Pi model
+  ansible.builtin.set_fact:
+    rpi_model_detected: "{{ rpi_model_raw.content | b64decode | trim | regex_replace('.*Raspberry Pi ', '') | regex_replace(' Model .*', '') | lower }}"
+  when: rpi_model_file.stat.exists
+
+- name: Set model to auto-detected value
+  ansible.builtin.set_fact:
+    rpi_model: "{{ rpi_model_detected }}"
+  when:
+    - rpi_model_file.stat.exists
+    - rpi_model | default('auto') == 'auto'
+    - rpi_model_detected is defined
+
+- name: Validate Raspberry Pi model
+  ansible.builtin.assert:
+    that:
+      - rpi_model in ['pi3', 'pi4', 'pi5', 'auto']
+    fail_msg: "Invalid rpi_model: {{ rpi_model }}. Must be pi3, pi4, pi5, or auto"
+    success_msg: "Raspberry Pi model: {{ rpi_model }}"
+
+- name: Display detected model
+  ansible.builtin.debug:
+    msg: "Raspberry Pi model detected: {{ rpi_model }}"
+  when: rpi_model_file.stat.exists
+
+- name: Warn if not running on Raspberry Pi
+  ansible.builtin.debug:
+    msg: "WARNING: This role is designed for Raspberry Pi. Some features may not work."
+  when: not rpi_model_file.stat.exists
+
