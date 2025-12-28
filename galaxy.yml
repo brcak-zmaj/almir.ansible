@@ -1,4 +1,4 @@
-namespace: brcakzmaj
+namespace: brcak_zmaj
 name: almiransible
 version: 1.0.1
 readme: README.md
@@ -7,4 +7,5 @@ authors:
 description: Ansible roles and collections for server management tasks
 license:
   - GPL-3.0-or-later
+repository: https://github.com/brcak-zmaj/almir.ansible
 dependencies: {}
