@@ -73,7 +73,7 @@ This ansible role will is intended to setup my development workstation
   vars:
 
   roles:
-    - role: almir.ansible.my-pc-setup
+    - role: almir-ansible.my-pc-setup
 ```
 
 ## Author Information

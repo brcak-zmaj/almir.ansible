@@ -32,7 +32,7 @@ No Dependencies
   vars:
 
   roles:
-    - role: almir.ansible.google-earth
+    - role: almir-ansible.google-earth
 ```
 
 ## Author Information

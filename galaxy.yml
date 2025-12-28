@@ -1,6 +1,6 @@
 namespace: brcak-zmaj
-name: almir.ansible
-version: 1.0.0
+name: almir-ansible
+version: 1.0.1
 readme: README.md
 authors:
   - almir
