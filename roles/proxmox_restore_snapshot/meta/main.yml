@@ -1,17 +1,11 @@
 ---
 galaxy_info:
-  author: almir
-  description: This ansible role will setup and install Brave Browser
+  author: Almir Zohorovic
+  description: This ansible role will is intended to speed up testing, and give you quick way to include a way to restore a snapshot
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
   platforms:
-    - name: Fedora
-      versions:
-        - all
-    - name: EL
-      versions:
-        - all
     - name: Ubuntu
       versions:
         - all
@@ -20,7 +14,9 @@ galaxy_info:
         - all
   
   galaxy_tags:
-    - applications
-    - browser
+    - hypervisor
+    - proxmox
+    - virtualization
 
 dependencies: []
+

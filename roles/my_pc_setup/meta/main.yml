@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: almir
-  description: A comprehensive Ansible role for removing unnecessary packages, bloatware, and system components from Linux distributions (Fedora, RHEL, CentOS, Debian, Ubuntu).
+  author: Almir Zohorovic
+  description: This ansible role will is intended to setup my development workstation
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
@@ -20,9 +20,11 @@ galaxy_info:
         - all
   
   galaxy_tags:
-    - cleanup
-    - optimization
-    - system
+    - workstation
+    - desktop
+    - development
+    - configuration
 
 dependencies:
     - community.general
+

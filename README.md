@@ -40,7 +40,6 @@ This collection includes the following roles for server management, system optim
 - **docker-tuning**: Configures various sysctl parameters to optimize servers running Docker containers.
 - **proxmox**: Comprehensive configuration and optimization for Proxmox Virtual Environment (PVE) servers including repository management, ZFS tuning, GPU passthrough, backup configuration, and more.
 - **proxmox-restore-snapshot**: Easy-to-use role for restoring Proxmox snapshots in playbooks.
-- **proxmox-tuning**: Configures a vanilla Proxmox server to a production-ready, tuned server.
 
 ### Monitoring & Exporters
 - **nvidia-exporter**: Sets up NVIDIA GPU metrics exporter for Prometheus monitoring.

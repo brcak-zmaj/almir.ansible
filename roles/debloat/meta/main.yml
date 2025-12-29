@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: almir
-  description: Postgresql Tuning role for Ansible collection
+  author: Almir Zohorovic
+  description: A comprehensive Ansible role for removing unnecessary packages, bloatware, and system components from Linux distributions (Fedora, RHEL, CentOS, Debian, Ubuntu).
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
@@ -20,8 +20,10 @@ galaxy_info:
         - all
   
   galaxy_tags:
+    - cleanup
     - optimization
-    - performance
-    - tuning
+    - system
 
-dependencies: []
+dependencies:
+    - community.general
+

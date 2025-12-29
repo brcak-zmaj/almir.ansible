@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: almir
-  description: This ansible role will Install virtualbox on targets
+  author: Almir Zohorovic
+  description: This ansible role will Install cifs-utils on targets
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
@@ -20,7 +20,9 @@ galaxy_info:
         - all
   
   galaxy_tags:
-    - applications
-    - virtualization
+    - filesystem
+    - network
+    - storage
 
 dependencies: []
+
