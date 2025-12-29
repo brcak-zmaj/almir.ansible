@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: almir
+  description: A comprehensive Ansible role for configuring Raspberry Pi 3, 4, and 5 devices with extensive configuration options for swap management, logging optimization, power management, boot settings, hardware interfaces, and system tuning. This role is designed to be production-ready and includes optimizations specifically for SD card longevity.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.9"
+  
+  platforms:
+    - name: Raspbian
+      versions:
+        - all
+  
+  galaxy_tags:
+    - configuration
+    - embedded
+    - iot
+    - management
+    - raspberry-pi
+    - system
+
+dependencies: []

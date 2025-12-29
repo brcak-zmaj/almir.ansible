@@ -14,7 +14,7 @@ The collection is tested and supported with: `ansible >= 2.9`
 
 ## Installing the collection
 
-Before using the Grafana collection, you need to install it using the below command:
+Install the collection using the command below:
 
 ```shell
 ansible-galaxy collection install brcak_zmaj.almir_ansible
@@ -22,16 +22,58 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
 
 ## Roles included in the collection
 
-This collection includes the following roles to help set up and manage Brave Browser, debloating, My Dev workstation, proxmox:
+This collection includes the following roles for server management, system optimization, and application deployment:
 
+### System Management
 - **brave-browser**: Installs and configures Brave Web Browser on your target hosts.
-- **debloat**: Cleans up and unneeded packages including language packs.
-- **my-pc-setup**: This is intended to configure and setup my development machine. Installs all packages I need, sets up mountpoints and configures the appearance.
-- **proxmox-restore_snapshot**: Developed to make it easy to include into playbooks for restoring snapshots when nessesary.
-- **proxmox-tuning**: Configures a vanilla proxmox server to a production and tuned server
-- **docker-tuning**: Configures various sysctl parameters to bulletproof a server that's running docker containers
-- **mysql-tuning**: Configures various sysctl parameters to bulletproof a server that's running MySQL
-- **postgresql-tuning**: Configures various sysctl parameters to bulletproof a server that's running PostgreSQL
+- **cifs-utils**: Configures CIFS/SMB mount utilities for network file sharing.
+- **debloat**: Removes unnecessary packages, bloatware, and system components from Linux distributions (Fedora, RHEL, CentOS, Debian, Ubuntu).
+- **my-pc-setup**: Configures and sets up development workstations. Installs packages, sets up mountpoints, and configures appearance.
+- **pc-tuning**: System tuning and optimization for desktop/workstation systems.
+- **virtualbox**: Installs and configures VirtualBox virtualization software.
+
+### Database Tuning
+- **mysql-tuning**: Configures various sysctl parameters to optimize servers running MySQL.
+- **postgresql-tuning**: Configures various sysctl parameters to optimize servers running PostgreSQL.
+
+### Container & Virtualization
+- **docker-tuning**: Configures various sysctl parameters to optimize servers running Docker containers.
+- **proxmox**: Comprehensive configuration and optimization for Proxmox Virtual Environment (PVE) servers including repository management, ZFS tuning, GPU passthrough, backup configuration, and more.
+- **proxmox-restore-snapshot**: Easy-to-use role for restoring Proxmox snapshots in playbooks.
+- **proxmox-tuning**: Configures a vanilla Proxmox server to a production-ready, tuned server.
+
+### Monitoring & Exporters
+- **nvidia-exporter**: Sets up NVIDIA GPU metrics exporter for Prometheus monitoring.
+
+### Application Deployment
+- **google-earth**: Installs and configures Google Earth on target systems.
+
+### Embedded Systems
+- **raspberry-pi**: Comprehensive Ansible role for configuring Raspberry Pi 3, 4, and 5 devices with extensive configuration options for swap management, logging optimization, power management, boot settings, hardware interfaces, and system tuning.
+
+## Quick Start Examples
+
+### Install a single role from the collection
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: brcak_zmaj.almir_ansible.debloat
+```
+
+### Install multiple roles
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: brcak_zmaj.almir_ansible.debloat
+    - role: brcak_zmaj.almir_ansible.docker_tuning
+    - role: brcak_zmaj.almir_ansible.mysql_tuning
+```
 
 ## Contributing
 
@@ -45,7 +87,7 @@ I am accepting GitHub pull requests and issues. There are many ways in which you
 
 GPL-3.0-or-later
 
-> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer. This repo contains "shortened" versions of my personal roles - If interested in full versions or custom roles please contact me at ansible@th2h2f0rt1.33mail.com 
 
 ## Stats
 

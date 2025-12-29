@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: almir
+  description: This ansible role will is intended to speed up testing, and give you quick way to include a way to restore a snapshot
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.9"
+  
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  
+  galaxy_tags:
+    - hypervisor
+    - proxmox
+    - virtualization
+
+dependencies: []

@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  author: almir
+  description: This Ansible role applies optimized system settings for servers running Docker, ensuring maximum performance, reliability, and efficiency.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.9"
+  
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+    - name: EL
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  
+  galaxy_tags:
+    - optimization
+    - performance
+    - system
+    - tuning
+
+dependencies: []

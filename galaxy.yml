@@ -1,9 +1,9 @@
 namespace: brcak_zmaj
 name: almir_ansible
-version: 1.2.0
+version: 1.3.0
 readme: README.md
 authors:
-  - almir
+  - almir zohorovic
 description: Ansible roles and collections for server management tasks
 license:
   - GPL-3.0-or-later
