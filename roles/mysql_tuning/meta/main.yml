@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: almir
-  description: This Ansible role applies optimized system settings for servers running Docker, ensuring maximum performance, reliability, and efficiency.
+  author: Almir Zohorovic
+  description: Mysql Tuning role for Ansible collection
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
@@ -22,7 +22,7 @@ galaxy_info:
   galaxy_tags:
     - optimization
     - performance
-    - system
     - tuning
 
 dependencies: []
+

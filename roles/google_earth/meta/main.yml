@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: almir
-  description: This ansible role will is intended to setup my development workstation
+  author: Almir Zohorovic
+  description: This ansible role will Install google-earth on targets
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
@@ -20,10 +20,8 @@ galaxy_info:
         - all
   
   galaxy_tags:
-    - workstation
+    - applications
     - desktop
-    - development
-    - configuration
 
-dependencies:
-    - community.general
+dependencies: []
+

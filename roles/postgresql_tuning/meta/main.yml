@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  author: almir
-  description: Pc Tuning role for Ansible collection
+  author: Almir Zohorovic
+  description: Postgresql Tuning role for Ansible collection
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   
@@ -25,3 +25,4 @@ galaxy_info:
     - tuning
 
 dependencies: []
+

@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  author: almir
+  author: Almir Zohorovic
   description: A comprehensive Ansible role for configuring and optimizing Proxmox Virtual Environment (PVE) servers. This role handles repository configuration, system tuning, ZFS optimization, GPU passthrough, backup configuration, and more.
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
@@ -21,3 +21,4 @@ galaxy_info:
     - virtualization
 
 dependencies: []
+
