@@ -1,3 +1,5 @@
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Raspberry_Pi_OS_Logo.png/840px-Raspberry_Pi_OS_Logo.png?" width="600" height="180" alt="Raspberry Pi Logo" />
+
 
 # almir.RaspberryPi
 
