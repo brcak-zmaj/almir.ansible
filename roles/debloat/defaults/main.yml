@@ -1,6 +1,10 @@
+# Display summary after debloat operations
+debloat_show_summary: true
 
+# Flatpak packages to uninstall
 uninstall_flatpak_packages: []
 
+# Language packs to remove
 language_packs:
   - language-pack-gnome-ar*
   - language-pack-gnome-de*
@@ -12,7 +16,8 @@ language_packs:
   - language-pack-gnome-ru*
   - language-pack-gnome-zh*
 
-redhat_debloat:  # RedHat Specific
+# RedHat-specific packages to remove
+redhat_debloat:
   - cheese-common*
   - ffmpeg-free
   - hyperv*
@@ -20,14 +25,20 @@ redhat_debloat:  # RedHat Specific
   - simple-scan*
   - toolbox
   - whoopsie*
+  - annobin-docs
 
-debian_debloat:  # Debian Specific
+# Debian-specific packages to remove
+debian_debloat:
   - ristretto*
   - transmission*
 
+# Common packages to remove (all distributions)
 common_debloat:
   # GNOME/GTK apps
   - akregator
+  - kf6-kdoctools
+  - kf6-kio-doc
+  - gnome-user-docs
   - akregator-libs
   - dragon
   - dragonplayer
@@ -57,7 +68,12 @@ common_debloat:
   - cockpit-packagekit
   - cockpit-podman
   - cockpit-selinux
-  - cockpit-subscription  
+  - cockpit-subscription
+  - cockpit-bridge
+  - cockpit-storaged
+  - cockpit-system
+  - cockpit-ws
+  - cockpit-ws-selinux
   - banshee
   - brasero
   - claws-mail
@@ -93,6 +109,7 @@ common_debloat:
   - ristretto*
   - thunderbird*
   - transmission*
+  - open-vm-tools
 
   # LibreOffice help packs
   - libreoffice-help-de
@@ -118,3 +135,100 @@ common_debloat:
   - libreoffice-l10n-ru
   - libreoffice-l10n-zh-cn
   - libreoffice-l10n-zh-tw
+
+# Font packages to remove (language-specific fonts)
+font_packages:
+  - default-fonts-ar
+  - default-fonts-as
+  - default-fonts-ast
+  - default-fonts-be
+  - default-fonts-bg
+  - default-fonts-bn
+  - default-fonts-bo
+  - default-fonts-br
+  - default-fonts-chr
+  - default-fonts-dv
+  - default-fonts-dz
+  - default-fonts-el
+  - default-fonts-eo
+  - default-fonts-eu
+  - default-fonts-fa
+  - default-fonts-got
+  - default-fonts-gu
+  - default-fonts-he
+  - default-fonts-hi
+  - default-fonts-hy
+  - default-fonts-ia
+  - default-fonts-iu
+  - default-fonts-ka
+  - default-fonts-kab
+  - default-fonts-km
+  - default-fonts-kn
+  - default-fonts-ku
+  - default-fonts-lo
+  - default-fonts-mai
+  - default-fonts-ml
+  - default-fonts-mni
+  - default-fonts-mr
+  - default-fonts-my
+  - default-fonts-nb
+  - default-fonts-ne
+  - default-fonts-nn
+  - default-fonts-nqo
+  - default-fonts-nr
+  - default-fonts-nso
+  - default-fonts-or
+  - default-fonts-pa
+  - default-fonts-ru
+  - default-fonts-sat
+  - default-fonts-si
+  - default-fonts-ss
+  - default-fonts-syr
+  - default-fonts-ta
+  - default-fonts-te
+  - default-fonts-th
+  - default-fonts-tn
+  - default-fonts-ts
+  - default-fonts-uk
+  - default-fonts-ur
+  - default-fonts-ve
+  - default-fonts-vi
+  - default-fonts-xh
+  - default-fonts-yi
+  - default-fonts-zu
+  - default-fonts-other-serif
+  - google-noto-naskh-arabic-vf-fonts
+  - google-noto-serif-armenian-vf-fonts
+  - google-noto-serif-bengali-vf-fonts
+  - google-noto-serif-devanagari-vf-fonts
+  - google-noto-serif-ethiopic-vf-fonts
+  - google-noto-serif-georgian-vf-fonts
+  - google-noto-serif-gujarati-vf-fonts
+  - google-noto-serif-gurmukhi-vf-fonts
+  - google-noto-serif-hebrew-vf-fonts
+  - google-noto-serif-kannada-vf-fonts
+  - google-noto-serif-khmer-vf-fonts
+  - google-noto-serif-lao-vf-fonts
+  - google-noto-serif-oriya-vf-fonts
+  - google-noto-serif-sinhala-vf-fonts
+  - google-noto-serif-tamil-vf-fonts
+  - google-noto-serif-telugu-vf-fonts
+  - google-noto-serif-thai-vf-fonts
+  - rit-rachana-fonts
+
+# User-defined additional packages to remove
+# Add custom packages here that aren't in the default lists above
+# Example:
+#   custom_debloat_packages:
+#     - some-package
+#     - another-package
+custom_debloat_packages: []
+
+# Packages to keep (exclude from removal)
+# Add package names here to prevent them from being removed even if they're in debloat lists above
+# This acts as a whitelist/keep list
+# Example:
+#   keep_packages:
+#     - evolution  # Keep evolution even though it's in common_debloat
+#     - podman     # Keep podman even though it's in redhat_debloat
+keep_packages: []
