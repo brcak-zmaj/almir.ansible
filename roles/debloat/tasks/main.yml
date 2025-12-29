@@ -12,13 +12,13 @@
   ansible.builtin.set_fact:
     master_debloat_list: >-
       {{
-        (common_debloat | default([])) +
-        (redhat_debloat | default([]) if ansible_os_family == 'RedHat' else []) +
-        (debian_debloat | default([]) if ansible_os_family == 'Debian' else []) +
-        (font_packages | default([])) +
-        (custom_debloat_packages | default([]))
+        common_debloat +
+        (redhat_debloat if ansible_os_family == 'RedHat' else []) +
+        (debian_debloat if ansible_os_family == 'Debian' else []) +
+        font_packages +
+        custom_debloat_packages
       }}
-    master_language_packs: "{{ language_packs | default([]) }}"
+    master_language_packs: "{{ language_packs }}"
 
 - name: Filter packages to keep from master list
   ansible.builtin.set_fact:
@@ -52,13 +52,13 @@
   ansible.builtin.set_fact:
     installed_packages_to_remove: >-
       {{
-        debloat_list_filtered | default([]) |
+        debloat_list_filtered |
         select('in', all_installed_packages_rpm.stdout_lines | default([])) |
         list
       }}
   when:
     - ansible_os_family == 'RedHat'
-    - debloat_list_filtered | default([]) | length > 0
+    - debloat_list_filtered | length > 0
     - all_installed_packages_rpm.stdout_lines is defined
     - all_installed_packages_rpm.stdout_lines | length > 0
 
@@ -66,13 +66,13 @@
   ansible.builtin.set_fact:
     installed_packages_to_remove: >-
       {{
-        debloat_list_filtered | default([]) |
+        debloat_list_filtered |
         select('in', all_installed_packages_dpkg.stdout_lines | default([])) |
         list
       }}
   when:
     - ansible_os_family == 'Debian'
-    - debloat_list_filtered | default([]) | length > 0
+    - debloat_list_filtered | length > 0
     - all_installed_packages_dpkg.stdout_lines is defined
     - all_installed_packages_dpkg.stdout_lines | length > 0
 
@@ -87,7 +87,7 @@
   no_log: true
   when:
     - ansible_os_family == 'RedHat'
-    - language_packs_filtered | default([]) | length > 0
+    - language_packs_filtered | length > 0
 
 - name: Find installed language packs - Debian
   become: true
@@ -100,7 +100,7 @@
   no_log: true
   when:
     - ansible_os_family == 'Debian'
-    - language_packs_filtered | default([]) | length > 0
+    - language_packs_filtered | length > 0
 
 - name: Extract installed language packs list
   ansible.builtin.set_fact:
@@ -111,13 +111,14 @@
         unique
       }}
   when:
-    - language_packs_filtered | default([]) | length > 0
+    - language_packs_filtered | length > 0
     - language_packs_found.stdout_lines is defined
     - language_packs_found.stdout_lines | length > 0
 
 - name: Combine all packages for removal
   ansible.builtin.set_fact:
     all_packages_to_remove: "{{ (installed_packages_to_remove | default([])) + (installed_language_packs | default([])) | unique }}"
+  when: (installed_packages_to_remove is defined and installed_packages_to_remove | length > 0) or (installed_language_packs is defined and installed_language_packs | length > 0)
 
 - name: Remove installed packages - RedHat
   become: true
@@ -133,7 +134,8 @@
   failed_when: false
   when:
     - ansible_os_family == 'RedHat'
-    - all_packages_to_remove | default([]) | length > 0
+    - all_packages_to_remove is defined
+    - all_packages_to_remove | length > 0
 
 - name: Remove installed packages - Debian
   become: true
@@ -149,7 +151,8 @@
   failed_when: false
   when:
     - ansible_os_family == 'Debian'
-    - all_packages_to_remove | default([]) | length > 0
+    - all_packages_to_remove is defined
+    - all_packages_to_remove | length > 0
 
 - name: Get all installed Flatpak packages
   become: true
@@ -160,18 +163,18 @@
   failed_when: false
   environment: "{{ debloat_env }}"
   no_log: true
-  when: uninstall_flatpak_packages | default([]) | length > 0
+  when: uninstall_flatpak_packages | length > 0
 
 - name: Find installed Flatpak packages to remove
   ansible.builtin.set_fact:
     installed_flatpak_packages: >-
       {{
-        uninstall_flatpak_packages | default([]) |
+        uninstall_flatpak_packages |
         select('in', all_flatpak_installed.stdout_lines | default([])) |
         list
       }}
   when:
-    - uninstall_flatpak_packages | default([]) | length > 0
+    - uninstall_flatpak_packages | length > 0
     - all_flatpak_installed.stdout_lines is defined
     - all_flatpak_installed.stdout_lines | length > 0
 
@@ -181,14 +184,15 @@
     name: "{{ item }}"
     state: absent
   environment: "{{ debloat_env }}"
-  loop: "{{ installed_flatpak_packages | default([]) }}"
+  loop: "{{ installed_flatpak_packages }}"
   register: flatpak_debloat_result
   ignore_errors: yes
   changed_when: flatpak_debloat_result.changed | default(false)
   failed_when: false
   when:
-    - uninstall_flatpak_packages | default([]) | length > 0
-    - installed_flatpak_packages | default([]) | length > 0
+    - uninstall_flatpak_packages | length > 0
+    - installed_flatpak_packages is defined
+    - installed_flatpak_packages | length > 0
 
 - name: Display debloat summary
   ansible.builtin.debug:
@@ -197,18 +201,19 @@
       - "System: {{ ansible_distribution | default('Unknown') }} {{ ansible_distribution_version | default('') }} ({{ ansible_os_family }})"
       - ""
       - "Packages:"
-      - "  - Checked in debloat lists: {{ (debloat_list_filtered | default([]) | length) + (language_packs_filtered | default([]) | length) }}"
-      - "  - Successfully removed: {{ all_packages_to_remove | default([]) | length if (debloat_result.changed | default(false)) else 0 }}"
-      - "  - Status: {{ 'Removed successfully' if (debloat_result.changed | default(false)) else ('Already removed (not present)' if (all_packages_to_remove | default([]) | length > 0) else 'None found to remove') }}"
+      - "  - Checked in debloat lists: {{ (debloat_list_filtered | length) + (language_packs_filtered | length) }}"
+      - "  - Identified for removal: {{ all_packages_to_remove | length if all_packages_to_remove is defined else 0 }}"
+      - "  - Successfully removed: {{ all_packages_to_remove | length if (debloat_result.changed | default(false)) else 0 }}"
+      - "  - Status: {{ 'Removed successfully' if (debloat_result.changed | default(false)) else ('Already removed (not present)' if (all_packages_to_remove is defined and all_packages_to_remove | length > 0) else 'None found to remove') }}"
       - ""
       - "Flatpak:"
-      - "  - Checked in debloat lists: {{ uninstall_flatpak_packages | default([]) | length }}"
-      - "  - Identified for removal: {{ installed_flatpak_packages | default([]) | length }}"
-      - "  - Successfully removed: {{ installed_flatpak_packages | default([]) | length if (flatpak_debloat_result.changed | default(false)) else 0 }}"
-      - "  - Status: {{ 'Removed successfully' if (flatpak_debloat_result.changed | default(false)) else ('Already removed (not present)' if (installed_flatpak_packages | default([]) | length > 0) else 'None found to remove') }}"
+      - "  - Checked in debloat lists: {{ uninstall_flatpak_packages | length }}"
+      - "  - Identified for removal: {{ installed_flatpak_packages | length if installed_flatpak_packages is defined else 0 }}"
+      - "  - Successfully removed: {{ installed_flatpak_packages | length if (flatpak_debloat_result.changed | default(false)) else 0 }}"
+      - "  - Status: {{ 'Removed successfully' if (flatpak_debloat_result.changed | default(false)) else ('Already removed (not present)' if (installed_flatpak_packages is defined and installed_flatpak_packages | length > 0) else 'None found to remove') }}"
       - ""
-      - "Packages kept (excluded): {{ keep_packages | default([]) | length }}"
-  when: debloat_show_summary | default(true)
+      - "Packages kept (excluded): {{ keep_packages | length }}"
+  when: debloat_show_summary
   vars:
     debloat_result: "{{ debloat_result | default({'changed': false}) }}"
     flatpak_debloat_result: "{{ flatpak_debloat_result | default({'changed': false}) }}"
