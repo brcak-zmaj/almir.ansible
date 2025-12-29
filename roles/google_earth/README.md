@@ -1,5 +1,7 @@
 <img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" /> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Google_Earth_icon.svg/120px-Google_Earth_icon.svg.png" width="250" height="156" alt="Google Earth Logo" />
 
+
+
 ## Ansible role - Google Earth
 
 This ansible role will Install google-earth on targets
@@ -46,3 +48,6 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
 ## Author Information
 
 -   [Almir Zohorovic](https://github.com/brcak-zmaj)
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

@@ -1,3 +1,4 @@
+
 # almir.RaspberryPi
 
 A comprehensive Ansible role for configuring Raspberry Pi 3, 4, and 5 devices with extensive configuration options for swap management, logging optimization, power management, boot settings, hardware interfaces, and system tuning. This role is designed to be production-ready and includes optimizations specifically for SD card longevity.
@@ -666,3 +667,7 @@ For issues, questions, or contributions, please use the [GitHub Issues](https://
 - Model auto-detection
 - Temperature monitoring
 - Security configuration
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

@@ -1,5 +1,7 @@
 <img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
 
+
+
 ## Ansible role - My PC Setup
 
 This ansible role will is intended to setup my development workstation
@@ -88,3 +90,7 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
 
 -   [Almir Zohorovic](https://github.com/brcak-zmaj)
 
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")
