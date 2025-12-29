@@ -46,3 +46,7 @@ I am accepting GitHub pull requests and issues. There are many ways in which you
 GPL-3.0-or-later
 
 > Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

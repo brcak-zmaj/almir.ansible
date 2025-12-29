@@ -1,3 +1,4 @@
+
 # mysql_tuning
 
 Mysql Tuning role for Ansible collection
@@ -33,3 +34,7 @@ GPL-3.0-or-later
 ## Author Information
 
 Almir Zohorovic
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

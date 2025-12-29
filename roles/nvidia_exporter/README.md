@@ -1,5 +1,7 @@
 <img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" /> <img src="https://upload.wikimedia.org/wikipedia/sco/thumb/2/21/Nvidia_logo.svg/351px-Nvidia_logo.svg.png" width="250" height="156" alt="Nvidia Logo" />
 
+
+
 ## Ansible role - nvidia-exporter
 
 This ansible role will setup the nvidia exporter agent on a target that has an nvidia GPU. This is used to enable metrics for displaying into Grafana. Inspiration and code was used from this repository https://github.com/utkuozdemir/nvidia_gpu_exporter
@@ -57,3 +59,6 @@ See ![Metrics](https://github.com/utkuozdemir/nvidia_gpu_exporter/blob/master/ME
 
 -   [Almir Zohorovic](https://github.com/brcak-zmaj)
 -   [Utku Ozdemir] (https://github.com/utkuozdemir)
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")
