@@ -1,8 +1,4 @@
-<div align = "center">
-  <img alt = "project logo" src = "https://github.com/OliveTin/OliveTin/blob/main/frontend/OliveTinLogo.png" width = "128" />
-  <h1>OliveTin</h1>
-
-  OliveTin gives **safe** and **simple** access to predefined shell commands from a web interface.
+<img alt = "project logo" src = "https://github.com/OliveTin/OliveTin/blob/main/frontend/OliveTinLogo.png" width = "128" />
 
 # Ansible Role - OliveTin
 

@@ -1,4 +1,3 @@
-# almir.geospatial_data
 
 Ansible role for installing geospatial software and downloading offline map data on Linux systems.
 
@@ -24,24 +23,6 @@ This role provides comprehensive geospatial capabilities for Linux systems, incl
 ### Dependencies
 
 - **community.general** collection (required for Flatpak modules)
-
-Install the collection:
-```bash
-ansible-galaxy collection install community.general
-```
-
-## Installation
-
-Install from Ansible Galaxy:
-```bash
-ansible-galaxy role install almir.geospatial_data
-```
-
-Or add to your `requirements.yml`:
-```yaml
-roles:
-  - name: almir.geospatial_data
-```
 
 ## Features
 
@@ -188,7 +169,7 @@ None
   hosts: workstations
   become: true
   roles:
-    - role: almir.geospatial_data
+    - role: brcak_zmaj.almir_ansible.geospatial_data
   vars:
     user: "almir"
     install_qgis: true
@@ -204,7 +185,7 @@ None
   hosts: workstations
   become: true
   roles:
-    - role: almir.geospatial_data
+    - role: brcak_zmaj.almir_ansible.geospatial_data
   vars:
     user: "almir"
     osm_regions:
@@ -226,7 +207,7 @@ None
   hosts: workstations
   become: true
   roles:
-    - role: almir.geospatial_data
+    - role: brcak_zmaj.almir_ansible.geospatial_data
   vars:
     user: "almir"
     use_flatpak: false
@@ -241,7 +222,7 @@ None
   hosts: workstations
   become: true
   roles:
-    - role: almir.geospatial_data
+    - role: brcak_zmaj.almir_ansible.geospatial_data
   vars:
     user: "almir"
     install_gps_support: true
@@ -257,7 +238,7 @@ None
   hosts: workstations
   become: true
   roles:
-    - role: almir.geospatial_data
+    - role: brcak_zmaj.almir_ansible.geospatial_data
   vars:
     user: "almir"
     install_marble: false
@@ -272,7 +253,7 @@ None
   hosts: workstations
   become: true
   roles:
-    - role: almir.geospatial_data
+    - role: brcak_zmaj.almir_ansible.geospatial_data
   vars:
     user: "almir"
     osm_download_regions: false
@@ -313,4 +294,4 @@ MIT
 
 ## Author Information
 
-Almir
+Almir Zohorovic
