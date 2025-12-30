@@ -1,0 +1,7 @@
+alarm: high_connection_rate
+on: web_log.apache.connections
+lookup: average {{ netdata_apache_high_connection_rate_lookup }} unaligned of connections
+units: connections/s
+every: {{ netdata_apache_high_connection_rate_every }}
+warn: $this > {{ netdata_apache_high_connection_rate_warn }}
+crit: $this > {{ netdata_apache_high_connection_rate_crit }}

@@ -1,0 +1,119 @@
+---
+# Geospatial Data Role - Default Variables
+# Role: almir.geospatial_data
+
+# ============================================================================
+# USER CONFIGURATION
+# ============================================================================
+user: "almir"
+home: "/home/{{ user }}"
+scripts_dir: "{{ home }}/scripts"
+data_dir: "{{ home }}/data"
+
+# ============================================================================
+# TASK ENABLE/DISABLE FLAGS
+# ============================================================================
+install_geospatial_software: true   # Install geospatial software (QGIS, Marble, Viking)
+install_map_data: true              # Download offline map datasets
+install_gps_support: true           # Install GPS daemon and hardware support
+
+# ============================================================================
+# PACKAGE MANAGER CONFIGURATION
+# ============================================================================
+use_flatpak: true                   # Use Flatpak for software installation (preferred)
+                                    # If false, will attempt DNF installation where available
+install_flatpak: true               # Install Flatpak package manager
+add_flathub: true                   # Add Flathub repository
+verify_dependencies: true           # Verify installed dependencies
+
+# ============================================================================
+# GEOSPATIAL SOFTWARE INSTALLATION
+# ============================================================================
+# Individual software enable/disable flags (default: all true)
+install_qgis: true                   # Install QGIS Desktop
+install_marble: true                 # Install Marble Virtual Globe
+install_viking: true                 # Install Viking GPS Data Editor
+
+# ============================================================================
+# MAP DATA CONFIGURATION
+# ============================================================================
+map_data_dir: "{{ data_dir }}/maps"
+
+# OpenStreetMap
+osm_enabled: true
+osm_download_regions: true          # Download regional extracts from Geofabrik
+osm_download_planet: false          # Download full planet file (~84GB)
+osm_regions:
+  - "north-america"
+  - "europe"
+  - "europe/bosnia-herzegovina"
+  - "us/georgia"
+osm_format: "pbf"
+osm_extract_url: "https://download.geofabrik.de"
+
+# OpenStreetMap PBF Files (direct downloads from planet.openstreetmap.org)
+# Only used if osm_download_planet is true
+osm_pbf_files:
+  - "https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf"
+#  - "https://planet.openstreetmap.org/pbf/planet-251222.osm.pbf"  # Optional: uncomment to add more files
+
+# MBTiles
+# Pre-rendered map tiles in MBTiles format (used by mobile apps and web viewers)
+mbtiles_enabled: true
+mbtiles_regions:
+  - "north-america"
+  - "europe"
+mbtiles_sources:
+  # Example MBTiles sources (uncomment and configure as needed)
+  # - url: "https://example.com/maps/north-america.mbtiles"
+  #   name: "north-america"
+  # - url: "https://example.com/maps/europe.mbtiles"
+  #   name: "europe"
+
+# SRTM Elevation Data
+# These downloads are SKIPPED if srtm_regions is empty (default)
+srtm_enabled: true
+srtm_regions:
+  # North America examples (covering US Georgia region)
+  - "N34W084"  # Georgia, USA
+  # Europe examples (covering Bosnia-Herzegovina region)
+  - "N44E018"  # Bosnia-Herzegovina
+  - "N44E017"  # Bosnia-Herzegovina
+  - "N43E018"  # Bosnia-Herzegovina/Croatia border
+srtm_resolution: "1arc"  # "1arc" (30m resolution, best quality) or "3arc" (90m resolution, smaller files)
+
+# ASTER Elevation Data
+# These downloads are SKIPPED if aster_regions is empty (default)
+aster_enabled: true
+aster_regions:
+  # North America examples (covering US Georgia region)
+  - "N34W084"  # Georgia, USA
+  # Europe examples (covering Bosnia-Herzegovina region)
+  - "N44E018"  # Bosnia-Herzegovina
+  - "N44E017"  # Bosnia-Herzegovina
+  - "N43E018"  # Bosnia-Herzegovina/Croatia border
+
+# USGS Topo Maps
+# These downloads are SKIPPED if usgs_topo_regions is empty (default)
+usgs_enabled: true
+usgs_topo_regions:
+  - {"name": "georgia"}               # Georgia, USA
+usgs_topo_scales:
+  - "250k"  # 1:250,000 scale (overview)
+  - "100k"  # 1:100,000 scale (detailed)
+  - "24k"   # 1:24,000 scale (very detailed, large files)
+
+# NOAA Nautical Charts
+# These downloads are SKIPPED if noaa_charts_regions is empty (default)
+noaa_enabled: true
+noaa_charts_regions:
+  - {"name": "US3EC03M"}             # US East Coast - North Carolina to Georgia
+noaa_chart_types:
+  - "ENC"  # Electronic Navigational Chart
+  - "RNC"  # Raster Navigational Chart
+
+# ============================================================================
+# GPS HARDWARE SUPPORT
+# ============================================================================
+gpsd_enabled: false                 # Service enabled by default?
+gpsd_device: "/dev/ttyUSB0"         # Default GPS device path

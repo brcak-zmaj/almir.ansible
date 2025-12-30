@@ -1,0 +1,8 @@
+alarm: login_failures
+  on: system.users
+  lookup: average {{ netdata_login_failures_lookup_period }} unaligned of failed_logins
+  units: failures/min
+  every: {{ netdata_login_failures_every }}
+  delay: {{ netdata_login_failures_delay }}
+  warn: $this > {{ netdata_login_failures_warn_threshold }}
+  crit: $this > {{ netdata_login_failures_crit_threshold }}

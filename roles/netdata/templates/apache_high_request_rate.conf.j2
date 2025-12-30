@@ -1,0 +1,7 @@
+alarm: high_request_rate
+on: web_log.apache.requests
+lookup: average {{ netdata_apache_high_request_rate_lookup }} unaligned of requests
+units: requests/s
+every: {{ netdata_apache_high_request_rate_every }}
+warn: $this > {{ netdata_apache_high_request_rate_warn }}
+crit: $this > {{ netdata_apache_high_request_rate_crit }}

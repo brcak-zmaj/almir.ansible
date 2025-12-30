@@ -1,0 +1,58 @@
+---
+# SRTM Elevation Data Downloads
+# Shuttle Radar Topography Mission elevation data
+
+- name: Create SRTM data directory
+  ansible.builtin.file:
+    path: "{{ map_data_dir }}/srtm"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0755'
+  when: srtm_enabled
+  become: yes
+
+- name: Download SRTM elevation data (1arc resolution)
+  ansible.builtin.get_url:
+    url: "https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL1.003/2000.02.11/{{ item }}.SRTMGL1.hgt.zip"
+    dest: "{{ map_data_dir }}/srtm/{{ item }}.SRTMGL1.hgt.zip"
+    mode: '0644'
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    timeout: 600
+    force: no
+  loop: "{{ srtm_regions | default([]) }}"
+  when: 
+    - srtm_enabled
+    - srtm_resolution == "1arc"
+    - srtm_regions | length > 0
+  become: yes
+  register: srtm_downloads
+  until: srtm_downloads is succeeded
+  retries: 3
+  delay: 10
+  loop_control:
+    label: "{{ item }} (1arc)"
+
+- name: Download SRTM elevation data (3arc resolution)
+  ansible.builtin.get_url:
+    url: "https://e4ftl01.cr.usgs.gov/MEASURES/SRTMGL3.003/2000.02.11/{{ item }}.SRTMGL3.hgt.zip"
+    dest: "{{ map_data_dir }}/srtm/{{ item }}.SRTMGL3.hgt.zip"
+    mode: '0644'
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    timeout: 600
+    force: no
+  loop: "{{ srtm_regions | default([]) }}"
+  when: 
+    - srtm_enabled
+    - srtm_resolution == "3arc"
+    - srtm_regions | length > 0
+  become: yes
+  register: srtm_downloads_3arc
+  until: srtm_downloads_3arc is succeeded
+  retries: 3
+  delay: 10
+  loop_control:
+    label: "{{ item }} (3arc)"
+

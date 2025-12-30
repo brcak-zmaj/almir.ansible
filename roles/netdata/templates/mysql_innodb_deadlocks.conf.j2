@@ -1,0 +1,7 @@
+alarm: innodb_deadlocks
+on: mysql.innodb_deadlocks
+lookup: average {{ netdata_mysql_innodb_deadlocks_lookup }} unaligned of rate
+units: deadlocks/s
+every: {{ netdata_mysql_innodb_deadlocks_every }}
+warn: $this > {{ netdata_mysql_innodb_deadlocks_warn }}
+crit: $this > {{ netdata_mysql_innodb_deadlocks_crit }}

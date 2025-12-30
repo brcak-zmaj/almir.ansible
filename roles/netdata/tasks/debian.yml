@@ -1,0 +1,7 @@
+---
+- name: Install Netdata dependencies | Debian
+  become: true
+  ansible.builtin.package:
+    name: "{{ netdata_dependencies_debian }}"
+    state: present
+  tags: common

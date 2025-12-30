@@ -1,0 +1,13 @@
+alarm: high_memory_15min
+  on: system.ram
+  lookup: average {{ netdata_memory_lookup_period }} unaligned of used
+  units: %
+  every: {{ netdata_memory_every }}
+  delay: {{ netdata_memory_delay }}
+  warn: $this > {{ netdata_memory_warn_threshold }}
+  crit: $this > {{ netdata_memory_crit_threshold }}
+{% if netdata_memory_trigger_enabled | bool %}
+  trigger:
+    - name: RestartNetdataOnHighMemory
+      exec: /usr/bin/memory_trigger.sh
+{% endif %}

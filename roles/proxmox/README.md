@@ -1,7 +1,6 @@
 <img src="https://www.proxmox.com/images/proxmox/Proxmox_logo_standard_hex_400px.png#joomlaImage://local-images/proxmox/Proxmox_logo_standard_hex_400px.png" width="500" height="70" alt="Proxmox Logo" />
 
 
-
 # Ansible Role - Proxmox VE Configuration
 
 A comprehensive Ansible role for configuring and optimizing Proxmox Virtual Environment (PVE) servers. This role handles repository configuration, system tuning, ZFS optimization, GPU passthrough, backup configuration, and more.

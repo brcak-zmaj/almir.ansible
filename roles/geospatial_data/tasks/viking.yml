@@ -1,0 +1,59 @@
+---
+# Viking Installation
+# Install Viking GPS Data Editor - GPS data editor and analyzer
+
+- name: Get system architecture for Flatpak refs
+  ansible.builtin.set_fact:
+    flatpak_arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+  when: use_flatpak
+
+- name: Install Viking via Flatpak
+  community.general.flatpak:
+    method: user
+    name: "app/org.viking.Viking/{{ flatpak_arch }}/stable"
+    state: present
+  when: 
+    - use_flatpak
+    - install_viking
+  become_user: "{{ user }}"
+  become: yes
+
+- name: Install Viking via system package manager (if available)
+  ansible.builtin.package:
+    name: viking
+    state: present
+    update_cache: yes
+  when: 
+    - not use_flatpak
+    - install_viking
+  become: yes
+  ignore_errors: yes
+  register: viking_package_install
+
+- name: Display Viking package manager installation status
+  ansible.builtin.debug:
+    msg: "Viking not available via system package manager. Use Flatpak (use_flatpak: true) or install from source."
+  when: 
+    - not use_flatpak
+    - install_viking
+    - viking_package_install.failed
+
+- name: Verify Viking installation
+  ansible.builtin.command: "{{ 'flatpak run org.viking.Viking --version' if use_flatpak else 'viking --version' }}"
+  register: viking_version
+  changed_when: false
+  failed_when: false
+  when: 
+    - install_viking
+    - verify_dependencies
+    - (use_flatpak or viking_package_install.rc == 0)
+  become: yes
+
+- name: Display Viking version
+  ansible.builtin.debug:
+    msg: "Viking version: {{ viking_version.stdout }}"
+  when: 
+    - install_viking
+    - verify_dependencies
+    - viking_version.rc == 0
+

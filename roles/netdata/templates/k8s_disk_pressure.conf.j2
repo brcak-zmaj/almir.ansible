@@ -1,0 +1,7 @@
+[Node Disk Pressure]
+    on = kubernetes.node_conditions
+    lookup: average {{ netdata_k8s_disk_pressure_lookup }} unbound::condition.disk_pressure
+    every: {{ netdata_k8s_disk_pressure_every }}
+    warn: $this > {{ netdata_k8s_disk_pressure_warn }}
+    crit: $this > {{ netdata_k8s_disk_pressure_crit }}
+    info: Nodes under disk pressure

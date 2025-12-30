@@ -1,0 +1,6 @@
+alarm: docker_swarm_nodes_down
+on: docker.swarm_nodes
+lookup: average {{ netdata_docker_swarm_nodes_down_lookup }} of down
+every: {{ netdata_docker_swarm_nodes_down_every }}
+warn: $this >= {{ netdata_docker_swarm_nodes_down_warn }}
+crit: $this >= {{ netdata_docker_swarm_nodes_down_crit }}

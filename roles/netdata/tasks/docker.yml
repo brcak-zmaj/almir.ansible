@@ -1,0 +1,20 @@
+---
+- name: Copy Docker alarm configurations
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ netdata_health_dir }}/{{ item | basename | regex_replace('.j2$', '') }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  loop:
+    - docker_daemon_cpu.conf.j2
+    - docker_daemon_memory.conf.j2
+    - docker_disk_usage.conf.j2
+    - docker_image_pull_failures.conf.j2
+    - docker_swarm_manager_lost.conf.j2
+    - docker_swarm_nodes_down.conf.j2
+    - docker_swarm_service_desired.conf.j2
+    - docker_swarm_update_failures.conf.j2
+  notify: Restart netdata
+  tags: netdata

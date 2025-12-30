@@ -1,0 +1,8 @@
+alarm: high_disk_usage
+  on: disk.space
+  lookup: average {{ netdata_disk_lookup_period }} unaligned of used
+  units: %
+  every: {{ netdata_disk_every }}
+  delay: {{ netdata_disk_delay }}
+  warn: $this > {{ netdata_disk_warn_threshold }}
+  crit: $this > {{ netdata_disk_crit_threshold }}

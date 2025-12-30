@@ -1,0 +1,7 @@
+alarm: high_read_write_ratio
+on: mysql.com_select
+formula: (($mysql.com_select > 0) ? ($mysql.com_insert + $mysql.com_update + $mysql.com_delete) / $mysql.com_select : 0)
+units: ratio
+every: {{ netdata_mysql_high_read_write_ratio_every }}
+warn: $this > {{ netdata_mysql_high_read_write_ratio_warn }}
+crit: $this > {{ netdata_mysql_high_read_write_ratio_crit }}

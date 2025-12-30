@@ -1,0 +1,6 @@
+alarm: docker_swarm_update_failures
+on: docker.swarm_services
+lookup: average {{ netdata_docker_swarm_update_failures_lookup }} of update_failures
+every: {{ netdata_docker_swarm_update_failures_every }}
+warn: $this > {{ netdata_docker_swarm_update_failures_warn }}
+crit: $this > {{ netdata_docker_swarm_update_failures_crit }}

@@ -1,0 +1,17 @@
+---
+- name: Copy Nginx alarm configurations
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ netdata_health_dir }}/{{ item | basename | regex_replace('.j2$', '') }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  loop:
+    - nginx_high_conn.conf.j2
+    - nginx_high_request_rate.conf.j2
+    - nginx_high_client_error_rate.conf.j2
+    - nginx_high_waiting_connections.conf.j2
+    - nginx_dropped_connections.conf.j2
+  notify: Restart netdata
+  tags: netdata

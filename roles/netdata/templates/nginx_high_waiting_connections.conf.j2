@@ -1,0 +1,7 @@
+alarm: high_waiting_connections
+on: nginx.waiting
+lookup: average {{ netdata_nginx_high_waiting_connections_lookup }} unaligned
+units: connections
+every: {{ netdata_nginx_high_waiting_connections_every }}
+warn: $this > {{ netdata_nginx_high_waiting_connections_warn }}
+crit: $this > {{ netdata_nginx_high_waiting_connections_crit }}

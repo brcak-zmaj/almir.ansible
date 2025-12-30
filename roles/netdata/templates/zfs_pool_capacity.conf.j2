@@ -1,0 +1,10 @@
+# checks ZFS pool capacity
+template: zfs_pool_capacity
+      on: zfs.poolsize
+   every: {{ netdata_zfs_pool_capacity_every }}
+    calc: ($used * 100) / $available
+    warn: $this > {{ netdata_zfs_pool_capacity_warn }}
+   crit: $this > {{ netdata_zfs_pool_capacity_crit }}
+   units: %
+    info: ZFS pool is reaching its capacity
+      to: sysadmin

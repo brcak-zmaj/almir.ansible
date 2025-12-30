@@ -1,0 +1,7 @@
+alarm: docker_daemon_memory
+on: system.mem
+lookup: average {{ netdata_docker_daemon_memory_lookup }} of used
+units: %
+every: {{ netdata_docker_daemon_memory_every }}
+warn: $this > {{ netdata_docker_daemon_memory_warn }}
+crit: $this > {{ netdata_docker_daemon_memory_crit }}

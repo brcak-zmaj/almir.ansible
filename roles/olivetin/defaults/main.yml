@@ -1,0 +1,52 @@
+---
+# OliveTin Ansible Role Defaults
+
+# Installation Method: 'package' or 'docker'
+# Default: package (installs via package manager)
+olivetin_install_method: package
+
+# Version Control
+olivetin_version: latest  # Use 'latest' for latest release, or specific version like 'v3.0.0'
+olivetin_docker_version: latest  # Docker image version/tag
+
+# Configuration File Management
+# Set to null to use role's default config template
+# Set to custom path to use your own config file (e.g., '/etc/OliveTin/config.yaml')
+olivetin_config_path: null  # null = use role template, custom path = use your own
+olivetin_config_dir: /etc/OliveTin  # Directory where config file will be placed
+
+# Package Manager Installation (Fedora/Debian)
+olivetin_install_package: true  # Only used when olivetin_install_method == 'package'
+olivetin_package_url_fedora: "https://github.com/OliveTin/OliveTin/releases/latest/download/OliveTin_linux_amd64.rpm"
+olivetin_package_url_debian: "https://github.com/OliveTin/OliveTin/releases/latest/download/OliveTin_linux_amd64.deb"
+
+# Service Configuration (for package install)
+olivetin_service_enabled: true
+olivetin_service_state: started
+
+olivetin_port: 1337
+
+# Uninstall/Purge OliveTin (removes installation and config)
+olivetin_uninstall: false
+
+# Docker Installation
+olivetin_install_docker: false  # Only used when olivetin_install_method == 'docker'
+olivetin_docker_network_name: olivetin_network
+olivetin_docker_network_create: true
+olivetin_docker_image: "jamesread/olivetin"
+olivetin_docker_container_name: olivetin
+olivetin_docker_port: 1337
+olivetin_docker_memory: "512m"
+olivetin_docker_cpus: 1
+olivetin_docker_restart_policy: unless-stopped
+olivetin_docker_user: root  # Required for Docker socket access
+olivetin_docker_pull_image: true
+
+# Docker Volume Configuration
+olivetin_docker_config_path: /docker/OliveTin  # Host path for config directory
+olivetin_docker_config_mount: "{{ olivetin_docker_config_path }}:/config"
+olivetin_docker_sock_mount: "/var/run/docker.sock:/var/run/docker.sock"  # For Docker control
+
+# Docker Environment Variables (if needed)
+olivetin_docker_env: {}
+

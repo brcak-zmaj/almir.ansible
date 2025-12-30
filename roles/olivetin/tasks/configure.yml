@@ -1,0 +1,27 @@
+---
+# Configuration Setup Tasks
+
+- name: Determine config file path
+  ansible.builtin.set_fact:
+    olivetin_config_file: "{{ olivetin_config_path }}"
+    olivetin_use_role_config: "{{ olivetin_config_path is none or olivetin_config_path == '' }}"
+
+- name: Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ olivetin_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Deploy config file from template
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ olivetin_config_file }}"
+    mode: '0644'
+    owner: root
+    group: root
+    notify:
+      - restart olivetin service
+      - restart olivetin container
+  tags:
+    - update_config
+  when: olivetin_use_role_config

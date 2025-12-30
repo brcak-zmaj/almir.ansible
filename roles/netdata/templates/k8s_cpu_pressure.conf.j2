@@ -1,0 +1,7 @@
+[Node CPU Pressure]
+    on = kubernetes.node_conditions
+    lookup: average {{ netdata_k8s_cpu_pressure_lookup }} unbound::condition.cpu_pressure
+    every: {{ netdata_k8s_cpu_pressure_every }}
+    warn: $this > {{ netdata_k8s_cpu_pressure_warn }}
+    crit: $this > {{ netdata_k8s_cpu_pressure_crit }}
+    info: Nodes under CPU pressure

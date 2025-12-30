@@ -1,0 +1,7 @@
+[Network Receive Errors]
+    on = kubernetes.network
+    lookup: average {{ netdata_k8s_network_issues_lookup }} unbound::rx_errors
+    every: {{ netdata_k8s_network_issues_every }}
+    warn: $this > {{ netdata_k8s_network_issues_warn }}
+    crit: $this > {{ netdata_k8s_network_issues_crit }}
+    info: Network receive errors

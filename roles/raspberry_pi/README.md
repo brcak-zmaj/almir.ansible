@@ -654,6 +654,7 @@ GPL-3.0-or-later
 This role is part of the `brcak_zmaj.almir_ansible` Ansible collection.
 
 **GitHub**: [brcak-zmaj/almir.ansible](https://github.com/brcak-zmaj/almir.ansible)
+- Almir Zohorovic
 
 ## Support
 

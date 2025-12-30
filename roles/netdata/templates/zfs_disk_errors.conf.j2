@@ -1,0 +1,10 @@
+# checks for ZFS disk errors
+template: zfs_disk_errors
+      on: zfs.diskerrors
+   every: {{ netdata_zfs_disk_errors_every }}
+    calc: $checksum_errors + $read_errors + $write_errors
+    warn: $this > {{ netdata_zfs_disk_errors_warn }}
+   crit: $this > {{ netdata_zfs_disk_errors_crit }}
+   units: errors
+    info: ZFS disk errors detected
+      to: sysadmin

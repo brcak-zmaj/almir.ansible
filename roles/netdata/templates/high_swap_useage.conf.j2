@@ -1,0 +1,8 @@
+alarm: high_swap_usage
+  on: system.swap
+  lookup: average {{ netdata_swap_lookup_period }} unaligned of used
+  units: %
+  every: {{ netdata_swap_every }}
+  delay: {{ netdata_swap_delay }}
+  warn: $this > {{ netdata_swap_warn_threshold }}
+  crit: $this > {{ netdata_swap_crit_threshold }}

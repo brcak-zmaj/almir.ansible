@@ -1,0 +1,49 @@
+---
+# OpenStreetMap Map Data Downloads
+
+- name: Create OSM data directory
+  ansible.builtin.file:
+    path: "{{ map_data_dir }}/osm"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0755'
+  when: osm_enabled
+  become: yes
+
+- name: Download OpenStreetMap PBF files from Geofabrik
+  ansible.builtin.get_url:
+    url: "{{ osm_extract_url }}/{{ item }}-latest.osm.pbf"
+    dest: "{{ map_data_dir }}/osm/{{ item | replace('/', '_') }}-latest.osm.pbf"
+    mode: '0644'
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    timeout: 600
+    force: no
+  loop: "{{ osm_regions | default([]) }}"
+  when: 
+    - osm_enabled
+    - osm_download_regions
+    - osm_regions | length > 0
+  become: yes
+  loop_control:
+    label: "{{ item }}"
+
+- name: Download OpenStreetMap PBF files (direct URLs from planet.openstreetmap.org)
+  ansible.builtin.get_url:
+    url: "{{ item }}"
+    dest: "{{ map_data_dir }}/osm/{{ item | basename }}"
+    mode: '0644'
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    timeout: 3600
+    force: no
+  loop: "{{ osm_pbf_files | default([]) }}"
+  when: 
+    - osm_enabled
+    - osm_download_planet
+    - osm_pbf_files | length > 0
+  become: yes
+  loop_control:
+    label: "{{ item | basename }}"
+

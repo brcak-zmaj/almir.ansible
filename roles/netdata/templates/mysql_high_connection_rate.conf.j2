@@ -1,0 +1,7 @@
+alarm: high_connection_rate
+on: mysql.global_connections
+lookup: average {{ netdata_mysql_high_connection_rate_lookup }} unaligned of rate
+units: connections/s
+every: {{ netdata_mysql_high_connection_rate_every }}
+warn: $this > {{ netdata_mysql_high_connection_rate_warn }}
+crit: $this > {{ netdata_mysql_high_connection_rate_crit }}

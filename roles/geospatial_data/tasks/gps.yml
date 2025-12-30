@@ -1,0 +1,38 @@
+---
+# GPS Hardware Support
+# Install GPS daemon and client tools
+
+- name: Install GPS daemon and clients
+  ansible.builtin.package:
+    name:
+      - gpsd
+      - gpsd-clients
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Check if gpsd service exists
+  ansible.builtin.systemd:
+    name: gpsd
+  register: gpsd_service_check
+  failed_when: false
+  changed_when: false
+
+- name: Configure gpsd device
+  ansible.builtin.lineinfile:
+    path: /etc/default/gpsd
+    regexp: '^DEVICES='
+    line: "DEVICES=\"{{ gpsd_device }}\""
+    create: yes
+    mode: '0644'
+  when: gpsd_service_check.status is defined
+  become: yes
+
+- name: Configure gpsd service
+  ansible.builtin.systemd:
+    name: gpsd
+    enabled: "{{ gpsd_enabled }}"
+    state: stopped
+  when: gpsd_service_check.status is defined
+  become: yes
+

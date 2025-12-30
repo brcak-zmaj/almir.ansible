@@ -1,0 +1,10 @@
+# checks if ARC size is out of bounds
+template: zfs_arc_size
+      on: zfs.arcsize
+   every: {{ netdata_zfs_arc_size_every }}
+    calc: $this
+    warn: $this > {{ netdata_zfs_arc_size_warn }}
+   crit: $this > {{ netdata_zfs_arc_size_crit }}
+   units: %
+    info: check if ARC (Adaptive Replacement Cache) is either too small or too large for efficient operation
+      to: sysadmin

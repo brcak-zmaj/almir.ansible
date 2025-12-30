@@ -1,0 +1,15 @@
+[Unusual Network Traffic In]
+    on = kubernetes.network_traffic
+    lookup: average {{ netdata_k8s_unusual_network_traffic_lookup }} unbound::rx
+    every: {{ netdata_k8s_unusual_network_traffic_every }}
+    warn: $this > {{ netdata_k8s_unusual_network_traffic_warn }}
+    crit: $this > {{ netdata_k8s_unusual_network_traffic_crit }}
+    info: Unusually high network receive rate
+
+[Unusual Network Traffic Out]
+    on = kubernetes.network_traffic
+    lookup: average {{ netdata_k8s_unusual_network_traffic_lookup }} unbound::tx
+    every: {{ netdata_k8s_unusual_network_traffic_every }}
+    warn: $this > {{ netdata_k8s_unusual_network_traffic_warn }}
+    crit: $this > {{ netdata_k8s_unusual_network_traffic_crit }}
+    info: Unusually high network transmit rate

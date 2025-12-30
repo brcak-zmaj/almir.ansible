@@ -1,0 +1,7 @@
+alarm: docker_daemon_cpu
+on: system.cpu
+lookup: average {{ netdata_docker_daemon_cpu_lookup }} of user,system
+units: %
+every: {{ netdata_docker_daemon_cpu_every }}
+warn: $this > {{ netdata_docker_daemon_cpu_warn }}
+crit: $this > {{ netdata_docker_daemon_cpu_crit }}

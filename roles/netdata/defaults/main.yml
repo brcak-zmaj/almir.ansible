@@ -1,0 +1,565 @@
+---
+# Netdata Role - Default Variables
+
+# ============================================================================
+# INSTALLATION CONFIGURATION
+# ============================================================================
+netdata_install_enabled: true
+netdata_kickstart_url: "https://get.netdata.cloud/kickstart.sh"
+netdata_kickstart_script_path: "/tmp/netdata-kickstart.sh"
+netdata_web_port: 19999                    # Netdata web interface port
+kickstart_no_log: false                    # Hide sensitive kickstart output
+
+# ============================================================================
+# FILE PERMISSIONS AND PATHS
+# ============================================================================
+netdata_binary_path: "/usr/sbin/netdata"
+netdata_config_dir: "/etc/netdata"
+netdata_health_dir: "/etc/netdata/health.d"
+netdata_config_file: "{{ netdata_config_dir }}/health_alarm_notify.conf"
+netdata_scripts_dir: "/usr/bin"
+netdata_config_dir_mode: "0755"
+netdata_health_dir_mode: "0755"
+netdata_config_file_mode: "0644"
+netdata_script_mode: "0755"
+netdata_kickstart_script_mode: "0755"
+
+# ============================================================================
+# MULTI-SERVICE CHECK CONFIGURATION
+# ============================================================================
+netdata_multi_services_check_enabled: true
+netdata_multi_services_list: []              # List of services to monitor
+                                             # Example: ["nginx", "mysql", "docker"]
+
+# ============================================================================
+# CUSTOM ALARM CONFIGURATION
+# ============================================================================
+# Allow users to specify custom alarm files or directories to copy
+# These will be deployed BEFORE the default alarms
+netdata_custom_alarm_files: []               # List of custom alarm file paths to copy
+                                             # Example: ["/path/to/custom_alarm.conf"]
+netdata_custom_alarm_dir: ""                 # Directory containing custom alarm files (empty = disabled)
+                                             # Example: "/path/to/custom_alarms/"
+                                             # All .conf files in this directory will be copied
+
+# ============================================================================
+# NETDATA.CONF CONFIGURATION
+# ============================================================================
+# Main configuration file management
+netdata_config_file_custom: ""                # Path to custom netdata.conf file (empty = use role template)
+                                              # Example: "/path/to/custom/netdata.conf"
+netdata_hostname: "{{ inventory_hostname }}"  # Override hostname in netdata.conf
+                                              # Example: "monitoring-server-01"
+netdata_enable_anonymous_dashboard: true      # Enable anonymous dashboard access (bypasses landing page)
+
+# ============================================================================
+# DEPENDENCY PACKAGES
+# ============================================================================
+# RedHat-based distributions (Fedora, RHEL, CentOS, etc.)
+netdata_dependencies_redhat:
+  - autoconf
+  - automake
+  - curl
+  - gcc
+  - gcc-c++
+  - git
+  - libuuid-devel
+  - openssl-devel
+  - lz4-devel
+  - elfutils-libelf-devel
+  - protobuf
+  - make
+  - nc
+  - pkgconfig
+  - python
+  - zlib-devel
+  - cmake
+
+# Debian-based distributions (Debian, Ubuntu, etc.)
+netdata_dependencies_debian:
+  - zlib1g-dev
+  - uuid-dev
+  - uuid-runtime
+  - libmnl-dev
+  - libmnl0
+  - gcc
+  - make
+  - autoconf
+  - autoconf-archive
+  - autogen
+  - automake
+  - pkg-config
+  - curl
+  - smartmontools
+
+# ============================================================================
+# KICKSTART SCRIPT PARAMETERS
+# ============================================================================
+# Directory Options
+netdata_install_prefix: ""                    # Custom install directory (empty = default)
+netdata_old_install_prefix: ""                # Clean previous install directory (empty = none)
+
+# Interactivity
+netdata_non_interactive: true
+netdata_interactive: false
+
+# Release Channel
+netdata_release_channel: "stable"             # Options: "stable" or "nightly"
+netdata_install_version: ""                   # Install specific version (empty = latest)
+
+# Auto-Updates
+netdata_auto_update: true                     # Enable automatic updates
+netdata_no_updates: false                     # Disable updates
+
+# Netdata Cloud Connection
+netdata_claim_token: ""                       # Claim token for Netdata Cloud (empty = not connected)
+netdata_claim_rooms: ""                       # Assign node to specific Cloud Rooms (comma-separated, empty = default)
+
+# Telemetry
+netdata_disable_telemetry: true              # Disable telemetry
+
+# Reinstall/Uninstall
+netdata_reinstall: false                      # Reinstall existing Netdata
+netdata_uninstall: false                      # Uninstall Netdata completely
+
+# ============================================================================
+# ENVIRONMENT VARIABLES FOR KICKSTART
+# ============================================================================
+netdata_tmpdir: ""                            # Temporary directory (empty = system default)
+netdata_rootcmd: ""                           # Command for root privileges (empty = auto-detect)
+
+# ============================================================================
+# NETDATA CLOUD CONFIGURATION
+# ============================================================================
+netdata_cloud_enabled: false                  # Enable Netdata Cloud connection
+netdata_cloud_claim_token: "{{ lookup('env', 'NETDATA_CLAIM_TOKEN') | default('', true) }}"
+
+# ============================================================================
+# NOTIFICATION CONFIGURATION
+# ============================================================================
+netdata_notifications_enabled: true
+
+# Email Notification Settings
+netdata_email_enabled: true
+netdata_email_recipient: "{{ lookup('env', 'NETDATA_EMAIL_RECIPIENT') | default('', true) }}"
+netdata_email_sender: "{{ lookup('env', 'NETDATA_EMAIL_SENDER') | default('', true) }}"
+netdata_smtp_server: "{{ lookup('env', 'NETDATA_SMTP_SERVER') | default('', true) }}"
+netdata_smtp_port: "{{ lookup('env', 'NETDATA_SMTP_PORT') | default('587', true) }}"
+netdata_smtp_user: "{{ lookup('env', 'NETDATA_SMTP_USER') | default('', true) }}"
+netdata_smtp_password: "{{ lookup('env', 'NETDATA_SMTP_PASSWORD') | default('', true) }}"
+netdata_smtp_ssl: true                        # Use SSL/TLS for SMTP
+netdata_smtp_starttls: true                   # Use STARTTLS
+
+# Slack Notification Settings
+netdata_slack_enabled: false
+netdata_slack_webhook_url: "{{ lookup('env', 'NETDATA_SLACK_WEBHOOK_URL') | default('', true) }}"
+netdata_slack_channel: "{{ lookup('env', 'NETDATA_SLACK_CHANNEL') | default('#netdata', true) }}"
+netdata_slack_username: "Netdata"             # Bot username
+netdata_slack_icon_emoji: ":chart_with_upwards_trend:"
+netdata_slack_send_resolved: true             # Send clear notifications
+
+# Discord Notification Settings
+netdata_discord_enabled: false
+netdata_discord_webhook_url: "{{ lookup('env', 'NETDATA_DISCORD_WEBHOOK_URL') | default('', true) }}"
+netdata_discord_username: "Netdata"
+netdata_discord_avatar_url: ""
+netdata_discord_send_resolved: true
+
+# PagerDuty Notification Settings
+netdata_pagerduty_enabled: false
+netdata_pagerduty_service_key: "{{ lookup('env', 'NETDATA_PAGERDUTY_SERVICE_KEY') | default('', true) }}"
+netdata_pagerduty_client_name: "Netdata"
+netdata_pagerduty_send_resolved: true
+
+# Custom Webhook Notification Settings
+netdata_webhook_enabled: false
+netdata_webhook_url: "{{ lookup('env', 'NETDATA_WEBHOOK_URL') | default('', true) }}"
+netdata_webhook_method: "POST"                # HTTP method
+netdata_webhook_headers: {}                   # Custom headers as dictionary
+netdata_webhook_timeout: 10
+
+# Telegram Notification Settings
+netdata_telegram_enabled: false
+netdata_telegram_bot_token: "{{ lookup('env', 'NETDATA_TELEGRAM_BOT_TOKEN') | default('', true) }}"
+netdata_telegram_chat_id: "{{ lookup('env', 'NETDATA_TELEGRAM_CHAT_ID') | default('', true) }}"
+netdata_telegram_send_resolved: true
+
+# Microsoft Teams Notification Settings
+netdata_teams_enabled: false
+netdata_teams_webhook_url: "{{ lookup('env', 'NETDATA_TEAMS_WEBHOOK_URL') | default('', true) }}"
+netdata_teams_send_resolved: true
+
+# Rocket.Chat Notification Settings
+netdata_rocketchat_enabled: false
+netdata_rocketchat_webhook_url: "{{ lookup('env', 'NETDATA_ROCKETCHAT_WEBHOOK_URL') | default('', true) }}"
+netdata_rocketchat_channel: "{{ lookup('env', 'NETDATA_ROCKETCHAT_CHANNEL') | default('#netdata', true) }}"
+netdata_rocketchat_username: "Netdata"
+netdata_rocketchat_icon_emoji: ":chart_with_upwards_trend:"
+netdata_rocketchat_send_resolved: true
+
+# Twilio Notification Settings
+netdata_twilio_enabled: false
+netdata_twilio_account_sid: "{{ lookup('env', 'NETDATA_TWILIO_ACCOUNT_SID') | default('', true) }}"
+netdata_twilio_auth_token: "{{ lookup('env', 'NETDATA_TWILIO_AUTH_TOKEN') | default('', true) }}"
+netdata_twilio_from_number: "{{ lookup('env', 'NETDATA_TWILIO_FROM_NUMBER') | default('', true) }}"
+netdata_twilio_to_number: "{{ lookup('env', 'NETDATA_TWILIO_TO_NUMBER') | default('', true) }}"
+netdata_twilio_send_resolved: false
+
+# Pushover Notification Settings
+netdata_pushover_enabled: false
+netdata_pushover_user_key: "{{ lookup('env', 'NETDATA_PUSHOVER_USER_KEY') | default('', true) }}"
+netdata_pushover_api_token: "{{ lookup('env', 'NETDATA_PUSHOVER_API_TOKEN') | default('', true) }}"
+netdata_pushover_priority: 0
+netdata_pushover_sound: "pushover"
+netdata_pushover_send_resolved: true
+
+# Pushbullet Notification Settings
+netdata_pushbullet_enabled: false
+netdata_pushbullet_api_token: "{{ lookup('env', 'NETDATA_PUSHBULLET_API_TOKEN') | default('', true) }}"
+netdata_pushbullet_send_resolved: true
+
+# ============================================================================
+# ALERT CONFIGURATION - GENERAL
+# ============================================================================
+netdata_alerts_enabled: true
+
+# CPU Alerts
+netdata_cpu_warn_threshold: 85
+netdata_cpu_crit_threshold: 95
+netdata_cpu_lookup_period: "-15m"
+netdata_cpu_every: "1m"
+netdata_cpu_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Memory Alerts
+netdata_memory_warn_threshold: 85
+netdata_memory_crit_threshold: 95
+netdata_memory_lookup_period: "-15m"
+netdata_memory_every: "1m"
+netdata_memory_delay: "up 5m down 15m multiplier 1.5 max 1h"
+netdata_memory_trigger_enabled: false       # Enable memory trigger script
+netdata_memory_trigger_threshold: 80        # Threshold for trigger script
+netdata_memory_trigger_services:            # Services to restart on high memory
+  - netdata
+
+# Disk Usage Alerts
+netdata_disk_warn_threshold: 80
+netdata_disk_crit_threshold: 90
+netdata_disk_lookup_period: "-10m"
+netdata_disk_every: "1m"
+netdata_disk_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Load Average Alerts
+netdata_load_warn_threshold: 5.0
+netdata_load_crit_threshold: 10.0
+netdata_load_lookup_period: "-10m"
+netdata_load_every: "1m"
+netdata_load_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Swap Usage Alerts
+netdata_swap_warn_threshold: 50
+netdata_swap_crit_threshold: 80
+netdata_swap_lookup_period: "-10m"
+netdata_swap_every: "1m"
+netdata_swap_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Network Latency Alerts
+netdata_net_latency_warn_threshold: 100
+netdata_net_latency_crit_threshold: 200
+netdata_net_latency_lookup_period: "-10m"
+netdata_net_latency_every: "1m"
+netdata_net_latency_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Dropped Packets Alerts
+netdata_dropped_packets_warn_threshold: 10
+netdata_dropped_packets_crit_threshold: 50
+netdata_dropped_packets_lookup_period: "-10m"
+netdata_dropped_packets_every: "1m"
+netdata_dropped_packets_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Inode Usage Alerts
+netdata_inode_warn_threshold: 80
+netdata_inode_crit_threshold: 90
+netdata_inode_lookup_period: "-10m"
+netdata_inode_every: "1m"
+netdata_inode_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Login Failures Alerts
+netdata_login_failures_warn_threshold: 5
+netdata_login_failures_crit_threshold: 10
+netdata_login_failures_lookup_period: "-5m"
+netdata_login_failures_every: "1m"
+netdata_login_failures_delay: "up 1m down 5m multiplier 1.5 max 30m"
+
+# Many Processes Alerts
+netdata_many_processes_warn_threshold: 500
+netdata_many_processes_crit_threshold: 1000
+netdata_many_processes_lookup_period: "-10m"
+netdata_many_processes_every: "1m"
+netdata_many_processes_delay: "up 5m down 15m multiplier 1.5 max 1h"
+
+# Recent Reboot Alerts
+netdata_recent_reboot_enabled: true          # Enable recent reboot detection
+netdata_recent_reboot_lookup_period: "-1h"
+netdata_recent_reboot_every: "5m"
+netdata_recent_reboot_delay: "up 0m down 1h"
+
+# ============================================================================
+# ALERT CONFIGURATION - NGINX
+# ============================================================================
+netdata_nginx_alerts_enabled: false
+
+netdata_nginx_high_conn_warn: 200
+netdata_nginx_high_conn_crit: 500
+netdata_nginx_high_conn_lookup: "-10m"
+netdata_nginx_high_conn_every: "1m"
+
+netdata_nginx_high_request_rate_warn: 1000
+netdata_nginx_high_request_rate_crit: 2000
+netdata_nginx_high_request_rate_lookup: "-10m"
+netdata_nginx_high_request_rate_every: "1m"
+
+netdata_nginx_high_client_error_rate_warn: 10
+netdata_nginx_high_client_error_rate_crit: 50
+netdata_nginx_high_client_error_rate_lookup: "-10m"
+netdata_nginx_high_client_error_rate_every: "1m"
+
+netdata_nginx_dropped_connections_warn: 10
+netdata_nginx_dropped_connections_crit: 50
+netdata_nginx_dropped_connections_lookup: "-10m"
+netdata_nginx_dropped_connections_every: "1m"
+
+netdata_nginx_high_waiting_connections_warn: 50
+netdata_nginx_high_waiting_connections_crit: 100
+netdata_nginx_high_waiting_connections_lookup: "-10m"
+netdata_nginx_high_waiting_connections_every: "1m"
+
+# ============================================================================
+# ALERT CONFIGURATION - APACHE
+# ============================================================================
+netdata_apache_alerts_enabled: false
+
+netdata_apache_high_conn_warn: 200
+netdata_apache_high_conn_crit: 500
+netdata_apache_high_conn_lookup: "-10m"
+netdata_apache_high_conn_every: "1m"
+
+netdata_apache_high_request_rate_warn: 1000
+netdata_apache_high_request_rate_crit: 2000
+netdata_apache_high_request_rate_lookup: "-10m"
+netdata_apache_high_request_rate_every: "1m"
+
+netdata_apache_high_client_error_rate_warn: 10
+netdata_apache_high_client_error_rate_crit: 50
+netdata_apache_high_client_error_rate_lookup: "-10m"
+netdata_apache_high_client_error_rate_every: "1m"
+
+netdata_apache_high_connection_rate_warn: 50
+netdata_apache_high_connection_rate_crit: 100
+netdata_apache_high_connection_rate_lookup: "-10m"
+netdata_apache_high_connection_rate_every: "1m"
+
+netdata_apache_high_workers_warn: 80
+netdata_apache_high_workers_crit: 95
+netdata_apache_high_workers_lookup: "-10m"
+netdata_apache_high_workers_every: "1m"
+
+# ============================================================================
+# ALERT CONFIGURATION - MYSQL
+# ============================================================================
+netdata_mysql_alerts_enabled: false
+
+netdata_mysql_slow_queries_warn: 10
+netdata_mysql_slow_queries_crit: 30
+netdata_mysql_slow_queries_lookup: "-10m"
+netdata_mysql_slow_queries_every: "1m"
+
+netdata_mysql_high_connection_rate_warn: 50
+netdata_mysql_high_connection_rate_crit: 100
+netdata_mysql_high_connection_rate_lookup: "-10m"
+netdata_mysql_high_connection_rate_every: "1m"
+
+netdata_mysql_high_aborted_connections_warn: 10
+netdata_mysql_high_aborted_connections_crit: 30
+netdata_mysql_high_aborted_connections_lookup: "-10m"
+netdata_mysql_high_aborted_connections_every: "1m"
+
+netdata_mysql_low_available_connections_warn: 20
+netdata_mysql_low_available_connections_crit: 10
+netdata_mysql_low_available_connections_lookup: "-10m"
+netdata_mysql_low_available_connections_every: "1m"
+
+netdata_mysql_table_lock_contention_warn: 5
+netdata_mysql_table_lock_contention_crit: 10
+netdata_mysql_table_lock_contention_lookup: "-10m"
+netdata_mysql_table_lock_contention_every: "1m"
+
+netdata_mysql_high_read_write_ratio_warn: 10
+netdata_mysql_high_read_write_ratio_crit: 20
+netdata_mysql_high_read_write_ratio_lookup: "-10m"
+netdata_mysql_high_read_write_ratio_every: "1m"
+
+netdata_mysql_temp_tables_on_disk_warn: 10
+netdata_mysql_temp_tables_on_disk_crit: 30
+netdata_mysql_temp_tables_on_disk_lookup: "-10m"
+netdata_mysql_temp_tables_on_disk_every: "1m"
+
+netdata_mysql_innodb_buffer_usage_warn: 80
+netdata_mysql_innodb_buffer_usage_crit: 90
+netdata_mysql_innodb_buffer_usage_lookup: "-10m"
+netdata_mysql_innodb_buffer_usage_every: "1m"
+
+netdata_mysql_replication_lag_warn: 60
+netdata_mysql_replication_lag_crit: 300
+netdata_mysql_replication_lag_lookup: "-10m"
+netdata_mysql_replication_lag_every: "1m"
+
+netdata_mysql_innodb_deadlocks_warn: 1
+netdata_mysql_innodb_deadlocks_crit: 5
+netdata_mysql_innodb_deadlocks_lookup: "-10m"
+netdata_mysql_innodb_deadlocks_every: "1m"
+
+# ============================================================================
+# ALERT CONFIGURATION - DOCKER
+# ============================================================================
+netdata_docker_alerts_enabled: false
+
+netdata_docker_daemon_cpu_warn: 80
+netdata_docker_daemon_cpu_crit: 95
+netdata_docker_daemon_cpu_lookup: "-10m"
+netdata_docker_daemon_cpu_every: "1m"
+
+netdata_docker_daemon_memory_warn: 80
+netdata_docker_daemon_memory_crit: 95
+netdata_docker_daemon_memory_lookup: "-10m"
+netdata_docker_daemon_memory_every: "1m"
+
+netdata_docker_disk_usage_warn: 80
+netdata_docker_disk_usage_crit: 90
+netdata_docker_disk_usage_lookup: "-10m"
+netdata_docker_disk_usage_every: "1m"
+
+netdata_docker_image_pull_failures_warn: 1
+netdata_docker_image_pull_failures_crit: 5
+netdata_docker_image_pull_failures_lookup: "-10m"
+netdata_docker_image_pull_failures_every: "1m"
+
+netdata_docker_swarm_manager_lost_enabled: false
+netdata_docker_swarm_nodes_down_warn: 1
+netdata_docker_swarm_nodes_down_crit: 3
+netdata_docker_swarm_nodes_down_lookup: "-5m"
+netdata_docker_swarm_nodes_down_every: "1m"
+
+netdata_docker_swarm_service_desired_warn: 5
+netdata_docker_swarm_service_desired_crit: 10
+netdata_docker_swarm_service_desired_lookup: "-10m"
+netdata_docker_swarm_service_desired_every: "1m"
+
+netdata_docker_swarm_update_failures_warn: 1
+netdata_docker_swarm_update_failures_crit: 5
+netdata_docker_swarm_update_failures_lookup: "-10m"
+netdata_docker_swarm_update_failures_every: "1m"
+
+# ============================================================================
+# ALERT CONFIGURATION - KUBERNETES
+# ============================================================================
+netdata_kubernetes_alerts_enabled: false
+
+netdata_k8s_api_latency_warn: 100
+netdata_k8s_api_latency_crit: 500
+netdata_k8s_api_latency_lookup: "-10m"
+netdata_k8s_api_latency_every: "1m"
+
+netdata_k8s_cpu_pressure_warn: 5
+netdata_k8s_cpu_pressure_crit: 10
+netdata_k8s_cpu_pressure_lookup: "-10m"
+netdata_k8s_cpu_pressure_every: "1m"
+
+netdata_k8s_memory_pressure_warn: 5
+netdata_k8s_memory_pressure_crit: 10
+netdata_k8s_memory_pressure_lookup: "-10m"
+netdata_k8s_memory_pressure_every: "1m"
+
+netdata_k8s_disk_pressure_warn: 5
+netdata_k8s_disk_pressure_crit: 10
+netdata_k8s_disk_pressure_lookup: "-10m"
+netdata_k8s_disk_pressure_every: "1m"
+
+netdata_k8s_evicted_pods_warn: 1
+netdata_k8s_evicted_pods_crit: 5
+netdata_k8s_evicted_pods_lookup: "-10m"
+netdata_k8s_evicted_pods_every: "1m"
+
+netdata_k8s_pod_failures_warn: 1
+netdata_k8s_pod_failures_crit: 5
+netdata_k8s_pod_failures_lookup: "-10m"
+netdata_k8s_pod_failures_every: "1m"
+
+netdata_k8s_unscheduled_pods_warn: 1
+netdata_k8s_unscheduled_pods_crit: 5
+netdata_k8s_unscheduled_pods_lookup: "-10m"
+netdata_k8s_unscheduled_pods_every: "1m"
+
+netdata_k8s_node_status_warn: 1
+netdata_k8s_node_status_crit: 3
+netdata_k8s_node_status_lookup: "-10m"
+netdata_k8s_node_status_every: "1m"
+
+netdata_k8s_kubelet_issues_warn: 1
+netdata_k8s_kubelet_issues_crit: 5
+netdata_k8s_kubelet_issues_lookup: "-10m"
+netdata_k8s_kubelet_issues_every: "1m"
+
+netdata_k8s_network_issues_warn: 1
+netdata_k8s_network_issues_crit: 5
+netdata_k8s_network_issues_lookup: "-10m"
+netdata_k8s_network_issues_every: "1m"
+
+netdata_k8s_pv_usage_warn: 80
+netdata_k8s_pv_usage_crit: 90
+netdata_k8s_pv_usage_lookup: "-10m"
+netdata_k8s_pv_usage_every: "1m"
+
+netdata_k8s_endpoint_slices_warn: 100
+netdata_k8s_endpoint_slices_crit: 500
+netdata_k8s_endpoint_slices_lookup: "-10m"
+netdata_k8s_endpoint_slices_every: "1m"
+
+netdata_k8s_unusual_network_traffic_warn: 1000
+netdata_k8s_unusual_network_traffic_crit: 5000
+netdata_k8s_unusual_network_traffic_lookup: "-10m"
+netdata_k8s_unusual_network_traffic_every: "1m"
+
+# ============================================================================
+# ALERT CONFIGURATION - ZFS
+# ============================================================================
+netdata_zfs_alerts_enabled: false
+
+netdata_zfs_arc_miss_rate_warn: 10
+netdata_zfs_arc_miss_rate_crit: 20
+netdata_zfs_arc_miss_rate_lookup: "-10m"
+netdata_zfs_arc_miss_rate_every: "1m"
+
+netdata_zfs_arc_size_warn: 80
+netdata_zfs_arc_size_crit: 90
+netdata_zfs_arc_size_lookup: "-10m"
+netdata_zfs_arc_size_every: "1m"
+
+netdata_zfs_disk_errors_warn: 1
+netdata_zfs_disk_errors_crit: 5
+netdata_zfs_disk_errors_lookup: "-10m"
+netdata_zfs_disk_errors_every: "1m"
+
+netdata_zfs_pool_capacity_warn: 80
+netdata_zfs_pool_capacity_crit: 90
+netdata_zfs_pool_capacity_lookup: "-10m"
+netdata_zfs_pool_capacity_every: "1m"
+
+netdata_zfs_pool_fragmentation_warn: 50
+netdata_zfs_pool_fragmentation_crit: 75
+netdata_zfs_pool_fragmentation_lookup: "-10m"
+netdata_zfs_pool_fragmentation_every: "1m"
+
+# ============================================================================
+# ALERT CONFIGURATION - SMARTD
+# ============================================================================
+netdata_smartd_alerts_enabled: true

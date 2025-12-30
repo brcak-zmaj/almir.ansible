@@ -1,0 +1,16 @@
+#!/bin/bash
+
+HIGH_MEM_THRESHOLD={{ netdata_memory_trigger_threshold }}
+mem_usage=$(free | awk 'NR==2 {print $3/$2 * 100}')
+
+if [ "$(echo "$mem_usage > $HIGH_MEM_THRESHOLD" | bc -l)" -eq 1 ]; then
+    services=({% for service in netdata_memory_trigger_services %}"{{ service }}"{% if not loop.last %} {% endif %}{% endfor %})
+
+    for service in "${services[@]}"; do
+        # Remove .service suffix if present for pgrep check
+        service_name="${service%.service}"
+        if pgrep -x "$service_name" &>/dev/null || systemctl is-active --quiet "$service" 2>/dev/null; then
+            systemctl restart "$service" >/dev/null 2>&1
+        fi
+    done
+fi

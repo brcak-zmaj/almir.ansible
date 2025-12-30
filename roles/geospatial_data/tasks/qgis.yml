@@ -1,0 +1,48 @@
+---
+# QGIS Installation
+# Install QGIS Desktop - Geographic Information System
+
+- name: Get system architecture for Flatpak refs
+  ansible.builtin.set_fact:
+    flatpak_arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+  when: use_flatpak
+
+- name: Install QGIS via Flatpak
+  community.general.flatpak:
+    method: user
+    name: "app/org.qgis.qgis/{{ flatpak_arch }}/stable"
+    state: present
+  when: 
+    - use_flatpak
+    - install_qgis
+  become_user: "{{ user }}"
+  become: yes
+
+- name: Install QGIS via system package manager
+  ansible.builtin.package:
+    name: qgis
+    state: present
+    update_cache: yes
+  when: 
+    - not use_flatpak
+    - install_qgis
+  become: yes
+
+- name: Verify QGIS installation
+  ansible.builtin.command: "{{ 'flatpak run org.qgis.qgis --version' if use_flatpak else 'qgis --version' }}"
+  register: qgis_version
+  changed_when: false
+  failed_when: false
+  when: 
+    - install_qgis
+    - verify_dependencies
+  become: yes
+
+- name: Display QGIS version
+  ansible.builtin.debug:
+    msg: "QGIS version: {{ qgis_version.stdout }}"
+  when: 
+    - install_qgis
+    - verify_dependencies
+    - qgis_version.rc == 0
+

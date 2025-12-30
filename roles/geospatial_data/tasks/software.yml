@@ -1,0 +1,18 @@
+---
+# Geospatial Software Installation
+# Main entry point for installing geospatial software packages
+
+- name: Include Package Manager Setup
+  ansible.builtin.include_tasks: package_manager.yml
+
+- name: Include QGIS Installation
+  ansible.builtin.include_tasks: qgis.yml
+  when: install_qgis
+
+- name: Include Marble Installation
+  ansible.builtin.include_tasks: marble.yml
+  when: install_marble
+
+- name: Include Viking Installation
+  ansible.builtin.include_tasks: viking.yml
+  when: install_viking

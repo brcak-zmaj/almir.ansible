@@ -1,0 +1,8 @@
+alarm: high_load_average
+  on: system.load
+  lookup: average {{ netdata_load_lookup_period }} unaligned of load15
+  units: load
+  every: {{ netdata_load_every }}
+  delay: {{ netdata_load_delay }}
+  warn: $this > {{ netdata_load_warn_threshold }}
+  crit: $this > {{ netdata_load_crit_threshold }}

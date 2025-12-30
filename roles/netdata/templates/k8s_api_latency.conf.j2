@@ -1,0 +1,7 @@
+[API Server Latency]
+    on = kubernetes.apiserver
+    lookup: average {{ netdata_k8s_api_latency_lookup }} unbound::request_latency
+    every: {{ netdata_k8s_api_latency_every }}
+    warn: $this > {{ netdata_k8s_api_latency_warn }}
+    crit: $this > {{ netdata_k8s_api_latency_crit }}
+    info: Kubernetes API server request latency high

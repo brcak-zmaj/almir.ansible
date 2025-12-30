@@ -1,0 +1,48 @@
+---
+# Package Manager Setup
+# Install and configure Flatpak/Flathub if enabled, otherwise prepare for DNF installation
+
+- name: Check if Flatpak binary exists
+  ansible.builtin.stat:
+    path: /usr/bin/flatpak
+  register: flatpak_binary
+  when: use_flatpak
+  become: yes
+
+- name: Install Flatpak
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+  when: 
+    - use_flatpak
+    - install_flatpak
+    - not flatpak_binary.stat.exists
+  become: yes
+
+- name: Add Flathub remote
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+    method: user
+    state: present
+  when: 
+    - use_flatpak
+    - add_flathub
+  become_user: "{{ user }}"
+  become: yes
+
+- name: Verify Flatpak installation
+  ansible.builtin.command: flatpak --version
+  register: flatpak_version
+  changed_when: false
+  when: 
+    - use_flatpak
+    - verify_dependencies
+  become: yes
+
+- name: Display Flatpak version
+  ansible.builtin.debug:
+    msg: "Flatpak version: {{ flatpak_version.stdout }}"
+  when: 
+    - use_flatpak
+    - verify_dependencies

@@ -1,0 +1,8 @@
+alarm: high_net_latency
+  on: net.latency
+  lookup: average {{ netdata_net_latency_lookup_period }} unaligned of latency
+  units: ms
+  every: {{ netdata_net_latency_every }}
+  delay: {{ netdata_net_latency_delay }}
+  warn: $this > {{ netdata_net_latency_warn_threshold }}
+  crit: $this > {{ netdata_net_latency_crit_threshold }}

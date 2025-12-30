@@ -1,0 +1,7 @@
+alarm: slow_queries
+    on: mysql.queries
+lookup: average {{ netdata_mysql_slow_queries_lookup }} unaligned of slow
+ units: queries/s
+ every: {{ netdata_mysql_slow_queries_every }}
+  warn: $this > {{ netdata_mysql_slow_queries_warn }}
+  crit: $this > {{ netdata_mysql_slow_queries_crit }}

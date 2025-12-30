@@ -1,0 +1,7 @@
+alarm: docker_disk_usage
+on: docker.disk
+lookup: average {{ netdata_docker_disk_usage_lookup }} of used
+units: %
+every: {{ netdata_docker_disk_usage_every }}
+warn: $this > {{ netdata_docker_disk_usage_warn }}
+crit: $this > {{ netdata_docker_disk_usage_crit }}

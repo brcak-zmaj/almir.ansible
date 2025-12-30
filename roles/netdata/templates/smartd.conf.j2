@@ -1,0 +1,58 @@
+
+
+# Alarm for Reallocated Sector Count
+template: 1h_reallocated_sector_count_increase
+      on: smartd_log.reallocated_sector_count
+   every: 1h
+    calc: $this - $1h.ago
+    warn: $this > 5
+   crit: $this > 10
+    info: sudden increase in reallocated sector count over the last hour
+      to: sysadmin
+
+# Alarm for Current Pending Sector Count
+template: 1h_pending_sector_count_increase
+      on: smartd_log.current_pending_sector
+   every: 1h
+    calc: $this - $1h.ago
+    warn: $this > 3
+   crit: $this > 5
+    info: sudden increase in pending sectors over the last hour
+      to: sysadmin
+
+# Alarm for Offline Uncorrectable Count
+template: 1h_offline_uncorrectable_increase
+      on: smartd_log.offline_uncorrectable
+   every: 1h
+    calc: $this - $1h.ago
+    warn: $this > 1
+    info: increase in offline uncorrectable sectors over the last hour
+      to: sysadmin
+
+# Alarm for UDMA CRC Error Rate
+template: 1h_udma_crc_error_rate_increase
+      on: smartd_log.udma_crc_error_rate
+   every: 1h
+    calc: $this - $1h.ago
+    warn: $this > 2
+   crit: $this > 5
+    info: sudden increase in UDMA CRC errors over the last hour
+      to: sysadmin
+
+# Alarm for Spin Retry Count
+template: 1h_spin_retry_count_increase
+      on: smartd_log.spin_retry_count
+   every: 1h
+    calc: $this - $1h.ago
+    warn: $this > 1
+    info: increase in spin retries over the last hour
+      to: sysadmin
+
+# Alarm for Reported Uncorrectable Errors
+template: 1h_reported_uncorrectable_increase
+      on: smartd_log.reported_uncorrectable
+   every: 1h
+    calc: $this - $1h.ago
+    warn: $this > 2
+    info: increase in reported uncorrectable errors over the last hour
+      to: sysadmin

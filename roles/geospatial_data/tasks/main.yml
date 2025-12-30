@@ -1,0 +1,31 @@
+---
+# Geospatial Data Role - Main Task File
+# Role: almir.geospatial_data
+
+- name: Create user directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0755'
+  loop:
+    - "{{ scripts_dir }}"
+    - "{{ data_dir }}"
+  become: yes
+
+- name: Include Package Manager Setup
+  ansible.builtin.include_tasks: package_manager.yml
+
+- name: Include Geospatial Software Installation
+  ansible.builtin.include_tasks: software.yml
+  when: install_geospatial_software
+
+- name: Include Map Data
+  ansible.builtin.include_tasks: maps.yml
+  when: install_map_data
+
+- name: Include GPS Hardware Support
+  ansible.builtin.include_tasks: gps.yml
+  when: install_gps_support
+

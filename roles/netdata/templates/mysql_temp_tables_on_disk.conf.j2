@@ -1,0 +1,7 @@
+alarm: temp_tables_on_disk
+on: mysql.created_tmp_disk_tables
+lookup: average {{ netdata_mysql_temp_tables_on_disk_lookup }} unaligned of rate
+units: tables/s
+every: {{ netdata_mysql_temp_tables_on_disk_every }}
+warn: $this > {{ netdata_mysql_temp_tables_on_disk_warn }}
+crit: $this > {{ netdata_mysql_temp_tables_on_disk_crit }}

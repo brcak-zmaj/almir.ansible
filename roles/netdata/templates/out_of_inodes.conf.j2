@@ -1,0 +1,8 @@
+alarm: out_of_inodes
+  on: disk.inodes
+  lookup: average {{ netdata_inode_lookup_period }} unaligned of used
+  units: %
+  every: {{ netdata_inode_every }}
+  delay: {{ netdata_inode_delay }}
+  warn: $this > {{ netdata_inode_warn_threshold }}
+  crit: $this > {{ netdata_inode_crit_threshold }}

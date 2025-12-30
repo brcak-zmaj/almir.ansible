@@ -1,0 +1,7 @@
+[Pod Failures]
+    on = kubernetes.pods
+    lookup: average {{ netdata_k8s_pod_failures_lookup }} unbound::status.failed
+    every: {{ netdata_k8s_pod_failures_every }}
+    warn: $this > {{ netdata_k8s_pod_failures_warn }}
+    crit: $this > {{ netdata_k8s_pod_failures_crit }}
+    info: Number of pods in a failed state

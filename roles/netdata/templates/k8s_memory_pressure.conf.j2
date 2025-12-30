@@ -1,0 +1,7 @@
+[Node Memory Pressure]
+    on = kubernetes.node_conditions
+    lookup: average {{ netdata_k8s_memory_pressure_lookup }} unbound::condition.memory_pressure
+    every: {{ netdata_k8s_memory_pressure_every }}
+    warn: $this > {{ netdata_k8s_memory_pressure_warn }}
+    crit: $this > {{ netdata_k8s_memory_pressure_crit }}
+    info: Nodes under memory pressure

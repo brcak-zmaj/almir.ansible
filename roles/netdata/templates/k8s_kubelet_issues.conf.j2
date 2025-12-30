@@ -1,0 +1,7 @@
+[Kubelet Issues]
+    on = kubernetes.kubelet
+    lookup: average {{ netdata_k8s_kubelet_issues_lookup }} unbound::issues
+    every: {{ netdata_k8s_kubelet_issues_every }}
+    warn: $this > {{ netdata_k8s_kubelet_issues_warn }}
+    crit: $this > {{ netdata_k8s_kubelet_issues_crit }}
+    info: Kubelet reporting issues

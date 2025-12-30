@@ -1,0 +1,10 @@
+# checks for ZFS pool fragmentation
+template: zfs_pool_fragmentation
+      on: zfs.poolfrag
+   every: {{ netdata_zfs_pool_fragmentation_every }}
+    calc: $this
+    warn: $this > {{ netdata_zfs_pool_fragmentation_warn }}
+   crit: $this > {{ netdata_zfs_pool_fragmentation_crit }}
+   units: %
+    info: high ZFS pool fragmentation detected
+      to: sysadmin
