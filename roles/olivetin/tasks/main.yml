@@ -1,44 +1,14 @@
 ---
-# Main orchestration for OliveTin role
 
-- name: Check if OliveTin is already installed (Package)
-  ansible.builtin.command:
-    cmd: "{{ 'rpm -q OliveTin' if ansible_os_family == 'RedHat' else 'dpkg-query -W -f=${Status} OliveTin 2>/dev/null | grep -q \"install ok installed\" || dpkg-query -W -f=${Status} olivetin 2>/dev/null | grep -q \"install ok installed\"' }}"
-  become: true
-  register: olivetin_installed_check
-  changed_when: false
-  failed_when: false
-  when: olivetin_install_method == 'package'
-
-- name: Set fact for OliveTin installation status
-  ansible.builtin.set_fact:
-    olivetin_already_installed: >-
-      {{
-        (olivetin_installed_check.rc == 0 if olivetin_installed_check is defined else false)
-      }}
-
-- name: Include package uninstall
-  ansible.builtin.include_tasks: uninstall_package.yml
-  when:
-    - olivetin_uninstall
-    - olivetin_install_method == 'package'
-
-- name: Include Docker uninstall
-  ansible.builtin.include_tasks: uninstall_docker.yml
-  when:
-    - olivetin_uninstall
-    - olivetin_install_method == 'docker'
-
-- name: Include configuration setup
-  ansible.builtin.include_tasks: configure.yml
-  when: not olivetin_uninstall
+- name: Include uninstall tasks
+  ansible.builtin.include_tasks: uninstall.yml
+  when: olivetin_uninstall
 
 - name: Include package installation
   ansible.builtin.include_tasks: install_package.yml
   when:
     - not olivetin_uninstall
     - olivetin_install_method == 'package'
-    - not olivetin_already_installed
 
 - name: Include Docker installation
   ansible.builtin.include_tasks: install_docker.yml
@@ -46,3 +16,18 @@
     - not olivetin_uninstall
     - olivetin_install_method == 'docker'
 
+- name: Install Python password hashing dependencies
+  ansible.builtin.include_tasks: install_password_deps.yml
+  when: not olivetin_uninstall
+
+- name: Include user management
+  ansible.builtin.include_tasks: users.yml
+  when: not olivetin_uninstall
+
+- name: Include configuration setup
+  ansible.builtin.include_tasks: configure.yml
+  when: not olivetin_uninstall
+
+- name: Start OliveTin service
+  ansible.builtin.include_tasks: start_service.yml
+  when: not olivetin_uninstall

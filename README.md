@@ -3,7 +3,6 @@
 # Ansible Collection for Brcak Zmaj - Almir 
 
 [![Ansible Collection](https://img.shields.io/badge/brcak.zmaj-brightgreen)](https://galaxy.ansible.com/ui/repo/published/brcak_zmaj/almir_ansible)
-[![GitHub Tag](https://img.shields.io/github/v/release/brcak-zmaj/almir.ansible.svg)](https://github.com/brcak-zmaj/almir.ansible/tags)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/brcak-zmaj/almir.ansible)](https://github.com/brcak-zmaj/almir.ansible/commits)
 [![GitHub Contributors](https://img.shields.io/github/contributors/brcak-zmaj/almir.ansible)](https://github.com/brcak-zmaj/almir.ansible/graphs/contributors)
 

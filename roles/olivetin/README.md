@@ -1,326 +1,106 @@
-<img alt = "project logo" src = "https://github.com/OliveTin/OliveTin/blob/main/frontend/OliveTinLogo.png" width = "128" />
+<p align="center">
+<a href="https://www.netdata.cloud#gh-light-mode-only">
+  <img src="https://www.netdata.cloud/img/readme-images/netdata_readme_logo_light.png" alt="Netdata" width="300"/>
+</a>
+<a href="https://www.netdata.cloud#gh-dark-mode-only">
+  <img src="https://www.netdata.cloud/img/readme-images/netdata_readme_logo_dark.png" alt="Netdata" width="300"/>
+</a>
+</p>
+<h3 align="center">X-Ray Vision for your infrastructure!</h3>
 
-# Ansible Role - OliveTin
 
-A comprehensive Ansible role for deploying OliveTin on RedHat and Debian-based systems with support for both package manager and Docker installation methods.
+# OliveTin Ansible Role
 
-## Overview
+Lightweight Ansible role to install and configure OliveTin via package or Docker.
 
-OliveTin is a web-based interface for running Linux shell commands. This role automates the installation and configuration of OliveTin on Linux systems, providing a simple way to execute shell commands through a web interface.
+This README provides the minimum usage and variables needed to run the role in a playbook or as part of the `brcak_zmaj.almir_ansible` collection.
 
-## Features
+## Quick Start
 
-### Installation Methods
-- **Package Manager**: Install via RPM (Fedora/Redhat) or DEB (Debian/Ubuntu) packages
-- **Docker**: Deploy as Docker container with network and volume configuration
+Package install (default):
 
-### Configuration Management
-- **Default Configuration**: Automatically deploys a basic example configuration
-- **Custom Configuration**: Override with your own config file path
-- **Version Control**: Pin to specific versions or use latest releases
+```yaml
+- hosts: servers
+  become: true
+  roles:
+    - role: almir.olivetin
+      vars:
+        olivetin_install_method: package
+```
 
-### Service Management
-- **Systemd Integration**: Automatic service enablement and startup (package install)
-- **Firewall Configuration**: Use `geerlingguy.firewall` role or similar for firewall setup
+Docker install:
 
-### Docker Features
-- **Network Isolation**: Creates dedicated Docker network
-- **Volume Management**: Configurable volume mounts for configuration and Docker socket access
-- **Resource Limits**: Configurable memory and CPU limits
+```yaml
+- hosts: servers
+  become: true
+  roles:
+    - role: geerlingguy.docker  # ensure docker present
+    - role: almir.olivetin
+      vars:
+        olivetin_install_method: docker
+        olivetin_docker_config_path: /opt/olivetin
+```
 
-## Requirements
+## Important Variables (defaults in `defaults/main.yml`)
 
-### Ansible Version Compatibility
+- `olivetin_install_method`: `package` or `docker` (default: `package`)
+- `olivetin_config_path`: custom config file path (empty string = use role template)
+- `olivetin_config_dir`: `/etc/OliveTin` (package)
+- `olivetin_docker_config_path`: `/docker/OliveTin` (docker)
+- `olivetin_docker_image`: Docker image name (default: `jamesread/olivetin`)
+- `olivetin_docker_container_name`: container name (default: `olivetin`)
+- `olivetin_port`: HTTP port (default: `1337`)
 
-This role is tested and supported with:
-- **Ansible**: `>= 2.9`
-- **Python**: `>= 3.6` (on target system)
+For a complete list see `defaults/main.yml`.
 
-### Target System Requirements
+## Admin Password Behavior
 
-- **OS**: Fedora Linux or Debian-based Linux (Debian, Ubuntu)
-- **Access**: SSH access with sudo/root privileges
-- **Python**: Python 3 installed on target system
+The role builds `olivetin_users` and hashes passwords on the control node before writing the config. The admin password can be provided via:
 
-### Dependencies
+- Control-node environment variable:
 
-- **For Docker installation**: Docker must be installed (recommend using `geerlingguy.docker` role)
-- **For firewall configuration**: Use `geerlingguy.firewall` role or similar
-- **community.docker**: Required for Docker container management (install via `ansible-galaxy collection install community.docker`)
+```bash
+export OLIVETIN_ADMIN_PASSWORD='mysecret'
+ansible-playbook play.yml
+```
 
-## Installation
+- Or by passing `olivetin_users` with `--extra-vars`:
 
-This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+```bash
+ansible-playbook play.yml --extra-vars 'olivetin_users=[{"username":"admin","usergroup":"admins","password":"mysecret"}]'
+```
+
+When the role runs it will hash the provided password and write it into the config file.
+
+## Using in a Collection
+
+If you're using this role as part of the `brcak_zmaj.almir_ansible` collection:
 
 ```bash
 ansible-galaxy collection install brcak_zmaj.almir_ansible
 ```
 
-Or use the role directly:
-
-```bash
-ansible-galaxy install almir.olivetin
-```
-
-## Role Variables
-
-### Installation Method
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `olivetin_install_method` | Installation method: `package` or `docker` | `package` |
-
-### Version Control
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `olivetin_version` | Package version (use `latest` for latest release) | `latest` |
-| `olivetin_docker_version` | Docker image version/tag | `latest` |
-
-### Configuration Management
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `olivetin_config_path` | Custom config file path (null = use role template) | `null` |
-| `olivetin_config_dir` | Directory where config file is placed | `/etc/OliveTin` |
-
-### Package Manager Installation
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `olivetin_package_url_fedora` | Fedora RPM package URL | GitHub latest release |
-| `olivetin_package_url_debian` | Debian DEB package URL | GitHub latest release |
-| `olivetin_service_enabled` | Enable systemd service | `true` |
-| `olivetin_service_state` | Service state (started/stopped) | `started` |
-| `olivetin_port` | Web interface port | `1337` |
-| `olivetin_uninstall` | Uninstall and purge OliveTin | `false` |
-
-### Docker Installation
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `olivetin_docker_network_name` | Docker network name | `olivetin_network` |
-| `olivetin_docker_network_create` | Create network if it doesn't exist | `true` |
-| `olivetin_docker_image` | Docker image | `jamesread/olivetin` |
-| `olivetin_docker_container_name` | Container name | `olivetin` |
-| `olivetin_docker_port` | Host port mapping | `1337` |
-| `olivetin_docker_memory` | Container memory limit | `512m` |
-| `olivetin_docker_cpus` | Container CPU limit | `1` |
-| `olivetin_docker_restart_policy` | Container restart policy | `unless-stopped` |
-| `olivetin_docker_user` | Container user (root for Docker socket access) | `root` |
-| `olivetin_docker_config_path` | Host path for config directory | `/docker/OliveTin` |
-| `olivetin_docker_config_mount` | Config volume mount | `{{ olivetin_docker_config_path }}:/config` |
-| `olivetin_docker_sock_mount` | Docker socket mount | `/var/run/docker.sock:/var/run/docker.sock` |
-| `olivetin_docker_env` | Additional environment variables | `{}` |
-
-## Dependencies
-
-- **For Docker**: `geerlingguy.docker` role (recommended) or Docker must be installed manually
-- **community.docker**: Required for Docker container management
-
-## Example Playbooks
-
-### Basic Package Installation (Fedora)
-
-```yaml
----
-- name: Install OliveTin via package manager
-  hosts: fedora_server
-  become: true
-  roles:
-    - role: almir.olivetin
-  vars:
-    olivetin_install_method: package
-    olivetin_port: 1337
-```
-
-### Docker Installation
-
-```yaml
----
-- name: Install OliveTin via Docker
-  hosts: docker_server
-  become: true
-  roles:
-    - role: geerlingguy.docker  # Install Docker first
-    - role: almir.olivetin
-  vars:
-    olivetin_install_method: docker
-    olivetin_docker_port: 1337
-    olivetin_docker_memory: "1g"
-    olivetin_docker_cpus: 2
-    olivetin_docker_config_path: /opt/docker/olivetin
-```
-
-### Specific Version Installation
-
-```yaml
----
-- name: Install specific OliveTin version
-  hosts: olivetin_server
-  become: true
-  roles:
-    - role: almir.olivetin
-  vars:
-    olivetin_install_method: package
-    olivetin_version: v3.0.0  # Pin to specific version
-```
-
-## Post-Installation
-
-### Accessing OliveTin
-
-After installation, access OliveTin at:
-- **URL**: `http://your-server-ip:1337`
-- **Port**: Default is `1337` (configurable via `olivetin_port`)
-
-### Configuration
-
-The default configuration file is located at:
-- **Package install**: `/etc/OliveTin/config.yaml`
-- **Docker install**: `{{ olivetin_docker_config_path }}/config.yaml`
-
-### Basic Configuration Example
-
-The role deploys a basic example configuration:
-
-```yaml
-actions:
-  - title: "Hello world!"
-    shell: echo 'Hello World!'
-```
-
-For advanced configuration options, see the [OliveTin Documentation](https://docs.olivetin.app/configuration/).
-
-### Service Management (Package Install)
-
-```bash
-# Check service status
-sudo systemctl status OliveTin
-
-# View logs
-sudo journalctl -eu OliveTin
-
-# Restart service
-sudo systemctl restart OliveTin
-```
-
-### Docker Container Management
-
-```bash
-# Check container status
-docker ps | grep olivetin
-
-# View container logs
-docker logs olivetin
-
-# Restart container
-docker restart olivetin
-```
-
-### Config File Updates
-
-To update the OliveTin configuration without reinstalling:
-
-```yaml
-- hosts: olivetin_servers
-  become: true
-  roles:
-    - role: almir.olivetin
-  vars:
-    olivetin_install_method: package  # or docker
-  tags:
-    - update_config
-```
-
-This will only run the configuration deployment tasks and restart the appropriate service/container.
-
-### Uninstall OliveTin
-
-To completely remove OliveTin and all its configuration:
-
-```yaml
-- hosts: olivetin_servers
-  become: true
-  roles:
-    - role: almir.olivetin
-  vars:
-    olivetin_uninstall: true
-    olivetin_install_method: package  # or docker
-```
-
-This will:
-- Stop and remove the service/container
-- Remove the package or Docker container
-- Delete configuration files and directories
-
-### Firewall Configuration
-
-Use the `geerlingguy.firewall` role or similar for firewall configuration:
+Then reference it in your playbook as:
 
 ```yaml
 - hosts: servers
   become: true
   roles:
-    - role: geerlingguy.firewall
-      vars:
-        firewall_allowed_tcp_ports:
-          - "{{ olivetin_port }}"
-    - role: almir.olivetin
+    - role: brcak_zmaj.almir_ansible.almir.olivetin
 ```
 
-### Using Existing Docker Network
+## Paths
 
-If you want to use an existing Docker network:
+- Package config: `/etc/OliveTin/config.yaml`
+- Docker config: `<olivetin_docker_config_path>/config.yaml`
 
-```yaml
-olivetin_docker_network_name: existing_network
-olivetin_docker_network_create: false
-```
+## Service
 
-## Troubleshooting
+Package installs use a `systemd` service named `OliveTin` (case-sensitive). Use `sudo systemctl status OliveTin` to check.
 
-### Service Won't Start (Package Install)
+## Cleanup
 
-Check the service status and logs:
-
-```bash
-sudo systemctl status OliveTin
-sudo journalctl -eu OliveTin
-```
-
-Common issues:
-- Missing configuration file: Ensure `/etc/OliveTin/config.yaml` exists
-- Invalid YAML syntax: Validate your configuration file
-- Port already in use: Change `olivetin_port` to a different port
-
-### Docker Container Issues
-
-Check container logs:
-
-```bash
-docker logs olivetin
-```
-
-Common issues:
-- Docker socket permission: Container runs as root by default for Docker socket access
-- Network issues: Ensure Docker network exists or set `olivetin_docker_network_create: true`
-- Volume mount issues: Ensure config directory exists and has correct permissions
-
-### Firewall Issues
-
-Use the `geerlingguy.firewall` role (or similar) for firewall configuration:
-
-```yaml
-- hosts: servers
-  become: true
-  roles:
-    - role: geerlingguy.firewall
-      vars:
-        firewall_allowed_tcp_ports:
-          - "{{ olivetin_port }}"
-    - role: almir.olivetin
-```
+This role allows to uninstall and cleanup when `olivetin_uninstall: true` is set.
 
 ## Security Considerations
 
@@ -342,10 +122,6 @@ Use the `geerlingguy.firewall` role (or similar) for firewall configuration:
 - Ensure configuration file has appropriate permissions (644, root:root)
 - Review actions carefully before deployment
 - Use OliveTin's access control features for multi-user environments
-
-## Idempotency
-
-This role is fully idempotent. All tasks use proper Ansible modules and include state checks to ensure safe re-execution. Existing configurations and data are preserved.
 
 ## Notes
 

@@ -99,13 +99,6 @@ The role automatically detects the Raspberry Pi model from `/proc/device-tree/mo
 ansible-galaxy role install almir.RaspberryPi
 ```
 
-### From Source
-
-```bash
-git clone https://github.com/brcak-zmaj/almir.ansible.git
-cd almir.ansible/roles/almir.RaspberryPi
-```
-
 ### Using in a Collection
 
 If you're using this role as part of the `brcak_zmaj.almir_ansible` collection:

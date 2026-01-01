@@ -7,30 +7,15 @@
     name: "{{ olivetin_docker_network_name }}"
   when: olivetin_docker_network_create
 
-- name: Ensure Docker config directory exists
-  ansible.builtin.file:
-    path: "{{ olivetin_docker_config_path }}"
-    state: directory
-    mode: '0755'
-  become: true
+# Config file is handled in configure.yml, no need to duplicate here
 
-- name: Copy config file to Docker config directory
-  tags: [docker, dockerconfig, olivetin]
-  ansible.builtin.copy:
-    src: "{{ olivetin_config_file }}"
-    dest: "{{ olivetin_docker_config_path }}/config.yaml"
-    remote_src: true
-    mode: '0644'
-  notify:
-    - restart olivetin container
-
-- name: Create OliveTin Docker container
+- name: Create OliveTin Docker container (don't start yet - config must be ready first)
   tags: [docker, olivetin]
   community.docker.docker_container:
     name: "{{ olivetin_docker_container_name }}"
     image: "{{ olivetin_docker_image }}:{{ olivetin_docker_version }}"
     pull: "{{ olivetin_docker_pull_image }}"
-    state: started
+    state: created
     restart_policy: "{{ olivetin_docker_restart_policy }}"
     memory: "{{ olivetin_docker_memory }}"
     cpus: "{{ olivetin_docker_cpus }}"

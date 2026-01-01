@@ -1,0 +1,26 @@
+---
+
+- name: Hash user passwords using Python/passlib with Argon2id
+  ansible.builtin.command:
+    cmd: python3 -c "from passlib.hash import argon2; ph = argon2.using(); print(ph.hash('{{ item.password }}'))"
+  register: password_hash_results
+  loop: "{{ olivetin_users }}"
+  when: olivetin_users | length > 0
+  no_log: "{{ olivetin_no_log_passwords | bool }}"
+  loop_control:
+    label: "{{ item.username }}"
+  changed_when: false
+
+- name: Build OliveTin users list with hashed passwords
+  ansible.builtin.set_fact:
+    olivetin_users_with_hashes: "{{ olivetin_users_with_hashes | default([]) + [user_with_hash] }}"
+  vars:
+    user_with_hash:
+      username: "{{ item.0.username }}"
+      usergroup: "{{ item.0.usergroup | default('') }}"
+      password_hash: "{{ item.1.stdout }}"
+  loop: "{{ olivetin_users | zip(password_hash_results.results) | list }}"
+  when: olivetin_users | length > 0
+  no_log: "{{ olivetin_no_log_passwords | bool }}"
+  loop_control:
+    label: "{{ item.0.username }}"

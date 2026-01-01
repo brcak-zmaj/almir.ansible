@@ -10,10 +10,10 @@ olivetin_version: latest  # Use 'latest' for latest release, or specific version
 olivetin_docker_version: latest  # Docker image version/tag
 
 # Configuration File Management
-# Set to null to use role's default config template
+# Set to empty string to use role's default config template
 # Set to custom path to use your own config file (e.g., '/etc/OliveTin/config.yaml')
-olivetin_config_path: null  # null = use role template, custom path = use your own
-olivetin_config_dir: /etc/OliveTin  # Directory where config file will be placed
+olivetin_config_path: ""  # Empty = use role template, custom path = use your own
+olivetin_config_dir: /etc/OliveTin  # Directory where config file will be placed (package install)
 
 # Package Manager Installation (Fedora/Debian)
 olivetin_install_package: true  # Only used when olivetin_install_method == 'package'
@@ -36,7 +36,7 @@ olivetin_docker_network_create: true
 olivetin_docker_image: "jamesread/olivetin"
 olivetin_docker_container_name: olivetin
 olivetin_docker_port: 1337
-olivetin_docker_memory: "512m"
+olivetin_docker_memory: "1g"
 olivetin_docker_cpus: 1
 olivetin_docker_restart_policy: unless-stopped
 olivetin_docker_user: root  # Required for Docker socket access
@@ -49,4 +49,59 @@ olivetin_docker_sock_mount: "/var/run/docker.sock:/var/run/docker.sock"  # For D
 
 # Docker Environment Variables (if needed)
 olivetin_docker_env: {}
+
+# ============================================================================
+# USER MANAGEMENT
+# ============================================================================
+# OliveTin local users configuration
+# Passwords will be automatically hashed using bcrypt
+# Users only need to provide plaintext passwords - hashing happens automatically
+olivetin_users:
+  - username: "admin"
+    usergroup: "admins"
+    password: "{{ lookup('env', 'OLIVETIN_ADMIN_PASSWORD') | default('admin', true) }}"
+  - username: "guest"
+    usergroup: "guests"
+    password: "guest"
+
+# Hide passwords in Ansible output (security best practice)
+# Set to false to see password hashing errors during debugging
+olivetin_no_log_passwords: false
+
+# Note: passlib[bcrypt] must be installed on the Ansible control node for password hashing
+# Install with: pip install --user passlib[bcrypt]
+# This is a control node requirement, not a role task
+
+# ============================================================================
+# AUTHENTICATION & ACCESS CONTROL
+# ============================================================================
+# Require guests to login before accessing anything
+olivetin_auth_require_guests_to_login: false
+
+# Access Control Lists (ACLs)
+olivetin_access_control_lists:
+  - name: "admins"
+    permissions:
+      view: true
+      exec: true
+      logs: true
+    match_usergroups:
+      - "admins"
+    add_to_every_action: true
+  - name: "guests"
+    permissions:
+      view: true
+      exec: false
+      logs: false
+    match_usergroups:
+      - "guests"
+
+# Default permissions for unauthenticated users
+olivetin_default_permissions:
+  view: true
+  exec: false
+  logs: false
+
+# Log level
+olivetin_log_level: "INFO"
 
