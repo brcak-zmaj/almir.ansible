@@ -1,0 +1,21 @@
+---
+
+galaxy_info:
+  author: almir
+  description: "Geospatial software and offline map data role"
+  company: brcak_zmaj
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - geospatial
+    - maps
+    - offline
+
+dependencies: []

@@ -25,6 +25,5 @@ galaxy_info:
     - development
     - configuration
 
-dependencies:
-    - community.general
+dependencies: []
 

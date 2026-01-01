@@ -24,6 +24,5 @@ galaxy_info:
     - optimization
     - system
 
-dependencies:
-    - community.general
+dependencies: []
 
