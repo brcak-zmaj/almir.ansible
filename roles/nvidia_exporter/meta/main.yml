@@ -1,28 +1,8 @@
 ---
 galaxy_info:
   author: Almir Zohorovic
-  description: This ansible role will setup the nvidia exporter agent on a target that has an nvidia GPU. This is used to enable metrics for displaying into Grafana. Inspiration and code was used from this repository https://github.com/utkuozdemir/nvidia_gpu_exporter
+  description: Setup nvidia exporter agent for GPU metrics.
   license: GPL-3.0-or-later
   min_ansible_version: "2.9"
-  
-  platforms:
-    - name: Fedora
-      versions:
-        - all
-    - name: EL
-      versions:
-        - all
-    - name: Ubuntu
-      versions:
-        - all
-    - name: Debian
-      versions:
-        - all
-  
-  galaxy_tags:
-    - gpu
-    - monitoring
-    - prometheus
 
 dependencies: []
-
