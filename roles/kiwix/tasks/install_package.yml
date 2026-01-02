@@ -1,0 +1,7 @@
+---
+
+- name: Install Kiwix package
+  ansible.builtin.package:
+    name: "{{ kiwix_package_name }}"
+    state: present
+    update_cache: yes

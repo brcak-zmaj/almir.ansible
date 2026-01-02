@@ -1,0 +1,54 @@
+---
+# Kiwix Ansible Role Defaults
+
+# User Configuration
+kiwix_user: "almir"
+kiwix_home: "/home/{{ kiwix_user }}"
+kiwix_install_path: "{{ kiwix_home }}/kiwix"
+
+# Installation Method: package, docker, flatpak
+kiwix_install_method: package
+
+# User-provided ZIM URLs file (optional, will be copied to zim_files/zim_urls.txt)
+kiwix_local_urls_file: null
+
+# Custom ZIM source path on target (optional, will sync pre-downloaded ZIM files)
+kiwix_zim_source_custom: null
+
+# Package Manager Installation
+kiwix_package_name: kiwix-desktop.x86_64
+
+# Docker Installation
+kiwix_docker_image: "ghcr.io/kiwix/kiwix-serve"
+kiwix_docker_version: latest
+kiwix_docker_port: 8080
+kiwix_docker_memory: "2g"
+kiwix_docker_cpus: 2
+kiwix_docker_restart_policy: unless-stopped
+kiwix_docker_container_name: kiwix-serve
+kiwix_docker_network_name: kiwix_network
+kiwix_docker_network_create: true
+kiwix_docker_readonly: true
+
+# Docker Environment Variables
+kiwix_docker_puid: "{{ ansible_user_id | default(1000) }}"
+kiwix_docker_pgid: "{{ ansible_user_gid | default(1000) }}"
+kiwix_docker_tz: "{{ ansible_date_time.tz | default('UTC') }}"
+
+# Flatpak Installation
+kiwix_flatpak_app_id: org.kiwix.kiwixdesktop
+
+# Cron Configuration (for automated syncing with kiwix_zim_sync.sh)
+kiwix_enable_cron: false
+kiwix_cron_schedule: "0 3 * * 0"
+kiwix_cron_cmd: >-
+  {{ kiwix_install_path }}/kiwix_zim_sync.sh sync -a
+  -p {{ kiwix_install_path }}/zim_files
+  -u {{ kiwix_install_path }}/zim_files/zim_urls.txt
+  >> /var/log/kiwix.log 2>&1
+
+# Uninstall Configuration
+kiwix_uninstall: false
+
+# Desktop Configuration (kiwix-desktop)
+kiwix_deploy_config: true
