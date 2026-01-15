@@ -5,7 +5,6 @@
     key: /org/gnome/desktop/app-folders/folder-children
     value: "['Utilities', 'YaST', 'Pardus', 'd48e5d24-feaf-4854-8214-0644eb706f87', 'b2fdf8f7-2b31-4fd1-bfda-a2ee8bedd8d4', 'f9abc26b-76b0-42bd-b474-a45cea59e5a3', '7efc5a72-b182-4c9d-82fa-99a327c3cf3a', 'cffb9d05-ad64-407b-8a7f-13e2958c3d57', '3c79ef2d-9662-4c5c-a65a-55f92fcc8384', 'System', '3f939857-24c1-4364-8767-e6c84eb9b48e', 'b1dd445c-7e66-439b-893c-64771b64b73f', '96753670-f1f8-48fb-94bd-181515224a3d', 'e487cb59-56bb-42a6-a621-30ee6a1ee8e6']"
 
-# Folder: 3c79ef2d... (Snapshots)
 - name: App Folder | Snapshots apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -24,7 +23,6 @@
     key: /org/gnome/desktop/app-folders/folders/3c79ef2d-9662-4c5c-a65a-55f92fcc8384/translate
     value: "false"
 
-# Folder: 7efc5a72... (Terminal)
 - name: App Folder | Terminal apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -43,7 +41,6 @@
     key: /org/gnome/desktop/app-folders/folders/7efc5a72-b182-4c9d-82fa-99a327c3cf3a/translate
     value: "false"
 
-# Folder: Pardus
 - name: App Folder | Pardus categories
   become_user: "{{ user }}"
   community.general.dconf:
@@ -62,7 +59,6 @@
     key: /org/gnome/desktop/app-folders/folders/Pardus/translate
     value: "true"
 
-# Folder: System
 - name: App Folder | System apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -81,7 +77,6 @@
     key: /org/gnome/desktop/app-folders/folders/System/translate
     value: "true"
 
-# Folder: Utilities
 - name: App Folder | Utilities apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -100,7 +95,6 @@
     key: /org/gnome/desktop/app-folders/folders/Utilities/translate
     value: "true"
 
-# Folder: YaST
 - name: App Folder | YaST categories
   become_user: "{{ user }}"
   community.general.dconf:
@@ -119,7 +113,6 @@
     key: /org/gnome/desktop/app-folders/folders/YaST/translate
     value: "true"
 
-# Folder: b2fdf8f7... (Games)
 - name: App Folder | Games apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -132,7 +125,6 @@
     key: /org/gnome/desktop/app-folders/folders/b2fdf8f7-2b31-4fd1-bfda-a2ee8bedd8d4/name
     value: "'Games'"
 
-# Folder: cffb9d05... (Media Editors)
 - name: App Folder | Media Editors apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -151,7 +143,6 @@
     key: /org/gnome/desktop/app-folders/folders/cffb9d05-ad64-407b-8a7f-13e2958c3d57/translate
     value: "false"
 
-# Folder: d48e5d24... (Office)
 - name: App Folder | Office apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -164,7 +155,6 @@
     key: /org/gnome/desktop/app-folders/folders/d48e5d24-feaf-4854-8214-0644eb706f87/name
     value: "'Office'"
 
-# Folder: f9abc26b... (Wine)
 - name: App Folder | Wine apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -183,7 +173,6 @@
     key: /org/gnome/desktop/app-folders/folders/f9abc26b-76b0-42bd-b474-a45cea59e5a3/translate
     value: "false"
 
-# Folder: 3f939857... (Internet)
 - name: App Folder | Internet apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -196,7 +185,6 @@
     key: /org/gnome/desktop/app-folders/folders/3f939857-24c1-4364-8767-e6c84eb9b48e/name
     value: "'Internet'"
 
-# Folder: b1dd445c... (Mgmt)
 - name: App Folder | Mgmt apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -215,7 +203,6 @@
     key: /org/gnome/desktop/app-folders/folders/b1dd445c-7e66-439b-893c-64771b64b73f/translate
     value: "false"
 
-# Folder: 96753670... (Media)
 - name: App Folder | Media apps
   become_user: "{{ user }}"
   community.general.dconf:
@@ -234,7 +221,6 @@
     key: /org/gnome/desktop/app-folders/folders/96753670-f1f8-48fb-94bd-181515224a3d/translate
     value: "false"
 
-# Folder: e487cb59... (Flatpak Tools)
 - name: App Folder | Flatpak Tools apps
   become_user: "{{ user }}"
   community.general.dconf:

@@ -16,8 +16,8 @@
   ansible.builtin.copy:
     src: "{{ wallpaper_src }}"
     dest: "{{ wallpaper_dest }}/wallpaper.png"
-    owner: almir
-    group: almir
+    owner: "{{ user }}"
+    group: "{{ user }}"
     mode: '0644'
   when: wallpaper is defined and wallpaper == true
 

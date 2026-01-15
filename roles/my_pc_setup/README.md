@@ -1,90 +1,242 @@
-<img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
+## Ansible Role - My PC Setup
 
+A comprehensive Ansible role for setting up and configuring a Linux development workstation. This role automates the installation of development tools, multimedia codecs, desktop environments, virtualization packages, gaming platforms, and system optimizations.
 
+> **⚠️ Disclaimer**: This role is is just an EXAMPLE role for setting up a dev workstation... While it serves as an example of what Ansible can accomplish, **it is not recommended for production systems**. Use as a reference and customize for your own needs.
 
-## Ansible role - My PC Setup
+## Supported Platforms
 
-This ansible role will is intended to setup my development workstation
+- **Debian-based**: Debian 11+, Ubuntu 20.04+
+- **RHEL-based**: EL 8+, Fedora 38+
 
 ## Requirements
 
-- Ansible 2.13+
+- Ansible >= 2.13
+- Target system must be Ubuntu, Debian, Fedora, or RHEL-compatible
+- SSH access with sudo privileges
 
-## Role Defaults
+## Overview
 
-| Variable Name         | Description                                                          | Default Value                                                       |
-|-----------------------|----------------------------------------------------------------------|---------------------------------------------------------------------|
-| `remmina_pkgs`        | Contains packages I typically use for remmina. | `remmina, remmina-plugin-x2go, remmina-plugin-spice,...` |
-| `flatpak_packages`    | Contains flatpaks I use.                       | `com.github.qarmin.czkawka, org.fedoraproject.MediaWriter, fr.romainvigier.MetadataCleaner,...` |
-| `flatpak_repo`        | Flatpak Repo.                                  | `https://flathub.org/repo/flathub.flatpakrepo` |
-| `java_version`        | Specifies what java version I need.            | `java-11-openjdk` |
-| `earth_repo`          | Google earth repo.                             | `deb [signed-by=/etc/apt/trusted.gpg.d/google.gpg arch=amd64] http://dl.google.com/linux/earth/deb/ stable main` |
-| `earth_repo_name`     | Location for local repo.                       | `/etc/apt/sources.list.d/google-earth-pro.list` |
-| `earth_gpg`           | Google earth signing Key.                      | `https://dl.google.com/linux/linux_signing_key.pub` |
-| `earth_gpg_key`       | Google Earth GPG location                      | `/etc/apt/trusted.gpg.d/google.gpg` |
-| `earth_pkg`           | Name of the Google Earth Package.              | `google-earth-pro-stable` |
-| `virtual_box_key_url` | vbox Key.                                      | `https://www.virtualbox.org/download/oracle_vbox_2016.asc` |
-| `virtual_box_repo`    | vbox repo                                      | `deb https://download.virtualbox.org/virtualbox/debian buster contrib` |
-| `virtualbox_packages` | vbox packages                                  | `virtualbox, virtualbox-dkms,...` |
-| `libreoffice_languages_to_remove` | Remove any unneeded languages      | `libreoffice-help-zh-tw, libreoffice-help-zh-cn, libreoffice-help-ru,...` |
-| `libvirt_package`     | Libvirt package name                           | `libvirtd` |
-| `virtualization_packages` | Libvirt dependencies                       | `bridge-utils, libvirt, virt-install,...` |
-| `smb_mountpoint`      | This is where you enter your SMB Share         | `network.share.example` |
-| `mount_point_directories` | Enter all of your mountpoints from the SMB Share  | `- /mnt/example` |
-| `smb_mounts`          | Loop multple mountpoints from smb share to mapped dir   | `src: "//{{ smb_mountpoint }}/example", path: "/mnt/example"` |
-| `smb_credentials`     | Input SMB Credentials                          | `username={{ smb_username }},password={{ smb_password }}` |
-| `smb_mount_opts`      | Cifs Opts                                      | `noperm,dir_mode=0777,file_mode=0777,iocharset=utf8,_netdev,{{ smb_credentials }}` |
-| `smb_fstype`          | SMB File System Type                           | `cifs` |
-| `gstreamer_debian_packages` | Debian gstreamer dependencies            | `gstreamer1.0-plugins-base, gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad,...` |
-| `gstreamer_redhat_packages` | RHEL gstreamer dependencies              | `gstreamer1-plugins-base, gstreamer1-plugins-good, gstreamer1-plugins-bad-free,...` |
-| `gnome_shell_extensions_packages` |  Gnome dash to dock and extensions | `gnome-shell-extension-dash-to-dock, gnome-shell-extensions,...` |
-| `gnome_shell_enable_extension_command` |  Command to enable gnome dash to dock   | `gnome-extensions enable dash-to-dock@micxgx.gmail.com` |
-| `npm_global`          |  NPM Global                                    | `true` |
-| `nodejs_npm_packages` | NPM and Dependencies                           | `nodejs, npm,...` |
-| `global_npm_packages` | NPM Packages                                   | `"@gridsome/cli", "@semantic-release/changelog", "@semantic-release/git",...` |
-| `php_dev_packages`    | Install PHP Packages                           | `php-cli, php-curl, php-intl,...` |
-| `python_packages`     | Setup python and pip                           | `python3, python3-pip,...` |
-| `pip_packages`        | Install any pip packages                       | `requests, bandit, flake8,...` |
-| `rust_packages`       | Install any rust packages                      | `rust, cargo,...` |
+This role organizes functionality into modular task groups:
 
+- **prep** - Package manager setup and system updates
+- **dev** - Development tools (Node.js, Python, npm packages)
+- **games** - Gaming platform setup (Steam)
+- **internet** - Remote desktop clients (Remmina)
+- **multimedia** - Media codecs and GStreamer plugins
+- **posix** - POSIX system tasks (SMB/CIFS mounts, fstab configuration)
+- **virtualization** - KVM/QEMU and libvirt setup
+- **gnome** - GNOME desktop environment customization
 
-## Role Switches - Used to enable or disable a play from kicking off
+## Role Variables & Defaults
 
-| Variable Name         | Description                                                          | Examples                                                            |
-|-----------------------|----------------------------------------------------------------------|---------------------------------------------------------------------|
-| `Development Packages`       | Enables tasks to set up specific packages needed for dev      | `boto, java, linode-cli,...` | 
-| `Gaming Packages`            | Enabled anything "Gaming" related                             | `steam,...` | 
-| `Multimedia`       | Enabled any packages related to "Multimedia"                            | `codes,...` | 
+## Role Variables & Defaults
 
+### System & User Configuration
 
-## Dependencies - These are "optional" but I run them with this role..
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `user` | System user to configure | `almir` |
+| `group` | User's primary group | `{{ user }}` |
+| `home_dir` | User's home directory | `/home/{{ user }}` |
+| `user_priv_ssh` | Private SSH key (from env var) | `$ALMIR_SSH_PRIV_KEY` |
+| `user_pub_ssh` | Public SSH key (from env var) | `$ALMIR_SSH_PUB_KEY` |
+| `wallpaper_src` | Wallpaper file in `files/` directory | `wallpaper.png` |
+| `wallpaper_dest` | Destination for wallpaper | `{{ home_dir }}` |
+| `home_dir_clutter` | Home directories to remove | `[Music, Public, Templates, Videos]` |
 
-- almir.brave-browser
-- almir.debloat
-- almir.google-chrome
-- almir.sublime
-- geerlingguy.ansible
-- ecgalaxy.vscode
+### Remmina (Remote Desktop Client)
 
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `remmina_debian_pkgs` | Remmina packages for Debian/Ubuntu | RDP, VNC, SPICE, X2Go support |
+| `remmina_redhat_pkgs` | Remmina packages for RHEL/Fedora | RDP, VNC, SPICE, X2Go, WWW plugins |
+
+### Virtualization (libvirt/KVM/QEMU)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `libvirt_package` | Libvirt daemon package | `libvirtd` |
+| `virtualization_packages` | QEMU, KVM, virt-manager, and tools | Bridge utilities, virt-install, virt-top, libguestfs-tools |
+
+### Network Shares (SMB/CIFS)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `smb_mountpoint` | SMB server IP/hostname | `[]` (example: `10.123.123.123`) |
+| `mount_point_directories` | Local mount point paths | `[/mnt/example]` |
+| `smb_mounts` | Mount sources and destinations | Maps SMB shares to local paths |
+| `smb_credentials` | SMB username/password (from env vars) | `$ALMIR_SMB_USR`, `$ALMIR_SMB_PWD` |
+| `smb_mount_opts` | CIFS mount options | Permissions, charset, network-dependent |
+| `smb_fstype` | Filesystem type | `cifs` |
+
+### Multimedia & Codecs
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `gstreamer_debian_packages` | GStreamer plugins for Debian/Ubuntu | Base, good, bad, ugly, libav, codec support |
+| `gstreamer_redhat_packages` | GStreamer plugins for RHEL/Fedora | Base, good, bad (free), ugly, OpenH.264, FFmpeg |
+
+### Node.js & npm
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `nodejs_npm_packages_debian` | Node.js packages for Debian/Ubuntu | `nodejs`, `npm` |
+| `nodejs_npm_packages_redhat` | Node.js packages for RHEL/Fedora | `nodejs`, `npm`, `nodejs-npm` |
+| `global_npm_packages` | Global npm packages to install | `@anthropic-ai/claude-code`, `eslint`, `typescript` |
+
+### Python & pip
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `python_packages` | Python system packages | `python3`, `python3-pip` |
+| `pip_packages` | Global pip packages | Security: bandit, flake8; API clients: requests, docker, PyGithub; DevOps: ansible-lint; and 15+ others |
+
+### Scheduled Tasks (Cron Jobs)
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `cron_jobs` | List of cron job definitions | Update flatpaks (6am daily), Sync backups (3am daily) |
+
+### Feature Toggles
+
+Enable or disable entire feature sets using boolean flags:
+
+| Feature | Variable | Default |
+|---------|----------|---------|
+| AWS SDK (boto) | `boto` | `false` |
+| Node.js + npm | `node` | `true` |
+| Python3 + pip | `python` | `true` |
+| Steam gaming | `steam` | `true` |
+| GStreamer codecs | `codecs` | `true` |
+| Remmina remote desktop | `reminna` | `true` |
+| SMB/CIFS mounts | `fstab` | `true` |
+| Konsole terminal | `konsole` | `true` |
+| Flatpak apps | `flatpak` | `true` |
+| CLI utilities | `utilities` | `true` |
+| LibreOffice | `libreoffice` | `true` |
+| GPaste clipboard manager | `gpaste` | `true` |
+| libvirt virtualization | `libvirt` | `false` |
+| GNOME desktop tweaks | `gnome` | `true` |
+| Autostart applications | `autostart_tweaks` | `true` |
+| Custom wallpaper | `wallpaper` | `false` |
+
+## Task Structure
+
+The role is organized into the following task groups:
+
+- `prep/_main.yml` - Package manager setup and system updates (tagged: `package_mgmt`)
+- `dev/_main.yml` - Development tools, Node.js, Python, npm
+- `games/_main.yml` - Steam and gaming-related packages
+- `internet/_main.yml` - Internet tools and remote desktop clients
+- `multimedia/_main.yml` - Media codecs and GStreamer plugins
+- `posix/_main.yml` - Network mounts, fstab, POSIX system tasks (tagged: `posix`, `fstab`)
+- `virtualization/_main.yml` - libvirt, KVM, QEMU, virt-manager
+- `gnome/_main.yml` - GNOME desktop environment (runs only on GNOME systems)
+
+## Environment Variables
+
+The role uses the following environment variables for sensitive data:
+
+| Variable | Purpose |
+|----------|---------|
+| `ALMIR_SSH_PRIV_KEY` | Private SSH key content |
+| `ALMIR_SSH_PUB_KEY` | Public SSH key content |
+| `ALMIR_SMB_USR` | SMB/CIFS username |
+| `ALMIR_SMB_PWD` | SMB/CIFS password |
+
+Set these before running the playbook:
+
+```bash
+export ALMIR_SSH_PRIV_KEY="$(cat ~/.ssh/id_rsa)"
+export ALMIR_SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
+export ALMIR_SMB_USR="your_smb_username"
+export ALMIR_SMB_PWD="your_smb_password"
+```
+
+## Dependencies
+
+This role has no hard dependencies, but may optionally use:
+
+- `brcak_zmaj.almir_ansible.debloat` - Remove bloatware from workstations
+- `geerlingguy.docker` - Docker Setup
+
+Other compatible roles (external Galaxy roles):
+
+- `geerlingguy.ansible` - Ansible installation
+- `ecgalaxy.vscode` - VS Code IDE setup
 
 ## Installation
 
-This role is part of the `brcak_zmaj.almir_ansible` collection. Install the collection:
+This role is part of the `brcak_zmaj.almir_ansible` collection:
 
 ```bash
 ansible-galaxy collection install brcak_zmaj.almir_ansible
 ```
-## Playbook
+## Example Playbook
+
+### Basic Setup (All Features Enabled)
 
 ```yaml
-- name: Setup Dev Workstation
-  hosts: Almir Dev Workstation
+---
+- name: Setup Development Workstation
+  hosts: localhost
+  gather_facts: true
   become: true
-  vars:
 
   roles:
-    - role: brcak_zmaj.almir_ansible.my-pc-setup
+    - role: brcak_zmaj.almir_ansible.my_pc_setup
 ```
+
+### Run Specific Tasks Only
+
+```bash
+# Update packages and install multimedia codecs only
+ansible-playbook playbook.yml --tags "package_mgmt,multimedia"
+
+# Configure POSIX system and fstab only
+ansible-playbook playbook.yml --tags "posix,fstab"
+
+# Development tools only
+ansible-playbook playbook.yml --tags "dev"
+```
+
+## Running the Role
+
+### From Command Line
+
+```bash
+# Set required environment variables
+export ALMIR_SSH_PRIV_KEY="$(cat ~/.ssh/id_rsa)"
+export ALMIR_SSH_PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
+export ALMIR_SMB_USR="domain\username"
+export ALMIR_SMB_PWD="password"
+
+# Run playbook
+ansible-playbook -i inventory.ini my_playbook.yml -K
+```
+
+## OS-Specific Behavior
+
+### Debian/Ubuntu
+
+- Uses `remmina_debian_pkgs` for remote desktop client
+- Uses `nodejs_npm_packages_debian` for Node.js installation
+- Uses `gstreamer_debian_packages` for media codecs
+
+### RHEL/Fedora
+
+- Uses `remmina_redhat_pkgs` for remote desktop client
+- Uses `nodejs_npm_packages_redhat` for Node.js installation
+- Uses `gstreamer_redhat_packages` for media codecs
+- Includes automatic desktop environment detection (GNOME/KDE)
+
+## Variables Files in `/vars`
+
+- `packages.yml` - Package definitions per OS
+- `flatpak_vars.yml` - Flatpak applications list
+- `bash_alias.yml` - Bash aliases for the user
+- `main.yml` - Main variable file
 
 ## License
 
