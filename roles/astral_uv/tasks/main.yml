@@ -1,0 +1,100 @@
+---
+# Astral UV installation role
+# Installs uv Python package manager from official releases
+
+- name: Validate supported platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['system'] in ['Linux', 'Darwin']
+    fail_msg: "Unsupported OS: {{ ansible_facts['system'] }}. Only Linux and macOS are supported."
+    quiet: true
+
+- name: Check if uv is already installed
+  ansible.builtin.stat:
+    path: "{{ uv_install_dir }}/uv"
+  register: _uv_installed
+
+- name: Get installed uv version
+  when: _uv_installed.stat.exists
+  ansible.builtin.command:
+    cmd: "{{ uv_install_dir }}/uv --version"
+  register: _uv_current_version
+  changed_when: false
+  failed_when: false
+
+- name: Fetch latest release version from GitHub
+  when: uv_version == 'latest'
+  block:
+    - name: Query GitHub API for latest release
+      ansible.builtin.uri:
+        url: "{{ _uv_releases_url }}/latest"
+        method: GET
+        return_content: false
+        follow_redirects: none
+        status_code: [302]
+      register: _uv_latest_release
+
+    - name: Extract version from redirect URL
+      ansible.builtin.set_fact:
+        _uv_target_version: "{{ _uv_latest_release.location | regex_search('/([0-9]+\\.[0-9]+\\.[0-9]+)$', '\\1') | first }}"
+
+- name: Set target version for pinned release
+  when: uv_version != 'latest'
+  ansible.builtin.set_fact:
+    _uv_target_version: "{{ uv_version }}"
+
+- name: Determine if installation is needed
+  ansible.builtin.set_fact:
+    _uv_needs_install: >-
+      {{
+        uv_force_reinstall | bool
+        or not _uv_installed.stat.exists
+        or (_uv_current_version.stdout | default('') | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') | default('0.0.0')) != _uv_target_version
+      }}
+
+- name: Install uv
+  when: _uv_needs_install | bool
+  block:
+    - name: Include libc detection tasks (Linux only)
+      when: ansible_facts['system'] == 'Linux'
+      ansible.builtin.include_tasks: detect_libc.yml
+
+    - name: Set libc variant for macOS
+      when: ansible_facts['system'] == 'Darwin'
+      ansible.builtin.set_fact:
+        _uv_libc: ""
+
+    - name: Build platform key
+      ansible.builtin.set_fact:
+        _uv_platform_key: >-
+          {{ ansible_facts['system'] }}_{{ ansible_facts['architecture'] }}{{ '_' + _uv_libc if _uv_libc | default('') else '' }}
+
+    - name: Validate platform is supported
+      ansible.builtin.assert:
+        that:
+          - _uv_platform_key in _uv_platform_map
+        fail_msg: >-
+          Unsupported platform: {{ _uv_platform_key }}.
+          Supported platforms: {{ _uv_platform_map.keys() | list | join(', ') }}
+        quiet: true
+
+    - name: Set download artifact name
+      ansible.builtin.set_fact:
+        _uv_artifact: "{{ _uv_platform_map[_uv_platform_key] }}"
+
+    - name: Build download URL
+      ansible.builtin.set_fact:
+        _uv_download_url: "{{ _uv_releases_url }}/download/{{ _uv_target_version }}/{{ _uv_artifact }}"
+
+    - name: Include download and install tasks
+      ansible.builtin.include_tasks: install.yml
+
+- name: Include PATH configuration tasks
+  when: uv_modify_path | bool
+  ansible.builtin.include_tasks: configure_path.yml
+
+- name: Display installation summary
+  ansible.builtin.debug:
+    msg: >-
+      uv {{ _uv_target_version }} is {{ 'now installed' if _uv_needs_install | bool else 'already installed' }}
+      at {{ uv_install_dir }}/uv

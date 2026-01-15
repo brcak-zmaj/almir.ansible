@@ -11,20 +11,21 @@ This role provides comprehensive system debloating capabilities:
 ### 📦 Package Removal
 - **Common Packages**: Remove bloatware, games, and unnecessary applications across all distributions
 - **Distribution-Specific**: Remove packages specific to RedHat-based or Debian-based systems
-- **Language Packs**: Remove language packs and localization files
-- **Font Packages**: Remove language-specific font packages
+- **Language Packs**: Remove language packs and localization files (supports wildcards)
+- **Font Packages**: Remove language-specific fonts you don't need
+- **LibreOffice**: Remove help and localization packs for languages you don't use
 - **Custom Packages**: User-defined additional packages to remove
-- **Flatpak Packages**: Remove Flatpak applications
+- **Flatpak Packages**: Remove Flatpak applications (system and user-level)
 
 ### 🛡️ Safety Features
 - **Keep List**: Whitelist packages to prevent removal even if they're in debloat lists
-- **Pre-installation Checks**: Only attempts to remove packages that are actually installed
-- **Dependency Handling**: Gracefully handles dependency conflicts with `skip_broken`
-- **Error Suppression**: Prevents false failures from non-installed packages
+- **Wildcard Support**: Match package patterns (e.g., `language-pack-gnome-*`)
+- **Smart Filtering**: Only attempts to remove packages that are actually installed
+- **Idempotent**: Safe to run multiple times - Ansible handles package state natively
 
 ### 📊 Reporting
-- **Summary Output**: Displays what was removed after debloat operations
-- **Clean Logging**: Suppresses terminal escape sequences and unnecessary warnings
+- **Debug Mode**: Optional detailed output of packages found and targeted for removal
+- **Clean Execution**: Relies on Ansible's native idempotency for status reporting
 
 ## Requirements
 
@@ -58,24 +59,32 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
 
 | Variable Name | Description | Default Value |
 |---------------|-------------|---------------|
-| `debloat_show_summary` | Display summary after debloat operations | `true` |
-| `common_debloat` | List of common packages to remove (all distributions) | See defaults |
-| `redhat_debloat` | List of RedHat-specific packages to remove | See defaults |
-| `debian_debloat` | List of Debian-specific packages to remove | See defaults |
-| `language_packs` | List of language packs to remove | See defaults |
-| `font_packages` | List of font packages to remove | See defaults |
-| `custom_debloat_packages` | User-defined additional packages to remove | `[]` |
-| `keep_packages` | Packages to keep (exclude from removal) | `[]` |
-| `uninstall_flatpak_packages` | Flatpak packages to uninstall | `[]` |
+| `debloat_debug` | Enable debug output showing packages found for removal | `false` |
+| `debloat_flatpak_user` | Username for user-level Flatpak removal (leave empty to skip) | `"almir"` |
+| `debloat_extra_packages` | Additional system packages to remove (merged with defaults) | `[]` |
+| `debloat_extra_flatpaks` | Additional Flatpak app IDs to remove (merged with defaults) | `[]` |
+| `keep_packages` | Packages to exclude from removal (whitelist) | `[]` |
 
-### Package Lists
+### Default Package Lists (Customizable)
 
-The role includes comprehensive default lists for:
-- Common bloatware (games, unnecessary apps, LibreOffice help/locale packs)
-- RedHat-specific packages (cockpit, podman, etc.)
-- Debian-specific packages
-- Language packs (with wildcard support)
-- Font packages (language-specific fonts)
+| Variable Name | Description | Default |
+|---------------|-------------|---------|
+| `common_debloat` | Common bloatware packages (all distributions) | See `defaults/main.yml` |
+| `redhat_debloat` | RedHat-specific packages (Fedora, RHEL, CentOS) | See `defaults/main.yml` |
+| `debian_debloat` | Debian-specific packages (Debian, Ubuntu) | See `defaults/main.yml` |
+| `language_packs` | Language packs to remove (supports wildcards like `*`) | See `defaults/main.yml` |
+| `font_packages` | Language-specific font packages | See `defaults/main.yml` |
+| `uninstall_flatpak_packages` | Flatpak application IDs to uninstall | `[]` |
+
+### Package Categories Included by Default
+
+The role targets these categories:
+- **Games**: GNOME games, card games, puzzles (aisleriot, gnome-mines, gnome-sudoku, etc.)
+- **Productivity**: Unwanted apps (Thunderbird, Evolution, Rhythmbox, Brasero, etc.)
+- **System Tools**: Cockpit, toolbox, simple-scan, open-vm-tools
+- **LibreOffice**: Help and localization packs for non-English languages
+- **Fonts**: Language-specific fonts (Arabic, Hebrew, Indian languages, CJK, etc.)
+- **Language Packs**: GNOME language packs for non-English languages
 
 ## Dependencies
 
@@ -94,6 +103,19 @@ The role includes comprehensive default lists for:
     - role: brcak_zmaj.almir_ansible.debloat
 ```
 
+### With Debug Output
+
+```yaml
+---
+- name: Remove bloat with debug information
+  hosts: all
+  become: true
+  roles:
+    - role: brcak_zmaj.almir_ansible.debloat
+      vars:
+        debloat_debug: true
+```
+
 ### Custom Packages and Keep List
 
 ```yaml
@@ -103,50 +125,47 @@ The role includes comprehensive default lists for:
   become: true
   roles:
     - role: brcak_zmaj.almir_ansible.debloat
-  vars:
-    custom_debloat_packages:
-      - unwanted-package-1
-      - unwanted-package-2
-    keep_packages:
-      - evolution  # Keep even though it's in common_debloat
-      - podman     # Keep even though it's in redhat_debloat
+      vars:
+        debloat_extra_packages:
+          - unwanted-package-1
+          - unwanted-package-2
+        keep_packages:
+          - kf6-kdoctools              # Prevents KDE cascade removal
+          - evolution-data-server      # Keep GNOME mail/calendar
+          - totem-pl-parser           # Keep media library dependencies
 ```
 
-### Disable Summary
+### Remove Custom Flatpaks
 
 ```yaml
 ---
-- name: Remove bloat without summary
+- name: Remove bloat and specific Flatpaks
   hosts: all
   become: true
   roles:
     - role: brcak_zmaj.almir_ansible.debloat
-  vars:
-    debloat_show_summary: false
+      vars:
+        uninstall_flatpak_packages:
+          - org.example.UnwantedApp
+          - com.somevendor.Application
+        debloat_flatpak_user: "myusername"
 ```
 
 ## How It Works
 
-1. **Environment Setup**: Sets environment variables to suppress terminal escape sequences
-2. **Filtering**: Filters out packages in the `keep_packages` list from all debloat lists
-3. **Pre-checks**: Verifies which packages are actually installed before attempting removal
-4. **Removal**: Removes only installed packages, skipping those with dependency conflicts
-5. **Summary**: Displays a summary of what was removed (if enabled)
-
-## Safety Features
-
-- **Pre-installation Checks**: Only attempts to remove packages that are installed
-- **Keep List**: Packages in `keep_packages` are never removed, even if in debloat lists
-- **Dependency Handling**: Uses `skip_broken` to handle dependency conflicts gracefully
-- **Error Suppression**: Prevents false failures from non-installed packages
+1. **Build Removal Lists**: Combines common, OS-specific, language, and font packages into a master list
+2. **Filter Keep List**: Removes any packages in `keep_packages` from the removal list
+3. **Gather System Facts**: Queries installed packages using `package_facts`
+4. **Match Wildcards**: Expands wildcard patterns (like `language-pack-*`) against installed packages
+5. **Filter Installed**: Creates final list containing only packages actually installed on the system
+6. **Remove Packages**: Uses native DNF (Fedora/RHEL) or APT (Debian/Ubuntu) to remove packages
+7. **Remove Flatpaks**: Removes Flatpak applications at system and user level (if configured)
 
 ## Notes
 
-- **Idempotency**: The role is idempotent - running it multiple times is safe
-- **Dependency Conflicts**: Some packages may have dependency conflicts (e.g., cockpit, open-vm-tools). The role handles these gracefully with `skip_broken`
-- **Terminal Warnings**: Some terminal escape sequence warnings may appear but are harmless
-- **Wildcard Support**: Language packs support wildcards (e.g., `language-pack-gnome-*`)
-- **Distribution Detection**: Automatically detects OS family and applies appropriate debloat lists
+- **Idempotency**: The role is idempotent - safe to run multiple times
+- **Dependency Handling**: DNF/APT will prevent removal of packages needed by installed software
+- **No Forced Removal**: Does not use `--nodeps` or similar dangerous flags
 
 ## License
 
@@ -154,9 +173,16 @@ GPL-3.0-or-later
 
 ## Author Information
 
-- [Almir Zohorovic](https://github.com/brcak-zmaj)
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
+- Almir Zohorovic
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
+
 
 ## Stats
 
 ![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")
-

@@ -1,7 +1,4 @@
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Raspberry_Pi_OS_Logo.png/840px-Raspberry_Pi_OS_Logo.png" width="600" height="180" alt="Raspberry Pi Logo" />
-
-
-# almir.RaspberryPi
+# Ansible Role - Raspberry Pi
 
 A comprehensive Ansible role for configuring Raspberry Pi 3, 4, and 5 devices with extensive configuration options for swap management, logging optimization, power management, boot settings, hardware interfaces, and system tuning. This role is designed to be production-ready and includes optimizations specifically for SD card longevity.
 
@@ -91,29 +88,6 @@ This role is tested and supported with:
 
 The role automatically detects the Raspberry Pi model from `/proc/device-tree/model`. You can also manually specify the model using the `rpi_model` variable.
 
-## Installation
-
-### From Ansible Galaxy
-
-```bash
-ansible-galaxy role install almir.RaspberryPi
-```
-
-### Using in a Collection
-
-If you're using this role as part of the `brcak_zmaj.almir_ansible` collection:
-
-```bash
-ansible-galaxy collection install brcak_zmaj.almir_ansible
-```
-
-Then reference it in your playbook as:
-
-```yaml
-roles:
-  - role: brcak_zmaj.almir_ansible.raspberry_pi
-```
-
 ## Quick Start
 
 ### Basic Usage
@@ -123,7 +97,7 @@ roles:
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     rpi_swap_enable: true
     rpi_swap_size_mb: 100
@@ -138,7 +112,7 @@ roles:
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     rpi_swap_enable: false          # Disable swap for SD card longevity
     rpi_journald_storage: volatile  # RAM only - no SD card writes
@@ -158,7 +132,7 @@ rpi_swap_enable: true              # Enable/disable swap
 rpi_swap_size_mb: 100              # Swap file size in MB
 rpi_swap_file: /var/swap           # Swap file location
 rpi_swap_swappiness: 10            # Swappiness (0-100, lower = less swap usage)
-rpi_swap_vfs_cache_pressure: 50    # VFS cache pressure (1-100)
+rpi_swap_vfs_cache_pressure: 50   # VFS cache pressure (1-100)
 ```
 
 **Recommended for SD cards**: `rpi_swap_swappiness: 10` or lower to minimize swap usage.
@@ -170,12 +144,12 @@ rpi_logging_manage: true           # Enable logging management
 
 # Systemd Journald
 rpi_journald_enable: true
-rpi_journald_storage: volatile      # persistent, volatile, auto, none
-                                    # volatile = RAM only (best for SD cards)
-rpi_journald_max_use: 50M           # Maximum disk space for journal
-rpi_journald_max_file_size: 10M     # Maximum size per journal file
-rpi_journald_max_retention_days: 3  # Maximum days to retain logs
-rpi_journald_compress: true         # Compress old journal files
+rpi_journald_storage: volatile     # persistent, volatile, auto, none
+                                   # volatile = RAM only (best for SD cards)
+rpi_journald_max_use: 50M          # Maximum disk space for journal
+rpi_journald_max_file_size: 10M   # Maximum size per journal file
+rpi_journald_max_retention_days: 3 # Maximum days to retain logs
+rpi_journald_compress: true       # Compress old journal files
 
 # Syslog
 rpi_syslog_manage: true
@@ -200,10 +174,10 @@ rpi_power_manage: true
 rpi_power_led_enable: true         # Enable power LED (Pi 4/5)
 rpi_power_led_trigger: default     # default, heartbeat, none
 rpi_activity_led_enable: true      # Enable activity LED
-rpi_activity_led_trigger: mmc0     # mmc0, cpu0, default, none
+rpi_activity_led_trigger: mmc0    # mmc0, cpu0, default, none
 rpi_power_save_enable: false       # Enable power saving mode
-rpi_power_save_wifi: false         # WiFi power saving
-rpi_power_save_usb: false          # USB power saving
+rpi_power_save_wifi: false        # WiFi power saving
+rpi_power_save_usb: false         # USB power saving
 ```
 
 ### Boot Configuration
@@ -217,11 +191,11 @@ rpi_gpu_mem: 128                   # GPU memory in MB (64, 128, 256, 512)
 # Overclocking (Pi 3/4)
 rpi_overclock_enable: false
 rpi_overclock_arm_freq: 1500       # ARM CPU frequency (MHz)
-rpi_overclock_arm_freq_min: 600    # Minimum ARM frequency
-rpi_overclock_gpu_freq: 500        # GPU frequency (MHz)
+rpi_overclock_arm_freq_min: 600   # Minimum ARM frequency
+rpi_overclock_gpu_freq: 500       # GPU frequency (MHz)
 rpi_overclock_sdram_freq: 500      # SDRAM frequency (MHz)
-rpi_overclock_voltage: 0           # Overvoltage (0-6, 0.025V steps)
-rpi_overclock_force_turbo: false   # Force turbo (may void warranty)
+rpi_overclock_voltage: 0          # Overvoltage (0-6, 0.025V steps)
+rpi_overclock_force_turbo: false  # Force turbo (may void warranty)
 
 # Pi 5 Overclocking
 rpi5_overclock_enable: false
@@ -257,7 +231,7 @@ rpi_usb_power_mode: "default"     # default, on, off
 # Boot Options
 rpi_boot_delay: 1                 # Boot delay (seconds)
 rpi_boot_wait: false              # Wait for network before boot
-rpi_boot_splash: true             # Enable boot splash screen
+rpi_boot_splash: true            # Enable boot splash screen
 rpi_boot_quiet: false             # Quiet boot
 
 # Custom Options
@@ -283,20 +257,20 @@ rpi_bluetooth_pairable: false
 ```yaml
 rpi_system_optimize: true
 rpi_fs_trim_enable: true          # Enable TRIM for SD cards (weekly)
-rpi_fs_noatime: true              # Mount with noatime (reduce writes)
-rpi_fs_commit: 5                  # Ext4 commit interval (seconds)
-rpi_cpu_governor: "ondemand"      # ondemand, performance, powersave, conservative
-rpi_cpu_min_freq: 600             # Minimum CPU frequency (MHz)
-rpi_cpu_max_freq: 0               # Maximum CPU frequency (0=auto, MHz)
-rpi_io_scheduler: "mq-deadline"   # mq-deadline, bfq, none, kyber
+rpi_fs_noatime: true             # Mount with noatime (reduce writes)
+rpi_fs_commit: 5                 # Ext4 commit interval (seconds)
+rpi_cpu_governor: "ondemand"     # ondemand, performance, powersave, conservative
+rpi_cpu_min_freq: 600            # Minimum CPU frequency (MHz)
+rpi_cpu_max_freq: 0              # Maximum CPU frequency (0=auto, MHz)
+rpi_io_scheduler: "mq-deadline"  # mq-deadline, bfq, none, kyber
 ```
 
 ### Hardware Interfaces
 
 ```yaml
 rpi_hardware_manage: true
-rpi_watchdog_enable: false      # Enable hardware watchdog
-rpi_watchdog_timeout: 15        # Watchdog timeout (seconds)
+rpi_watchdog_enable: false       # Enable hardware watchdog
+rpi_watchdog_timeout: 15         # Watchdog timeout (seconds)
 rpi_i2c_enable: false           # Enable I2C interface
 rpi_i2c_baudrate: 100000        # I2C baudrate
 rpi_spi_enable: false           # Enable SPI interface
@@ -310,13 +284,13 @@ rpi_onewire_enable: false       # Enable 1-Wire interface
 ```yaml
 rpi_security_manage: true
 rpi_ssh_enable: true
-rpi_ssh_password_auth: false         # Allow password authentication
-rpi_ssh_root_login: false            # Allow root login
-rpi_ssh_port: 22                     # SSH port
-rpi_firewall_enable: false           # Enable UFW firewall
+rpi_ssh_password_auth: false    # Allow password authentication
+rpi_ssh_root_login: false       # Allow root login
+rpi_ssh_port: 22               # SSH port
+rpi_firewall_enable: false     # Enable UFW firewall
 rpi_firewall_default_policy: "deny"  # allow, deny
-rpi_firewall_rules: []               # Example: ["22/tcp", "80/tcp", "443/tcp"]
-                                
+rpi_firewall_rules: []         # List of firewall rules
+                                # Example: ["22/tcp", "80/tcp", "443/tcp"]
 ```
 
 ### Package Management
@@ -349,9 +323,9 @@ rpi_keyboard_layout: "us"         # Keyboard layout
 
 ```yaml
 rpi_temp_monitor_enable: false   # Enable temperature monitoring
-rpi_temp_warning: 70             # Warning temperature (°C)
-rpi_temp_critical: 80            # Critical temperature (°C)
-rpi_temp_throttle: 85            # Throttle temperature (°C)
+rpi_temp_warning: 70            # Warning temperature (°C)
+rpi_temp_critical: 80           # Critical temperature (°C)
+rpi_temp_throttle: 85           # Throttle temperature (°C)
 ```
 
 ### Model Detection
@@ -371,7 +345,7 @@ The role automatically detects the Raspberry Pi model. You can override this by 
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     rpi_swap_enable: true
     rpi_swap_size_mb: 100
@@ -387,7 +361,7 @@ The role automatically detects the Raspberry Pi model. You can override this by 
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     rpi_overclock_enable: true
     rpi_overclock_arm_freq: 2000
@@ -403,7 +377,7 @@ The role automatically detects the Raspberry Pi model. You can override this by 
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     # Disable swap completely
     rpi_swap_enable: false
@@ -433,10 +407,10 @@ The role automatically detects the Raspberry Pi model. You can override this by 
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     rpi_gpu_mem: 256              # More GPU memory for video
-    rpi_hdmi_mode: 82             # 1920x1080 60Hz
+    rpi_hdmi_mode: 82            # 1920x1080 60Hz
     rpi_audio_enable: true
     rpi_cpu_governor: "ondemand"
     rpi_journald_storage: volatile
@@ -449,7 +423,7 @@ The role automatically detects the Raspberry Pi model. You can override this by 
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     # Enable hardware interfaces
     rpi_i2c_enable: true
@@ -475,7 +449,7 @@ The role automatically detects the Raspberry Pi model. You can override this by 
 - hosts: raspberry_pi
   become: yes
   roles:
-    - almir.RaspberryPi
+    - brcak_zmaj.almir_ansible.raspberry_pi
   vars:
     # Custom config.txt options
     rpi_config_custom:
@@ -640,29 +614,17 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 GPL-3.0-or-later
 
-> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
-
 ## Author Information
 
-This role is part of the `brcak_zmaj.almir_ansible` Ansible collection.
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
 
-**GitHub**: [brcak-zmaj/almir.ansible](https://github.com/brcak-zmaj/almir.ansible)
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
 - Almir Zohorovic
 
 ## Support
 
 For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
 
-## Changelog
-
-### Version 1.0.0
-- Initial release
-- Support for Raspberry Pi 3, 4, and 5
-- Comprehensive swap, logging, power, boot, network, and hardware configuration
-- SD card wear reduction optimizations
-- Model auto-detection
-- Temperature monitoring
-- Security configuration
 
 ## Stats
 

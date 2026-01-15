@@ -1,6 +1,4 @@
 ---
-# Geospatial Software Installation
-# Main entry point for installing geospatial software packages
 
 - name: Include Package Manager Setup
   ansible.builtin.include_tasks: package_manager.yml

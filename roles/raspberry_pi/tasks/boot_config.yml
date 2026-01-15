@@ -2,53 +2,53 @@
 # Boot Configuration (/boot/config.txt)
 # Manages all config.txt settings for Pi3, Pi4, and Pi5
 
-- name: Check if /boot/config.txt exists
+- name: Check if boot config exists
   ansible.builtin.stat:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
   register: config_txt_exists
   changed_when: false
 
-- name: Create /boot/config.txt if it doesn't exist
+- name: Create boot config if it doesn't exist
   ansible.builtin.file:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     state: touch
     mode: '0644'
   when: not config_txt_exists.stat.exists
 
 - name: Configure GPU memory split
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?gpu_mem="
     line: "gpu_mem={{ rpi_gpu_mem }}"
     state: present
 
 - name: Configure display settings
   ansible.builtin.include_tasks: boot_config_display.yml
-  when: rpi_display_enable | default(true)
+  when: rpi_display_enable | bool
 
 - name: Configure audio settings
   ansible.builtin.include_tasks: boot_config_audio.yml
-  when: rpi_audio_enable | default(true)
+  when: rpi_audio_enable | bool
 
 - name: Configure camera settings
   ansible.builtin.include_tasks: boot_config_camera.yml
-  when: rpi_camera_enable | default(false)
+  when: rpi_camera_enable | bool
 
 - name: Configure overclocking (Pi 3/4)
   ansible.builtin.include_tasks: boot_config_overclock.yml
   when:
-    - rpi_overclock_enable | default(false)
+    - rpi_overclock_enable | bool
     - rpi_model in ['pi3', 'pi4']
 
 - name: Configure Pi 5 overclocking
   ansible.builtin.include_tasks: boot_config_overclock_pi5.yml
   when:
-    - rpi5_overclock_enable | default(false)
+    - rpi5_overclock_enable | bool
     - rpi_model == 'pi5'
 
 - name: Configure GPIO settings
   ansible.builtin.include_tasks: boot_config_gpio.yml
-  when: rpi_gpio_enable | default(true)
+  when: rpi_gpio_enable | bool
 
 - name: Configure USB settings
   ansible.builtin.include_tasks: boot_config_usb.yml
@@ -58,13 +58,12 @@
 
 - name: Add custom config.txt options
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^{{ item | regex_replace('=.*', '') | regex_escape() }}="
     line: "{{ item }}"
     state: present
-  loop: "{{ rpi_config_custom | default([]) }}"
-  when: rpi_config_custom | default([]) | length > 0
+  loop: "{{ rpi_config_custom }}"
+  when: rpi_config_custom | length > 0
 
 - name: Configure cmdline.txt
   ansible.builtin.include_tasks: boot_config_cmdline.yml
-

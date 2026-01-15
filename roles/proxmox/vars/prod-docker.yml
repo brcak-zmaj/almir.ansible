@@ -1,0 +1,12 @@
+# Variables for Docker tagged VMs
+p_docker_cpu: "host"           # Set CPU model for Docker VMs
+p_docker_cores: 4              # Set number of CPU cores for Docker VMs
+p_docker_memory: 4096          # Set memory for Docker VMs (4GB)
+p_docker_numa: 1               # Enable NUMA for better memory management
+
+# Additional VM options for Docker VMs
+p_docker_tablet: 0             # Disable tablet input for pointer
+p_docker_agent: 1              # Enable QEMU Guest Agent
+p_docker_freeze: 0             # Disable CPU freeze at startup
+p_docker_kvm: 1                # Ensure KVM Hardware Virtualization is enabled
+p_docker_spice_enhancements: none  # Disable SPICE enhancements

@@ -1,9 +1,11 @@
 ---
-- name: reload sysctl
-  command: sysctl --system
-  become: yes
+- name: Reload sysctl
+  ansible.builtin.command:
+    cmd: sysctl --system
+  become: true
+  changed_when: true
 
-- name: reload systemd
-  systemd:
-    daemon_reload: yes
-  become: yes
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true

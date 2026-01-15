@@ -1,0 +1,13 @@
+---
+# =============================================================================
+# ZRAM Role - Debian Family Tasks
+# =============================================================================
+
+- name: Ensure zram-generator is installed (Debian)
+  ansible.builtin.apt:
+    name: "{{ zram_package_debian }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  tags: zram

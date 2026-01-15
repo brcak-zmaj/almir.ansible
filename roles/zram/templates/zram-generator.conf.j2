@@ -1,0 +1,13 @@
+# Managed by Ansible - zram role
+# Do not edit manually
+# See zram-generator.conf(5) for configuration options
+
+[{{ zram_device_name }}]
+zram-size = {{ zram_size }}
+{% if zram_compression_algorithm | length > 0 %}
+compression-algorithm = {{ zram_compression_algorithm }}
+{% endif %}
+{% if zram_host_memory_limit != 'none' and zram_host_memory_limit | length > 0 %}
+host-memory-limit = {{ zram_host_memory_limit }}
+{% endif %}
+swap-priority = {{ zram_swap_priority }}

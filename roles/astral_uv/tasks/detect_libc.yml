@@ -1,0 +1,56 @@
+---
+# Detect libc variant (glibc vs musl) on Linux systems
+
+- name: Use override libc variant if specified
+  when: uv_libc_variant | length > 0
+  ansible.builtin.set_fact:
+    _uv_libc: "{{ uv_libc_variant }}"
+
+- name: Auto-detect libc variant
+  when: uv_libc_variant | length == 0
+  block:
+    - name: Check for ldd command
+      ansible.builtin.command:
+        cmd: which ldd
+      register: _uv_ldd_check
+      changed_when: false
+      failed_when: false
+
+    - name: Get ldd version output
+      when: _uv_ldd_check.rc == 0
+      ansible.builtin.command:
+        cmd: ldd --version
+      register: _uv_ldd_version
+      changed_when: false
+      failed_when: false
+
+    - name: Detect musl libc
+      ansible.builtin.set_fact:
+        _uv_is_musl: "{{ 'musl' in (_uv_ldd_version.stdout | default('') + _uv_ldd_version.stderr | default('')) | lower }}"
+
+    - name: Extract glibc version
+      when: not _uv_is_musl | bool
+      ansible.builtin.set_fact:
+        _uv_glibc_version: >-
+          {{ (_uv_ldd_version.stdout | default('') + _uv_ldd_version.stderr | default(''))
+             | regex_search('([0-9]+\\.[0-9]+)', '\\1')
+             | first
+             | default('0.0') }}
+
+    - name: Check if glibc version meets minimum requirement
+      when: not _uv_is_musl | bool
+      ansible.builtin.set_fact:
+        _uv_glibc_sufficient: >-
+          {{ _uv_glibc_version is version(_uv_glibc_requirements[ansible_facts['architecture']] | default('2.17'), '>=') }}
+
+    - name: Set libc variant based on detection
+      ansible.builtin.set_fact:
+        _uv_libc: >-
+          {% if _uv_is_musl | bool %}musl{% elif _uv_glibc_sufficient | default(true) | bool %}gnu{% else %}musl{% endif %}
+
+    - name: Log detected libc information
+      ansible.builtin.debug:
+        msg: >-
+          Detected libc: {{ _uv_libc }}
+          {% if not _uv_is_musl | bool %}(glibc {{ _uv_glibc_version }}){% endif %}
+        verbosity: 1

@@ -1,0 +1,29 @@
+---
+# defaults/main.yml - Mullvad Browser role defaults
+
+# State of the Mullvad Browser package
+# Options: 'present' or 'absent'
+mullvad_browser_state: present
+
+# Install alpha version instead of stable
+# When true: installs mullvad-browser-alpha
+# When false: installs mullvad-browser (stable)
+mullvad_browser_install_alpha: false
+
+# Whether to add the Mullvad repository
+# Set to false if repository is already configured
+mullvad_browser_add_repository: true
+
+# Package names
+mullvad_browser_package_stable: mullvad-browser
+mullvad_browser_package_alpha: mullvad-browser-alpha
+
+# Repository configuration - RedHat family
+mullvad_browser_rhel_repo_url: "https://repository.mullvad.net/rpm/stable/mullvad.repo"
+mullvad_browser_rhel_repo_file: /etc/yum.repos.d/mullvad.repo
+
+# Repository configuration - Debian family
+mullvad_browser_debian_keyring_url: "https://repository.mullvad.net/deb/mullvad-keyring.asc"
+mullvad_browser_debian_keyring_path: /usr/share/keyrings/mullvad-keyring.asc
+mullvad_browser_debian_repo_url: "https://repository.mullvad.net/deb/stable"
+mullvad_browser_debian_repo_file: /etc/apt/sources.list.d/mullvad.list

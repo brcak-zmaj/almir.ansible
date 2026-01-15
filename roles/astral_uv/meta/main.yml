@@ -1,0 +1,42 @@
+---
+galaxy_info:
+  author: Almir
+  description: Install Astral uv - fast Python package and environment manager
+  license: MIT
+  min_ansible_version: "2.12"
+
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Alpine
+      versions:
+        - all
+    - name: MacOSX
+      versions:
+        - all
+
+  galaxy_tags:
+    - python
+    - uv
+    - astral
+    - package_manager
+    - development
+
+collections:
+  - ansible.builtin
+
+dependencies: []

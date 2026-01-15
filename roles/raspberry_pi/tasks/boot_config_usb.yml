@@ -3,7 +3,7 @@
 
 - name: Configure USB max current (Pi 4)
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?max_usb_current="
     line: "max_usb_current={{ rpi_usb_max_current }}"
     state: present
@@ -11,8 +11,7 @@
 
 - name: Configure USB power mode
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?usb_power_mode="
     line: "usb_power_mode={{ rpi_usb_power_mode }}"
     state: "{{ 'present' if rpi_usb_power_mode != 'default' else 'absent' }}"
-

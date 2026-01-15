@@ -18,7 +18,11 @@ pve_cpu_governor: performance
 
 # ZFS ARC Configuration
 # ARC values are calculated automatically based on RAM size
-# Formula: min = RAM/16, max = RAM/8 (with minimums enforced)
+# Formula by RAM tier:
+#   - <=16GB:   min = 512MB,    max = 512MB
+#   - 16-32GB:  min = 1GB,      max = 1GB
+#   - 32-64GB:  min = RAM/16,   max = RAM/8
+#   - >64GB:    min = RAM/8,    max = RAM/2 (aggressive caching for high-RAM VM hosts)
 # These values will be calculated in the zfs-tune.yml task
 
 # ZFS Scrub Schedule Configuration
@@ -38,8 +42,14 @@ pve_zfs_scrub_day_start: "8"       # Day range start (1-31) - default: 8 (second
 pve_zfs_scrub_day_end: "14"        # Day range end (1-31) - default: 14 (second week end)
 # Note: The cron job checks if it's Sunday, so it only runs on the Sunday within the day range
 
+# Cluster Configuration (optional - for /etc/hosts setup)
+proxmox_ve__cluster_ip: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0] | default('127.0.0.1')) }}"
+
 # GPU Passthrough Configuration
 pve_gpu_passthrough_enable: true
+pve_gpu_vendor_id: "10de:13ba"
+pve_gpu_audio_id: "10de:0fbc"
+pve_gpu_passthrough_vm_id: 105
 
 # IOMMU GRUB Parameters (for GPU passthrough)
 pve_iommu_grub_params:
@@ -100,4 +110,28 @@ proxmox_lxc_templates:
   - 'system/ubuntu-22.04-standard_22.04-1_amd64.tar.zst'
    
 proxmox_lxc_remove: []  # List of LXC template filenames to manually remove (just the filename, e.g., ['debian-12-standard_12.12-1_amd64.tar.zst'])
+
+# -------------------------
+# PVE Exporter Configuration
+# -------------------------
+# Enable/disable the Prometheus PVE exporter installation
+pve_exporter_enable: false
+
+# PVE API user for the exporter (format: user@realm)
+pve_exporter_user: "prometheus@pve"
+
+# Token name for API authentication
+pve_exporter_token_name: "exporter"
+
+# Python virtual environment path for the exporter
+pve_exporter_venv: "/opt/pve-exporter"
+
+# Listen address for the exporter (format: host:port)
+pve_exporter_listen: "0.0.0.0:9221"
+
+# SSL verification for PVE API connections
+pve_exporter_verify_ssl: false
+
+# Force token recreation (set to true to regenerate token on each run)
+pve_exporter_force_token_recreate: false
 

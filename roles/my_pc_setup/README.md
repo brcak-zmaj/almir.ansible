@@ -86,9 +86,20 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
     - role: brcak_zmaj.almir_ansible.my-pc-setup
 ```
 
+## License
+
+GPL-3.0-or-later
+
 ## Author Information
 
--   [Almir Zohorovic](https://github.com/brcak-zmaj)
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
+- Almir Zohorovic
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
 
 
 ## Stats

@@ -1,6 +1,4 @@
 ---
-# Map Data Downloads - Main Entry Point
-# Conditionally includes map download tasks based on enable flags
 
 - name: Ensure map data directory exists
   ansible.builtin.file:
@@ -18,19 +16,3 @@
 - name: Include MBTiles downloads
   ansible.builtin.include_tasks: maps_mbtiles.yml
   when: mbtiles_enabled
-
-- name: Include SRTM elevation data downloads
-  ansible.builtin.include_tasks: maps_srtm.yml
-  when: srtm_enabled
-
-- name: Include ASTER elevation data downloads
-  ansible.builtin.include_tasks: maps_aster.yml
-  when: aster_enabled
-
-- name: Include USGS topo maps downloads
-  ansible.builtin.include_tasks: maps_usgs.yml
-  when: usgs_enabled
-
-- name: Include NOAA nautical charts downloads
-  ansible.builtin.include_tasks: maps_noaa.yml
-  when: noaa_enabled

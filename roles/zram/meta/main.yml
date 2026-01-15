@@ -1,0 +1,41 @@
+---
+galaxy_info:
+  author: Almir Zohorovic
+  description: Manage Linux memory compression using zram via systemd zram-generator
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - "38"
+        - "39"
+        - "40"
+        - "41"
+        - "42"
+        - "43"
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+
+  galaxy_tags:
+    - system
+    - memory
+    - swap
+    - zram
+    - compression
+    - performance
+
+collections:
+  - ansible.builtin
+
+dependencies: []

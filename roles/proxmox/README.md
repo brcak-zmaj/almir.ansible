@@ -1,55 +1,45 @@
-<img src="https://www.proxmox.com/images/proxmox/Proxmox_logo_standard_hex_400px.png#joomlaImage://local-images/proxmox/Proxmox_logo_standard_hex_400px.png" width="500" height="70" alt="Proxmox Logo" />
+# Ansible Role - Proxmox VE
 
+A comprehensive Ansible role for configuring and optimizing Proxmox VE hypervisor hosts with ZFS tuning, GPU passthrough, backup configuration, and ISO/LXC template management.
 
-# Ansible Role - Proxmox VE Configuration
+## Overview
 
-A comprehensive Ansible role for configuring and optimizing Proxmox Virtual Environment (PVE) servers. This role handles repository configuration, system tuning, ZFS optimization, GPU passthrough, backup configuration, and more.
+This role automates the post-installation configuration of Proxmox VE hosts, providing enterprise-ready optimizations including ZFS ARC tuning, CPU governor configuration, GPU passthrough setup, subscription nag removal, and automated ISO/LXC template management.
 
 ## Features
 
-This role provides comprehensive configuration management for Proxmox VE servers:
+### System Configuration
+- **Subscription Nag Removal**: Remove Proxmox subscription notification popup
+- **Repository Configuration**: Configure enterprise or no-subscription repositories
+- **Microcode Installation**: Automatic CPU microcode updates (Intel/AMD)
+- **CPU Governor**: Configurable CPU frequency scaling governor
+- **System Packages**: Install essential utilities (htop, iotop, iftop, aria2, etc.)
 
-### 🔧 Repository & Package Management
-- Configure Proxmox VE repositories (no-subscription or enterprise)
-- Install microcode updates (Intel/AMD)
-- Install essential system packages
-- Manage Debian base repositories
+### ZFS Optimization
+- **Auto-calculated ARC**: Dynamically calculates ZFS ARC min/max based on system RAM:
+  - ≤16GB: min=512MB, max=512MB
+  - 16-32GB: min=1GB, max=1GB
+  - 32-64GB: min=RAM/16, max=RAM/8
+  - >64GB: min=RAM/8, max=RAM/2 (aggressive caching)
+- **Scrub Scheduling**: Configurable ZFS scrub schedule (default: 2nd Sunday monthly)
 
-### ⚡ System Tuning
-- **CPU Governor**: Configure CPU frequency scaling (performance, powersave, etc.)
-- **KSM (Kernel Same-page Merging)**: Automatic memory deduplication with RAM-based tuning
-- **KSM Tuning**: Dynamic KSM parameters based on system RAM size
+### GPU Passthrough
+- **IOMMU Configuration**: Automatic Intel/AMD IOMMU GRUB parameters
+- **VFIO Setup**: Configure VFIO kernel modules for PCI passthrough
+- **GPU Blacklisting**: Prevent host from loading GPU drivers
+- **VM Binding**: Bind specific GPUs to designated VMs
 
-### 💾 ZFS Optimization
-- **ARC Tuning**: Automatic ZFS ARC cache sizing based on RAM (min: RAM/16, max: RAM/8)
-- **ZFS Scrub Schedule**: Configurable monthly scrub schedule (default: second Sunday)
-- **ZFS Auto-snapshot**: Configure snapshot retention policies
+### Backup Configuration
+- **VZDump Settings**: Configure backup temp directory and bandwidth limits
+- **I/O Priority**: Configurable ionice values for backups
 
-### 🎮 GPU Passthrough
-- **IOMMU Configuration**: Enable Intel/AMD IOMMU for GPU passthrough
-- **VFIO Modules**: Automatic VFIO kernel module configuration
-- **GRUB Configuration**: Add required kernel parameters for passthrough
+### Template Management
+- **ISO Downloads**: Download ISOs from URL list with automatic hash verification
+- **LXC Templates**: Download LXC templates from Proxmox appliance repository
+- **Cleanup**: Remove obsolete ISOs and templates
 
-### 💾 Backup Configuration
-- **VZDump Settings**: Configure backup temporary directory, bandwidth limits, and I/O priority
-- **Backup Scripts**: Optional pre/post backup scripts
-
-### 🚫 Subscription Management
-- **Nag Removal**: Remove subscription warning from Proxmox web interface
-- **APT Configuration**: Prevent subscription prompts during package updates
-
-### 🐍 Python Package Management
-- **UV Installation**: Install and configure `uv` (fast Python package manager)
-- **Auto-updates**: Weekly cron job for `uv` self-updates
-
-### 📦 ISO & Template Management
-- **ISO Downloads**: Download and manage ISO images
-- **LXC Templates**: Download and manage LXC container templates
-- **Cleanup**: Remove old ISOs and templates
-
-### 🖥️ VM/LXC Configuration Deployment
-- **Config Backup/Restore**: Deploy VM and LXC configurations from backup
-- **Migration Support**: Restore configurations on new Proxmox servers
+### Python Environment
+- **UV Installation**: Install modern Python package manager (uv/astral-uv)
 
 ## Requirements
 
@@ -57,19 +47,19 @@ This role provides comprehensive configuration management for Proxmox VE servers
 
 This role is tested and supported with:
 - **Ansible**: `>= 2.9`
-- **Python**: `>= 3.6` (on target system)
+- **Python**: `>= 3.6` (on control node)
 
 ### Target System Requirements
 
-- **OS**: Proxmox VE 7.x or 8.x (Debian-based)
-- **Architecture**: x86_64 (amd64)
-- **Access**: SSH access with root or sudo privileges
-- **Python**: Python 3 installed on target system
+- **OS**: Proxmox VE 7.x or 8.x
+- **Access**: SSH access with root privileges
+- **Storage**: ZFS storage pool (for ZFS tuning features)
 
-### Optional Requirements
+### Dependencies
 
-- **ZFS**: For ZFS tuning features (automatically detected)
-- **GPU**: For GPU passthrough features (requires IOMMU support)
+- `ansible.builtin`
+- `ansible.posix`
+- `community.general`
 
 ## Installation
 
@@ -81,337 +71,165 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
 
 ## Role Variables
 
+### VZDump Backup Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `tmpdir` | Temporary directory for backups | `/dev/shm` |
+| `bwlimit` | Bandwidth limit (KB/s) | `35000` |
+| `ionice` | I/O priority (0-7, lower = higher priority) | `5` |
+
 ### Repository Configuration
 
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `pve_repo_type` | Proxmox repository type (`no-subscription` or `enterprise`) | `no-subscription` |
-| `pve_install_ucode` | Install microcode updates | `true` |
-| `pve_reboot_for_ucode` | Reboot after microcode installation | `false` |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `pve_repo_type` | Repository type (`enterprise`, `no-subscription`) | `no-subscription` |
+| `pve_install_ucode` | Install CPU microcode updates | `true` |
+| `pve_reboot_for_ucode` | Reboot after microcode update | `false` |
 
 ### CPU Configuration
 
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
+| Variable | Description | Default |
+|----------|-------------|---------|
 | `pve_set_cpu` | Enable CPU governor configuration | `no` |
-| `pve_cpu_governor` | CPU governor mode (`performance`, `powersave`, `ondemand`, `conservative`) | `performance` |
+| `pve_cpu_governor` | CPU frequency governor | `performance` |
 
-### ZFS Configuration
+### ZFS Scrub Schedule
 
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `pve_zfs_scrub_enable` | Enable ZFS scrub schedule | `true` |
-| `pve_zfs_scrub_minute` | Scrub minute (0-59) | `24` |
-| `pve_zfs_scrub_hour` | Scrub hour (0-23) | `0` (midnight) |
-| `pve_zfs_scrub_day_start` | Scrub day range start (1-31) | `8` (second week) |
-| `pve_zfs_scrub_day_end` | Scrub day range end (1-31) | `14` (second week) |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `pve_zfs_scrub_enable` | Enable ZFS scrub scheduling | `true` |
+| `pve_zfs_scrub_minute` | Cron minute (0-59) | `24` |
+| `pve_zfs_scrub_hour` | Cron hour (0-23) | `0` |
+| `pve_zfs_scrub_day_start` | Day range start | `8` |
+| `pve_zfs_scrub_day_end` | Day range end | `14` |
 
-**Note:** ZFS ARC min/max values are automatically calculated based on RAM size:
-- **Min ARC**: RAM / 16 (minimum 512MB)
-- **Max ARC**: RAM / 8 (minimum 512MB)
+### GPU Passthrough
 
-### GPU Passthrough Configuration
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
+| Variable | Description | Default |
+|----------|-------------|---------|
 | `pve_gpu_passthrough_enable` | Enable GPU passthrough configuration | `true` |
-| `pve_iommu_grub_params` | List of GRUB kernel parameters for IOMMU | See defaults |
+| `pve_gpu_vendor_id` | GPU PCI vendor:device ID | `10de:13ba` |
+| `pve_gpu_audio_id` | GPU audio device ID | `10de:0fbc` |
+| `pve_gpu_passthrough_vm_id` | Target VM ID for GPU | `105` |
+| `pve_iommu_grub_params` | GRUB IOMMU parameters | See defaults |
 
-**Default IOMMU Parameters:**
-```yaml
-pve_iommu_grub_params:
-  - "intel_iommu=on"              # Enable Intel IOMMU
-  - "iommu=pt"                    # Pass-through mode
-  - "pcie_acs_override=downstream,multifunction"
-  - "nofb"                        # Disable framebuffer
-  - "nomodeset"                   # Disable kernel mode setting
-  - "video=vesafb:off,efifb:off"  # Disable VESA and EFI framebuffer
-```
+### ISO Management
 
-### VZDump Backup Configuration
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `proxmox_iso_dir` | ISO storage directory | `/var/lib/vz/template/iso` |
+| `proxmox_iso_urls` | List of ISO URLs to download | See defaults |
+| `proxmox_iso_remove` | List of ISOs to remove | `[]` |
 
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `tmpdir` | Temporary directory for backups | `/dev/shm` |
-| `bwlimit` | Bandwidth limit (KB/s) | `35000` |
-| `ionice` | I/O priority class (0-7) | `5` |
+### LXC Template Management
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `proxmox_lxc_storage` | LXC template storage ID | `local` |
+| `proxmox_lxc_templates` | Templates to download | See defaults |
+| `proxmox_lxc_remove` | Templates to remove | `[]` |
+
+### VM Configuration Deployment
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `pve_deploy_vm_configs` | Deploy VM/LXC configs from files/ | `false` |
 
 ### System Packages
 
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `pve_system_packages` | List of system packages to install | See defaults |
-
-**Default Packages:**
-- Download utilities: `aria2`, `wget`, `curl`, `unzip`, `zip`
-- Network utilities: `ipset`, `iperf`, `iftop`, `iotop`
-- System utilities: `nano`, `build-essential`, `htop`
-- Security: `haveged`
-- Storage: `zfsutils-linux`, `cifs-utils`
-
-### ISO & Template Management
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `proxmox_iso_dir` | Directory for ISO storage | `/var/lib/vz/template/iso` |
-| `proxmox_iso_urls` | List of ISO URLs to download | `[]` |
-| `proxmox_iso_remove` | List of ISO filenames to remove | `[]` |
-| `proxmox_lxc_storage` | Storage ID for LXC templates | `local` |
-| `proxmox_lxc_templates` | List of LXC templates to download | `[]` |
-| `proxmox_lxc_remove` | List of LXC template filenames to remove | `[]` |
-
-### VM/LXC Configuration Deployment
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `pve_deploy_vm_configs` | Deploy VM configs from `files/vm_configs/` | `false` |
-### Other Configuration
-
-| Variable Name | Description | Default Value |
-|---------------|-------------|---------------|
-| `ansible_managed` | Ansible managed header text | `ansible managed` |
-
-## Dependencies
-
-No external dependencies.
-
-## Example Playbooks
-
-### Basic Configuration
-
-```yaml
----
-- name: Configure Proxmox VE Server
-  hosts: proxmox
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.proxmox
-  vars:
-    pve_repo_type: no-subscription
-    pve_set_cpu: yes
-    pve_cpu_governor: performance
-```
-
-### Full Configuration with ZFS and GPU Passthrough
-
-```yaml
----
-- name: Configure Proxmox VE Server
-  hosts: proxmox
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.proxmox
-  vars:
-    # Repository
-    pve_repo_type: no-subscription
-    pve_install_ucode: true
-    
-    # CPU Tuning
-    pve_set_cpu: yes
-    pve_cpu_governor: performance
-    
-    # ZFS Configuration
-    pve_zfs_scrub_enable: true
-    pve_zfs_scrub_hour: "2"  # 2 AM
-    
-    # GPU Passthrough
-    pve_gpu_passthrough_enable: true
-    
-    # Backup Configuration
-    tmpdir: /mnt/backups/tmp
-    bwlimit: 50000
-    
-    # ISO Management
-    proxmox_iso_urls:
-      - 'https://releases.ubuntu.com/24.04.3/ubuntu-24.04.3-live-server-amd64.iso'
-    
-    # LXC Templates
-    proxmox_lxc_templates:
-      - 'system/debian-12-standard_12.12-1_amd64.tar.zst'
-      - 'system/ubuntu-22.04-standard_22.04-1_amd64.tar.zst'
-```
-
-### VM/LXC Configuration Migration
-
-```yaml
----
-- name: Migrate Proxmox Configurations
-  hosts: proxmox_new
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.proxmox
-  vars:
-    pve_deploy_vm_configs: true  # Deploy configs from files/vm_configs/ and files/lxc_configs/
-```
-
-**Note:** Before deploying VM/LXC configs:
-1. Use `files/backup_proxmox_configs.sh` to backup configs from source server
-2. Ensure storage pools and disks are imported on target server
-3. Set `pve_deploy_vm_configs: true` to deploy configurations
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `pve_system_packages` | List of packages to install | See defaults |
 
 ## Tags
 
-This role supports the following tags for selective execution:
+Run specific tasks using tags:
 
-- `ISOs` - ISO and LXC template management only
-- `vm_configs` - VM/LXC configuration deployment only
-
-**Example:**
-```yaml
-ansible-playbook playbook.yml --tags ISOs
-```
-
-## Tasks Included
-
-### Repository & Packages
-- Configure Debian base repositories
-- Configure Proxmox VE repositories
-- Install microcode updates (Intel/AMD)
-- Install system packages
-
-### System Tuning
-- Configure CPU governor (systemd service)
-- Configure KSM (Kernel Same-page Merging) with RAM-based tuning
-- Enable and start KSM daemon
-
-### ZFS Optimization
-- Calculate and configure ZFS ARC cache limits
-- Configure ZFS scrub schedule (monthly)
-- Update ZFS auto-snapshot retention policies
-- Create ZFS ARC modprobe configuration
-
-### GPU Passthrough
-- Check IOMMU support
-- Configure GRUB with IOMMU parameters
-- Load VFIO kernel modules
-- Configure VFIO-PCI modprobe settings
-
-### Backup Configuration
-- Configure VZDump settings (`/etc/vzdump.conf`)
-
-### Subscription Management
-- Remove subscription nag from web UI
-- Configure APT to prevent subscription prompts
-
-### Python Package Manager
-- Install `uv` Python package manager
-- Configure shell completion
-- Set up weekly auto-update cron job
-
-### ISO & Template Management
-- Download ISO images
-- Download LXC templates
-- Remove old ISOs and templates
-
-### VM/LXC Configuration Deployment
-- Deploy VM configurations from `files/vm_configs/`
-- Deploy LXC configurations from `files/lxc_configs/`
-
-## Advanced Configuration
-
-### KSM Tuning by RAM Size
-
-KSM parameters are automatically adjusted based on system RAM:
-
-| RAM Size | KSM_THRES_COEF | KSM_SLEEP_MSEC |
-|----------|----------------|----------------|
-| ≤16GB    | 50             | 80             |
-| 16-32GB  | 40             | 60             |
-| 32-64GB  | 30             | 40             |
-| 64-128GB | 20             | 20             |
-| >128GB   | 10             | 10             |
-
-### ZFS ARC Calculation
-
-ZFS ARC limits are calculated automatically:
-
-| RAM Size | ARC Min | ARC Max |
-|----------|---------|---------|
-| ≤16GB    | 512MB   | 512MB   |
-| 16-32GB  | 1GB     | 1GB     |
-| >32GB    | RAM/16  | RAM/8   |
-
-### GPU Passthrough Requirements
-
-1. **Hardware Support:**
-   - CPU with IOMMU support (Intel VT-d or AMD-Vi)
-   - Motherboard with IOMMU enabled in BIOS
-   - GPU compatible with passthrough
-
-2. **Verification:**
-   - The role checks for IOMMU support using `dmesg`
-   - Displays DMAR/IOMMU information if available
-
-3. **After Configuration:**
-   - **Reboot required** for GRUB changes to take effect
-   - Verify IOMMU is active: `dmesg | grep -e DMAR -e IOMMU`
-   - Check GPU in IOMMU groups: `find /sys/kernel/iommu_groups/ -type l`
-
-## Backup Script
-
-The role includes a backup script for migrating VM/LXC configurations:
-
-**Location:** `files/backup_proxmox_configs.sh`
-
-**Usage:**
 ```bash
-# Backup from source server
-./files/backup_proxmox_configs.sh root@source-proxmox-server
+# Only manage ISOs and templates
+ansible-playbook playbook.yml --tags ISOs
 
-# Configs will be saved to:
-# - files/vm_configs/*.conf
-# - files/lxc_configs/*.conf
+# Only deploy VM configurations
+ansible-playbook playbook.yml --tags vm_configs
 ```
 
-**Note:** The script requires SSH key authentication. Set `SSH_KEY` environment variable if using a non-default key.
+## Example Playbooks
 
-## Handlers
+### Basic Proxmox Host Configuration
 
-This role includes the following handlers:
+```yaml
+---
+- name: Configure Proxmox VE host
+  hosts: proxmox_servers
+  become: true
 
-- `restart cpu-governor service` - Restart CPU governor service
-- `restart ksmtuned service` - Restart KSM daemon
-- `update initramfs` - Update initramfs (for ZFS/VFIO changes)
-- `proxmox-widget-toolkit` - Reinstall proxmox-widget-toolkit (subscription nag removal)
-- `UpdateCache` - Update APT cache
+  roles:
+    - role: brcak_zmaj.almir_ansible.proxmox
+```
 
-## Idempotency
+### Full Configuration with GPU Passthrough
 
-All tasks in this role are designed to be idempotent. You can safely run the role multiple times without side effects.
+```yaml
+---
+- name: Configure Proxmox with GPU passthrough
+  hosts: proxmox_gpu_host
+  become: true
 
-## Troubleshooting
+  vars:
+    pve_gpu_passthrough_enable: true
+    pve_gpu_vendor_id: "10de:2204"      # RTX 3090
+    pve_gpu_audio_id: "10de:1aef"       # RTX 3090 Audio
+    pve_gpu_passthrough_vm_id: 100
+    pve_set_cpu: "yes"
+    pve_cpu_governor: performance
 
-### ZFS ARC Warning on Boot
+  roles:
+    - role: brcak_zmaj.almir_ansible.proxmox
+```
 
-If you see warnings about ZFS ARC configuration on boot:
-- This is normal - the configuration is applied correctly
-- The warning appears because ZFS loads before the modprobe config
-- After the role runs and updates initramfs, the warning should disappear on next boot
+### Template and ISO Management
 
-### GPU Passthrough Not Working
+```yaml
+---
+- name: Manage Proxmox templates
+  hosts: proxmox_servers
+  become: true
 
-1. Verify IOMMU is enabled in BIOS/UEFI
-2. Check that IOMMU is active: `dmesg | grep -e DMAR -e IOMMU`
-3. Ensure you've rebooted after running the role
-4. Check IOMMU groups: `find /sys/kernel/iommu_groups/ -type l`
+  vars:
+    proxmox_iso_urls:
+      - 'https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso'
+      - 'https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.4.0-amd64-netinst.iso'
+    proxmox_lxc_templates:
+      - 'system/debian-12-standard_12.12-1_amd64.tar.zst'
+      - 'system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst'
+      - 'system/alpine-3.19-default_20240207_amd64.tar.xz'
 
-### KSM Not Active
+  roles:
+    - role: brcak_zmaj.almir_ansible.proxmox
+```
 
-- Check KSM status: `cat /sys/kernel/mm/ksm/run` (should be `1`)
-- Check KSM daemon: `systemctl status ksmtuned`
-- Review KSM configuration: `cat /etc/ksmtuned.conf`
+## Task Files
 
-### Microcode Not Applied
+| File | Purpose |
+|------|---------|
+| `preconfig.yml` | Pre-configuration (hosts, SSH, etc.) |
+| `ucode.yml` | Repository and microcode configuration |
+| `packages.yml` | System package installation |
+| `system_config.yml` | CPU governor and KSM configuration |
+| `zfs-tune.yml` | ZFS ARC and scrub configuration |
+| `pcie_passthrough.yml` | GPU/PCIe passthrough setup |
+| `vzdump.yml` | VZDump backup configuration |
+| `subscription-nag.yml` | Remove subscription popup |
+| `uv_install.yml` | UV Python manager installation |
+| `proxmox_ISO_manager.yml` | ISO and LXC template management |
+| `vm_config_deploy.yml` | VM/LXC configuration deployment |
 
-- Microcode updates require a reboot to take effect
-- Set `pve_reboot_for_ucode: true` to enable automatic reboot (use with caution)
-- Or manually reboot after running the role
+## Supported Platforms
 
-## Notes
-
-- **Reboot Required:** GPU passthrough configuration requires a reboot to take effect
-- **ZFS Optional:** ZFS features are automatically skipped if ZFS is not installed
-- **Root Access:** Some tasks require root access (use `become: true`)
+| Platform | Tested Versions |
+|----------|-----------------|
+| Proxmox VE | 7.4, 8.0, 8.1, 8.2, 8.3 |
 
 ## License
 
@@ -419,7 +237,14 @@ GPL-3.0-or-later
 
 ## Author Information
 
-- [Almir Zohorovic](https://github.com/brcak-zmaj)
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
+- Almir Zohorovic
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
 
 
 ## Stats

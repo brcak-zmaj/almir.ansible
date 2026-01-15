@@ -1,8 +1,0 @@
----
-galaxy_info:
-  author: Almir Zohorovic
-  description: Configure and optimize Proxmox Virtual Environment servers.
-  license: GPL-3.0-or-later
-  min_ansible_version: "2.9"
-
-dependencies: []

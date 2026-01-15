@@ -1,6 +1,4 @@
 ---
-# GPS Hardware Support
-# Install GPS daemon and client tools
 
 - name: Install GPS daemon and clients
   ansible.builtin.package:

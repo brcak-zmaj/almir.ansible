@@ -1,6 +1,16 @@
 ---
-
 - name: Install cifs-utils
   ansible.builtin.package:
     name: cifs-utils
+    state: present
+  when: cifs_utils_install | bool
+  tags: [cifs_utils]
+
+- name: Uninstall cifs-utils
+  ansible.builtin.package:
+    name: cifs-utils
+    state: absent
+  when: not (cifs_utils_install | bool)
+  tags: [cifs_utils]
+
     state: present

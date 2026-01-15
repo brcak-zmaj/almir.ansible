@@ -1,26 +1,27 @@
 ---
 - name: Calculate effective memory parameters for PostgreSQL on Debian
-  set_fact:
+  ansible.builtin.set_fact:
     postgresql_effective_shmmax: "{{ (ansible_memtotal_mb * 1024 * 1024 * 0.75) | int }}"
     postgresql_effective_shmall: "{{ ((ansible_memtotal_mb * 1024 * 1024 * 0.75) / 4096) | int }}"
   when: ansible_memtotal_mb is defined
-  tags: [sysctl]
+  tags: [postgresql_tuning, sysctl]
 
 - name: Apply Debian-specific kernel parameters for PostgreSQL
-  sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: >-
       {{ postgresql_effective_shmmax if item.name == 'kernel.shmmax'
          else (postgresql_effective_shmall if item.name == 'kernel.shmall'
          else item.value) }}
     state: present
-    reload: no
+    reload: false
   loop: "{{ postgresql_debian_sysctl_settings }}"
-  notify: reload sysctl
-  tags: [sysctl]
+  notify: Reload sysctl
+  when: postgresql_debian_sysctl_settings | length > 0
+  tags: [postgresql_tuning, sysctl]
 
 - name: Persist all PostgreSQL sysctl settings on Debian
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sysctl.d/99-postgresql.conf
     line: >-
       {{ item.name }} = {{
@@ -30,15 +31,20 @@
       }}
     regexp: "^#?{{ item.name }}"
     state: present
-    create: yes
+    create: true
     owner: root
     group: root
     mode: '0644'
   loop: "{{ postgresql_common_sysctl_settings + postgresql_debian_sysctl_settings }}"
-  tags: [sysctl]
+  tags: [postgresql_tuning, sysctl]
 
-- name: Ensure required kernel modules/packages on Debian
-  apt:
-    name: "linux-modules-extra-{{ ansible_kernel }}"
-    state: present
-  tags: [packages]
+- name: Adjust user limits for PostgreSQL on Debian
+  ansible.builtin.lineinfile:
+    path: /etc/security/limits.d/postgresql.conf
+    line: "{{ item.user }} {{ item.type }} {{ item.value }}"
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ postgresql_user_limits }}"
+  tags: [postgresql_tuning, limits]

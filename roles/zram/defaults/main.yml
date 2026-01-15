@@ -1,0 +1,62 @@
+---
+# =============================================================================
+# ZRAM Role - Default Variables
+# =============================================================================
+# This role manages Linux memory compression using zram via systemd zram-generator.
+# It detects existing configurations and only applies changes when the desired
+# configuration differs from the current state.
+
+# =============================================================================
+# ROLE BEHAVIOR
+# =============================================================================
+# Enable or disable zram configuration management
+zram_enabled: true
+
+# =============================================================================
+# ZRAM DEVICE CONFIGURATION
+# =============================================================================
+# Device name (typically zram0)
+zram_device_name: "zram0"
+
+# Size calculation formula (zram-generator syntax)
+# Available variable: ram (total system memory in MB)
+# Supports: arithmetic operators, min(), max(), SI suffixes
+# Examples:
+#   "min(ram / 2, 4096)"      - Half of RAM, max 4GB (conservative)
+#   "min(ram, 8192)"          - Equal to RAM, max 8GB (default)
+#   "ram * 2"                 - 2x RAM (aggressive, for low-RAM systems)
+#   "4096"                    - Fixed 4GB
+zram_size: "min(ram, 8192)"
+
+# Compression algorithm
+# Common options: lzo-rle (default), lzo, lz4, lz4hc, zstd
+# lzo-rle: Best balance of speed and compression (kernel default)
+# lz4:     Fastest compression/decompression
+# zstd:    Best compression ratio, slower
+# Leave empty to use kernel default
+zram_compression_algorithm: ""
+
+# Swap priority (higher = preferred)
+# Range: -1 to 32767
+# Set higher than disk swap to prefer zram
+zram_swap_priority: 100
+
+# =============================================================================
+# ADVANCED OPTIONS
+# =============================================================================
+# Host memory limit (MB) - disable zram on systems with more RAM than this
+# Set to empty string or "none" for no limit
+# Example: "65536" - disable zram on systems with >64GB RAM
+zram_host_memory_limit: "none"
+
+# =============================================================================
+# PACKAGE CONFIGURATION
+# =============================================================================
+# Package names vary by distribution
+zram_package_redhat: "zram-generator"
+zram_package_debian: "systemd-zram-generator"
+
+# Configuration file paths
+zram_config_dir: "/etc/systemd"
+zram_config_file: "{{ zram_config_dir }}/zram-generator.conf"
+zram_config_file_mode: "0644"

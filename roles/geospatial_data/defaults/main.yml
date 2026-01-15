@@ -63,54 +63,12 @@ mbtiles_enabled: true
 mbtiles_regions:
   - "north-america"
   - "europe"
-mbtiles_sources:
+mbtiles_sources: []
   # Example MBTiles sources (uncomment and configure as needed)
   # - url: "https://example.com/maps/north-america.mbtiles"
   #   name: "north-america"
   # - url: "https://example.com/maps/europe.mbtiles"
   #   name: "europe"
-
-# SRTM Elevation Data
-# These downloads are SKIPPED if srtm_regions is empty (default)
-srtm_enabled: true
-srtm_regions:
-  # North America examples (covering US Georgia region)
-  - "N34W084"  # Georgia, USA
-  # Europe examples (covering Bosnia-Herzegovina region)
-  - "N44E018"  # Bosnia-Herzegovina
-  - "N44E017"  # Bosnia-Herzegovina
-  - "N43E018"  # Bosnia-Herzegovina/Croatia border
-srtm_resolution: "1arc"  # "1arc" (30m resolution, best quality) or "3arc" (90m resolution, smaller files)
-
-# ASTER Elevation Data
-# These downloads are SKIPPED if aster_regions is empty (default)
-aster_enabled: true
-aster_regions:
-  # North America examples (covering US Georgia region)
-  - "N34W084"  # Georgia, USA
-  # Europe examples (covering Bosnia-Herzegovina region)
-  - "N44E018"  # Bosnia-Herzegovina
-  - "N44E017"  # Bosnia-Herzegovina
-  - "N43E018"  # Bosnia-Herzegovina/Croatia border
-
-# USGS Topo Maps
-# These downloads are SKIPPED if usgs_topo_regions is empty (default)
-usgs_enabled: true
-usgs_topo_regions:
-  - {"name": "georgia"}               # Georgia, USA
-usgs_topo_scales:
-  - "250k"  # 1:250,000 scale (overview)
-  - "100k"  # 1:100,000 scale (detailed)
-  - "24k"   # 1:24,000 scale (very detailed, large files)
-
-# NOAA Nautical Charts
-# These downloads are SKIPPED if noaa_charts_regions is empty (default)
-noaa_enabled: true
-noaa_charts_regions:
-  - {"name": "US3EC03M"}             # US East Coast - North Carolina to Georgia
-noaa_chart_types:
-  - "ENC"  # Electronic Navigational Chart
-  - "RNC"  # Raster Navigational Chart
 
 # ============================================================================
 # GPS HARDWARE SUPPORT

@@ -1,11 +1,11 @@
 #!/bin/bash
-# {{ ansible_managed }} - {{ ansible_date_time.iso8601 }}
+# {{ ansible_managed }}
 # Raspberry Pi Temperature Monitor
 
 TEMP_LOG="/var/log/rpi-temp/temperature.log"
-WARNING_TEMP={{ rpi_temp_warning }}
-CRITICAL_TEMP={{ rpi_temp_critical }}
-THROTTLE_TEMP={{ rpi_temp_throttle }}
+WARNING_TEMP={{ rpi_temp_warning | default(70) }}
+CRITICAL_TEMP={{ rpi_temp_critical | default(80) }}
+THROTTLE_TEMP={{ rpi_temp_throttle | default(85) }}
 
 # Get CPU temperature
 if command -v vcgencmd >/dev/null 2>&1; then

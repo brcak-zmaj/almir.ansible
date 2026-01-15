@@ -1,37 +1,21 @@
 ---
 # Power Management Configuration
 
-- name: Configure power LED
-  ansible.builtin.lineinfile:
-    path: /boot/config.txt
-    regexp: "^#?dtparam=pwr_led_trigger="
-    line: "dtparam=pwr_led_trigger={{ rpi_power_led_trigger }}"
-    state: "{{ 'present' if rpi_power_led_enable | default(true) else 'absent' }}"
-  when: rpi_model in ['pi4', 'pi5']
-
-- name: Configure activity LED
-  ansible.builtin.lineinfile:
-    path: /boot/config.txt
-    regexp: "^#?dtparam=act_led_trigger="
-    line: "dtparam=act_led_trigger={{ rpi_activity_led_trigger }}"
-    state: "{{ 'present' if rpi_activity_led_enable | default(true) else 'absent' }}"
-
 - name: Configure WiFi power saving
   ansible.builtin.lineinfile:
     path: /etc/NetworkManager/conf.d/99-rpi-wifi-power.conf
     regexp: "^wifi.powersave="
-    line: "wifi.powersave={{ 2 if rpi_power_save_wifi | default(false) else 3 }}"
+    line: "wifi.powersave={{ 2 if rpi_power_save_wifi | bool else 3 }}"
     create: true
     mode: '0644'
-  when: rpi_power_save_enable | default(false)
+  when: rpi_power_save_enable | bool
 
 - name: Configure USB autosuspend
   ansible.builtin.lineinfile:
     path: /etc/modprobe.d/rpi-usb-autosuspend.conf
     regexp: "^options usbcore autosuspend="
-    line: "options usbcore autosuspend={{ 1 if rpi_power_save_usb | default(false) else -1 }}"
+    line: "options usbcore autosuspend={{ 1 if rpi_power_save_usb | bool else -1 }}"
     create: true
     mode: '0644'
-  when: rpi_power_save_enable | default(false)
+  when: rpi_power_save_enable | bool
   notify: update initramfs
-

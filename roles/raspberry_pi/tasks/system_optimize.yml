@@ -1,14 +1,21 @@
 ---
 # System Optimizations
 
-- name: Configure filesystem mount options
-  ansible.builtin.lineinfile:
-    path: /etc/fstab
-    regexp: "^(/dev/.*\s+/\s+ext4)"
-    backrefs: true
-    line: '\1 defaults,noatime 0 1'
-  when: rpi_fs_noatime | default(true)
+- name: Check if noatime is already configured for root mount
+  ansible.builtin.shell:
+    cmd: grep -E '^(LABEL=|UUID=|/dev/)[^[:space:]]+[[:space:]]+/[[:space:]]+ext4' /etc/fstab | grep -q noatime
+  register: noatime_check
+  changed_when: false
   failed_when: false
+
+- name: Configure filesystem mount options with noatime
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^((LABEL=|UUID=|/dev/)[^\s]+\s+/\s+ext4\s+)(\S+)(\s+\d+\s+\d+)$'
+    replace: '\1\3,noatime\4'
+  when:
+    - rpi_fs_noatime | bool
+    - noatime_check.rc != 0
 
 - name: Configure ext4 commit interval
   ansible.builtin.sysctl:
@@ -39,6 +46,10 @@
     regexp: "^GOVERNOR="
     line: "GOVERNOR={{ rpi_cpu_governor }}"
     state: present
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
   when: rpi_cpu_governor is defined
 
 - name: Configure CPU min frequency
@@ -47,6 +58,10 @@
     regexp: "^MIN_SPEED="
     line: "MIN_SPEED={{ rpi_cpu_min_freq }}"
     state: present
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
   when: rpi_cpu_min_freq is defined
 
 - name: Configure CPU max frequency
@@ -55,6 +70,10 @@
     regexp: "^MAX_SPEED="
     line: "MAX_SPEED={{ rpi_cpu_max_freq if rpi_cpu_max_freq | int > 0 else '' }}"
     state: present
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
   when: rpi_cpu_max_freq is defined and rpi_cpu_max_freq | int > 0
 
 - name: Configure I/O scheduler
@@ -65,12 +84,14 @@
     line: '\1 elevator={{ rpi_io_scheduler }}'
   when: rpi_io_scheduler is defined
   failed_when: false
+  register: grub_scheduler_config
 
 - name: Update GRUB after I/O scheduler change
   ansible.builtin.command: update-grub
   when:
     - rpi_io_scheduler is defined
     - ansible_pkg_mgr == 'apt'
+    - grub_scheduler_config.changed | default(false)
   changed_when: true
   failed_when: false
 
@@ -81,5 +102,5 @@
     hour: "3"
     weekday: "0"
     job: "/sbin/fstrim -av"
-    state: "{{ 'present' if rpi_fs_trim_enable | default(true) else 'absent' }}"
+    state: "{{ 'present' if rpi_fs_trim_enable | bool else 'absent' }}"
 

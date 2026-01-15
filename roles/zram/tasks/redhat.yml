@@ -1,0 +1,11 @@
+---
+# =============================================================================
+# ZRAM Role - RedHat Family Tasks
+# =============================================================================
+
+- name: Ensure zram-generator is installed (RedHat)
+  ansible.builtin.dnf:
+    name: "{{ zram_package_redhat }}"
+    state: present
+  become: true
+  tags: zram

@@ -1,8 +1,21 @@
 ---
+# Minimal role metadata for Galaxy/portability
 galaxy_info:
-  author: Almir Zohorovic
-  description: Install geospatial software and download offline map datasets.
+  author: almir
+  description: "Geospatial software and offline map data role"
+  company: brcak_zmaj
   license: MIT
   min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - geospatial
+    - maps
+    - offline
 
 dependencies: []

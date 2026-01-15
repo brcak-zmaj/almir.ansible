@@ -3,43 +3,42 @@
 
 - name: Configure HDMI group
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?hdmi_group="
     line: "hdmi_group={{ rpi_hdmi_group }}"
     state: present
 
 - name: Configure HDMI mode
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?hdmi_mode="
     line: "hdmi_mode={{ rpi_hdmi_mode }}"
     state: present
 
 - name: Configure HDMI force hotplug
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?hdmi_force_hotplug="
-    line: "hdmi_force_hotplug={{ 1 if rpi_hdmi_force_hotplug | default(false) else 0 }}"
-    state: "{{ 'present' if rpi_hdmi_force_hotplug | default(false) else 'absent' }}"
+    line: "hdmi_force_hotplug={{ 1 if rpi_hdmi_force_hotplug | bool else 0 }}"
+    state: "{{ 'present' if rpi_hdmi_force_hotplug | bool else 'absent' }}"
 
 - name: Configure HDMI ignore EDID
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?hdmi_ignore_edid="
-    line: "hdmi_ignore_edid={{ 1 if rpi_hdmi_ignore_edid | default(false) else 0 }}"
-    state: "{{ 'present' if rpi_hdmi_ignore_edid | default(false) else 'absent' }}"
+    line: "hdmi_ignore_edid={{ 1 if rpi_hdmi_ignore_edid | bool else 0 }}"
+    state: "{{ 'present' if rpi_hdmi_ignore_edid | bool else 'absent' }}"
 
 - name: Configure HDMI drive
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?hdmi_drive="
     line: "hdmi_drive={{ rpi_hdmi_drive }}"
     state: present
 
 - name: Configure HDMI ignore CEC
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?hdmi_ignore_cec="
-    line: "hdmi_ignore_cec={{ 1 if rpi_hdmi_ignore_cec | default(false) else 0 }}"
-    state: "{{ 'present' if rpi_hdmi_ignore_cec | default(false) else 'absent' }}"
-
+    line: "hdmi_ignore_cec={{ 1 if rpi_hdmi_ignore_cec | bool else 0 }}"
+    state: "{{ 'present' if rpi_hdmi_ignore_cec | bool else 'absent' }}"

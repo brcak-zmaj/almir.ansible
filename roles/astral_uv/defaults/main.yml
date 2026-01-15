@@ -1,0 +1,48 @@
+---
+# Astral UV - Python package manager and environment tool
+# https://github.com/astral-sh/uv
+
+# Version to install (set to 'latest' to auto-detect, or pin specific version)
+uv_version: "latest"
+
+# Installation directory for binaries
+# Default follows XDG spec: ~/.local/bin
+uv_install_dir: "{{ ansible_facts['user_dir'] }}/.local/bin"
+
+# Whether to add install directory to PATH in shell profiles
+uv_modify_path: true
+
+# Shell profiles to modify when uv_modify_path is true
+# Supports: bash, zsh, fish
+uv_shell_profiles:
+  - "{{ ansible_facts['user_dir'] }}/.bashrc"
+  # - "{{ ansible_facts['user_dir'] }}/.zshrc"
+  # - "{{ ansible_facts['user_dir'] }}/.config/fish/config.fish"
+
+# Owner and group for installed binaries
+uv_owner: "{{ ansible_facts['user_id'] }}"
+uv_group: "{{ ansible_facts['user_gid'] }}"
+
+# Binary permissions
+uv_bin_mode: "0755"
+
+# Download settings
+uv_github_base_url: "https://github.com"
+uv_download_timeout: 300
+
+# Force reinstall even if uv is already installed at desired version
+uv_force_reinstall: false
+
+# Verify checksum after download (recommended)
+uv_verify_checksum: true
+
+# Temporary directory for downloads
+uv_tmp_dir: "/tmp"
+
+# Cleanup downloaded archive after installation
+uv_cleanup_archive: true
+
+# Platform override (auto-detected if not set)
+# Options: gnu, musl (Linux only)
+# Leave empty for auto-detection
+uv_libc_variant: ""

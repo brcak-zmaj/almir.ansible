@@ -7,7 +7,7 @@
 
 - name: Create the cron job for subscription nag fix
   ansible.builtin.template:
-    src: pve-subscribe-fix.j2
+    src: pve-subscribe-fix .j2
     dest: /etc/cron.daily/pve-subscribe-fix
     mode: '0755'
 

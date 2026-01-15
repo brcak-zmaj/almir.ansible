@@ -1,6 +1,9 @@
 ---
-# Geospatial Data Role - Main Task File
-# Role: almir.geospatial_data
+
+- name: Get system architecture for Flatpak refs
+  ansible.builtin.set_fact:
+    flatpak_arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+  when: use_flatpak
 
 - name: Create user directories
   ansible.builtin.file:

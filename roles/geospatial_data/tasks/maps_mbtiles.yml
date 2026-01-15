@@ -1,5 +1,4 @@
 ---
-# MBTiles Map Data Downloads
 
 - name: Create MBTiles data directory
   ansible.builtin.file:
@@ -23,7 +22,8 @@
   loop: "{{ mbtiles_sources | default([]) }}"
   when: 
     - mbtiles_enabled
-    - mbtiles_sources | length > 0
+    - mbtiles_sources is defined
+    - (mbtiles_sources | default([]) | length) > 0
   become: yes
   register: mbtiles_downloads
   until: mbtiles_downloads is succeeded

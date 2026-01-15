@@ -3,17 +3,16 @@
 
 - name: Enable camera interface
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?start_x="
     line: "start_x=1"
     state: present
-  when: rpi_camera_enable | default(false)
+  when: rpi_camera_enable | bool
 
 - name: Disable camera LED
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?disable_camera_led="
-    line: "disable_camera_led={{ 1 if rpi_camera_disable_led | default(false) else 0 }}"
-    state: "{{ 'present' if rpi_camera_disable_led | default(false) else 'absent' }}"
-  when: rpi_camera_enable | default(false)
-
+    line: "disable_camera_led={{ 1 if rpi_camera_disable_led | bool else 0 }}"
+    state: "{{ 'present' if rpi_camera_disable_led | bool else 'absent' }}"
+  when: rpi_camera_enable | bool

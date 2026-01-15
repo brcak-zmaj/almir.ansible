@@ -1,0 +1,88 @@
+---
+# Download and install uv binaries
+
+- name: Ensure install directory exists
+  ansible.builtin.file:
+    path: "{{ uv_install_dir }}"
+    state: directory
+    owner: "{{ uv_owner }}"
+    group: "{{ uv_group }}"
+    mode: "0755"
+
+- name: Create temporary download directory
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: uv_install_
+    path: "{{ uv_tmp_dir }}"
+  register: _uv_temp_dir
+
+- name: Download uv archive
+  ansible.builtin.get_url:
+    url: "{{ _uv_download_url }}"
+    dest: "{{ _uv_temp_dir.path }}/{{ _uv_artifact }}"
+    mode: "0644"
+    timeout: "{{ uv_download_timeout }}"
+  register: _uv_download
+
+- name: Download checksum file
+  when: uv_verify_checksum | bool
+  ansible.builtin.get_url:
+    url: "{{ _uv_download_url }}.sha256"
+    dest: "{{ _uv_temp_dir.path }}/{{ _uv_artifact }}.sha256"
+    mode: "0644"
+    timeout: 60
+  register: _uv_checksum_download
+  failed_when: false
+
+- name: Verify checksum
+  when:
+    - uv_verify_checksum | bool
+    - _uv_checksum_download is succeeded
+  block:
+    - name: Read checksum file
+      ansible.builtin.slurp:
+        src: "{{ _uv_temp_dir.path }}/{{ _uv_artifact }}.sha256"
+      register: _uv_checksum_content
+
+    - name: Extract expected checksum
+      ansible.builtin.set_fact:
+        _uv_expected_checksum: "{{ (_uv_checksum_content.content | b64decode).split()[0] }}"
+
+    - name: Calculate actual checksum
+      ansible.builtin.stat:
+        path: "{{ _uv_temp_dir.path }}/{{ _uv_artifact }}"
+        checksum_algorithm: sha256
+      register: _uv_actual_checksum
+
+    - name: Validate checksum matches
+      ansible.builtin.assert:
+        that:
+          - _uv_actual_checksum.stat.checksum == _uv_expected_checksum
+        fail_msg: >-
+          Checksum mismatch! Expected: {{ _uv_expected_checksum }},
+          Got: {{ _uv_actual_checksum.stat.checksum }}
+        quiet: true
+
+- name: Extract uv archive
+  ansible.builtin.unarchive:
+    src: "{{ _uv_temp_dir.path }}/{{ _uv_artifact }}"
+    dest: "{{ _uv_temp_dir.path }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+
+- name: Install uv binaries
+  ansible.builtin.copy:
+    src: "{{ _uv_temp_dir.path }}/{{ item }}"
+    dest: "{{ uv_install_dir }}/{{ item }}"
+    owner: "{{ uv_owner }}"
+    group: "{{ uv_group }}"
+    mode: "{{ uv_bin_mode }}"
+    remote_src: true
+  loop: "{{ _uv_binaries }}"
+
+- name: Cleanup temporary directory
+  when: uv_cleanup_archive | bool
+  ansible.builtin.file:
+    path: "{{ _uv_temp_dir.path }}"
+    state: absent

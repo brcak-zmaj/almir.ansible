@@ -1,0 +1,57 @@
+---
+# tasks/RedHat.yml - Mullvad Browser tasks for RedHat family (Fedora 41+)
+
+- name: Add Mullvad repository
+  when:
+    - mullvad_browser_add_repository | bool
+    - mullvad_browser_state == 'present'
+  block:
+    - name: Download Mullvad repository definition
+      ansible.builtin.get_url:
+        url: "{{ mullvad_browser_rhel_repo_url }}"
+        dest: "{{ mullvad_browser_rhel_repo_file }}"
+        owner: root
+        group: root
+        mode: '0644'
+        force: yes
+      become: true
+
+    - name: Refresh DNF cache for Mullvad repository
+      ansible.builtin.dnf:
+        update_cache: true
+      become: true
+  tags:
+    - mullvad_browser
+
+- name: Install Mullvad Browser package
+  ansible.builtin.dnf:
+    name: "{{ mullvad_browser_package }}"
+    state: present
+  become: true
+  when: mullvad_browser_state == 'present'
+  tags:
+    - mullvad_browser
+
+- name: Remove Mullvad Browser
+  when: mullvad_browser_state == 'absent'
+  block:
+    - name: Remove Mullvad Browser stable package
+      ansible.builtin.dnf:
+        name: "{{ mullvad_browser_package_stable }}"
+        state: absent
+      become: true
+
+    - name: Remove Mullvad Browser alpha package
+      ansible.builtin.dnf:
+        name: "{{ mullvad_browser_package_alpha }}"
+        state: absent
+      become: true
+
+    - name: Remove Mullvad repository file
+      ansible.builtin.file:
+        path: "{{ mullvad_browser_rhel_repo_file }}"
+        state: absent
+      become: true
+      when: mullvad_browser_add_repository | bool
+  tags:
+    - mullvad_browser

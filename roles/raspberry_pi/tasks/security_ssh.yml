@@ -10,7 +10,7 @@
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "^#?PasswordAuthentication"
-    line: "PasswordAuthentication {{ 'yes' if rpi_ssh_password_auth | default(false) else 'no' }}"
+    line: "PasswordAuthentication {{ 'yes' if rpi_ssh_password_auth | bool else 'no' }}"
     state: present
   notify: restart ssh
 
@@ -18,7 +18,7 @@
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "^#?PermitRootLogin"
-    line: "PermitRootLogin {{ 'yes' if rpi_ssh_root_login | default(false) else 'no' }}"
+    line: "PermitRootLogin {{ 'yes' if rpi_ssh_root_login | bool else 'no' }}"
     state: present
   notify: restart ssh
 
@@ -28,12 +28,11 @@
     regexp: "^#?Port"
     line: "Port {{ rpi_ssh_port }}"
     state: present
-  when: rpi_ssh_port | default(22) != 22
+  when: rpi_ssh_port != 22
   notify: restart ssh
 
 - name: Enable SSH service
   ansible.builtin.systemd:
     name: ssh
-    enabled: yes
+    enabled: true
     state: started
-

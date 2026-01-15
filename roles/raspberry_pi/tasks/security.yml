@@ -3,9 +3,8 @@
 
 - name: Configure SSH
   ansible.builtin.include_tasks: security_ssh.yml
-  when: rpi_ssh_enable | default(true)
+  when: rpi_ssh_enable | bool
 
 - name: Configure firewall
   ansible.builtin.include_tasks: security_firewall.yml
-  when: rpi_firewall_enable | default(false)
-
+  when: rpi_firewall_enable | bool

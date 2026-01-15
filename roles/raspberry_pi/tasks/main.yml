@@ -5,47 +5,63 @@
 - name: Detect Raspberry Pi model
   ansible.builtin.include_tasks: detect_model.yml
 
+- name: Detect boot config path (Ubuntu vs RPi OS)
+  block:
+    - name: Check for Ubuntu boot path
+      ansible.builtin.stat:
+        path: /boot/firmware/config.txt
+      register: ubuntu_boot_config
+
+    - name: Check for Raspberry Pi OS boot path
+      ansible.builtin.stat:
+        path: /boot/config.txt
+      register: rpios_boot_config
+
+    - name: Set boot config path
+      ansible.builtin.set_fact:
+        rpi_boot_config_file: "{{ '/boot/firmware/config.txt' if ubuntu_boot_config.stat.exists else '/boot/config.txt' }}"
+      when: rpi_boot_config_file == ''
+
 - name: Configure swap
   ansible.builtin.include_tasks: swap.yml
-  when: rpi_swap_manage | default(true)
+  when: rpi_swap_enable | bool
 
 - name: Configure logging and journald
   ansible.builtin.include_tasks: logging.yml
-  when: rpi_logging_manage | default(true)
+  when: rpi_logging_manage | bool
 
 - name: Configure power management
   ansible.builtin.include_tasks: power.yml
-  when: rpi_power_manage | default(true)
+  when: rpi_power_manage | bool
 
 - name: Configure boot settings (config.txt)
   ansible.builtin.include_tasks: boot_config.yml
-  when: rpi_boot_config_manage | default(true)
+  when: rpi_boot_config_manage | bool
 
 - name: Configure network settings
   ansible.builtin.include_tasks: network.yml
-  when: rpi_network_manage | default(true)
+  when: rpi_network_manage | bool
 
 - name: Configure system optimizations
   ansible.builtin.include_tasks: system_optimize.yml
-  when: rpi_system_optimize | default(true)
+  when: rpi_system_optimize | bool
 
 - name: Configure hardware interfaces
   ansible.builtin.include_tasks: hardware.yml
-  when: rpi_hardware_manage | default(true)
+  when: rpi_hardware_manage | bool
 
 - name: Configure security settings
   ansible.builtin.include_tasks: security.yml
-  when: rpi_security_manage | default(true)
+  when: rpi_security_manage | bool
 
 - name: Install system packages
   ansible.builtin.include_tasks: packages.yml
-  when: rpi_packages_install | default(true)
+  when: rpi_packages_install | bool
 
 - name: Configure timezone and locale
   ansible.builtin.include_tasks: locale.yml
-  when: rpi_locale_manage | default(true)
+  when: rpi_locale_manage | bool
 
 - name: Configure temperature monitoring
   ansible.builtin.include_tasks: temperature.yml
-  when: rpi_temp_monitor_enable | default(false)
-
+  when: rpi_temp_monitor_enable | bool

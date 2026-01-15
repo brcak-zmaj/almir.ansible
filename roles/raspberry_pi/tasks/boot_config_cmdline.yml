@@ -16,9 +16,9 @@
 - name: Add custom cmdline parameters
   ansible.builtin.set_fact:
     cmdline_params: "{{ cmdline_params | default([]) + [item] }}"
-  loop: "{{ rpi_cmdline_custom | default([]) }}"
+  loop: "{{ rpi_cmdline_custom }}"
   when:
-    - rpi_cmdline_custom | default([]) | length > 0
+    - rpi_cmdline_custom | length > 0
     - item not in (cmdline_params | default([]))
 
 - name: Write cmdline.txt
@@ -27,4 +27,3 @@
     dest: /boot/cmdline.txt
     mode: '0644'
   when: cmdline_params is defined and cmdline_params | length > 0
-

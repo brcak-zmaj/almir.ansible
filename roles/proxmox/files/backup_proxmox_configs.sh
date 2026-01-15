@@ -5,12 +5,7 @@
 # to the local files directory for use with the almir.proxmox Ansible role
 #
 # Usage: ./backup_proxmox_configs.sh [source_server]
-# Example: ./backup_proxmox_configs.sh root@192.168.1.100
-#
-# Configuration:
-# - Set your Proxmox server IP/hostname: Pass as argument or modify SOURCE_SERVER below
-# - Set SSH key path: Use SSH_KEY environment variable or modify SSH_KEY below
-#   Example: SSH_KEY=/path/to/key ./backup_proxmox_configs.sh root@192.168.1.100
+# Example: ./backup_proxmox_configs.sh root@192.168.50.130
 #
 # The script will:
 # - Copy all VM configs from /etc/pve/qemu-server/*.conf
@@ -20,29 +15,9 @@
 
 set -euo pipefail
 
-# Configuration: Set your Proxmox server IP/hostname and SSH credentials here
-# Option 1: Pass as command line argument (recommended)
-#   ./backup_proxmox_configs.sh root@192.168.1.100
-# Option 2: Modify the default value below
-#   SOURCE_SERVER="root@your-proxmox-ip-or-hostname"
-SOURCE_SERVER="${1:-}"
-
-# Configuration: Set your SSH key path here
-# Option 1: Use SSH_KEY environment variable (recommended)
-#   SSH_KEY=/path/to/key ./backup_proxmox_configs.sh root@192.168.1.100
-# Option 2: Modify the default value below
-#   SSH_KEY="/path/to/your/ssh/key"
+# Default source server (can be overridden via command line argument)
+SOURCE_SERVER="${1:-root@x.x.x.x}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_rsa}"
-
-# Validate that source server is provided
-if [ -z "$SOURCE_SERVER" ]; then
-    echo "Error: Source server is required"
-    echo "Usage: $0 [source_server]"
-    echo "Example: $0 root@192.168.1.100"
-    echo ""
-    echo "Or modify SOURCE_SERVER variable in this script"
-    exit 1
-fi
 
 # Script directory (where this script is located)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -145,4 +120,5 @@ log_info ""
 log_info "To deploy these configs to a new Proxmox server, you can:"
 log_info "  1. Copy the configs to /etc/pve/qemu-server/ and /etc/pve/lxc/ on the target server"
 log_info "  2. Ensure the storage pools and disks are imported first"
+log_info "  3. Restart the pve-cluster service if needed"
 

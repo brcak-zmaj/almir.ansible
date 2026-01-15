@@ -1,0 +1,86 @@
+
+- name: Fetch all VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ proxmox_host }}"
+    state: present
+    validate_certs: no
+  register: vms
+  tags: vm_options
+
+- name: Update common VM options for Prod-Docker tagged VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ proxmox_host }}"
+    vmid: "{{ item.vmid }}"
+    options:
+      cpu: "{{ p_docker_cpu }}"
+      cores: "{{ p_docker_cores }}"
+      memory: "{{ p_docker_memory }}"
+      numa: "{{ p_docker_numa }}"                   # Enable NUMA for memory management
+      agent: "{{ p_docker_agent }}"                 # Enable QEMU Guest Agent
+      freeze: "{{ p_docker_freeze }}"               # Disable CPU freeze at startup
+      kvm: "{{ p_docker_kvm }}"                     # Ensure KVM Hardware Virtualization is enabled
+      tablet: "{{ p_docker_tablet }}"               # Disable tablet input for pointer
+      spice_enhancements: "{{ p_docker_spice_enhancements }}"  # Disable SPICE enhancements
+    validate_certs: no
+  loop: "{{ vms.resources }}"
+  when: "'prod-docker' in item.tags"              # Only apply if the "prod-docker" tag is present
+  tags: vm_options
+
+- name: Update common VM options for Dev-Windows tagged VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ proxmox_host }}"
+    vmid: "{{ item.vmid }}"
+    options:
+      cpu: "{{ d_windows_cpu }}"
+      cores: "{{ d_windows_cores }}"
+      memory: "{{ d_windows_memory }}"
+      numa: "{{ d_windows_numa }}"                    # Enable NUMA for memory management
+      agent: "{{ d_windows_agent }}"                  # Enable QEMU Guest Agent
+      freeze: "{{ d_windows_freeze }}"                # Disable CPU freeze at startup
+      kvm: "{{ d_windows_kvm }}"                      # Ensure KVM Hardware Virtualization is enabled
+      spice_enhancements: "{{ d_windows_spice_enhancements }}"  # Disable SPICE enhancements
+      virtio: "{{ d_windows_virtio }}"                # Enable virtio drivers for performance
+      scsi_controller: "{{ d_windows_disk_interface }}"  # Set disk interface to virtio
+      machine: "{{ d_windows_machine_type }}"          # Set the machine type
+      balloon: "{{ d_windows_ballooning }}"            # Disable ballooning for memory
+    validate_certs: no
+  loop: "{{ vms.resources }}"
+  when: "'dev-win' in item.tags"               # Only apply if the "prod-windows" tag is present
+  tags: vm_options
+
+- name: Update common VM options for Prod-Windows tagged VMs
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    api_host: "{{ proxmox_host }}"
+    vmid: "{{ item.vmid }}"
+    options:
+      cpu: "{{ p_windows_cpu }}"
+      cores: "{{ p_windows_cores }}"
+      memory: "{{ p_windows_memory }}"
+      numa: "{{ p_windows_numa }}"                    # Enable NUMA for memory management
+      agent: "{{ p_windows_agent }}"                  # Enable QEMU Guest Agent
+      freeze: "{{ p_windows_freeze }}"                # Disable CPU freeze at startup
+      kvm: "{{ p_windows_kvm }}"                      # Ensure KVM Hardware Virtualization is enabled
+      spice_enhancements: "{{ p_windows_spice_enhancements }}"  # Disable SPICE enhancements
+      virtio: "{{ p_windows_virtio }}"                # Enable virtio drivers for performance
+      scsi_controller: "{{ p_windows_disk_interface }}"  # Set disk interface to virtio
+      machine: "{{ p_windows_machine_type }}"          # Set the machine type
+      balloon: "{{ p_windows_ballooning }}"            # Disable ballooning for memory
+    validate_certs: no
+  loop: "{{ vms.resources }}"
+  when: "'dev-win' in item.tags"               # Only apply if the "prod-windows" tag is present
+  tags: vm_options
+
+
+- name: Debug output for modified VMs
+  debug:
+    msg: "Updated VM {{ item.vmid }} with the specified options."
+  loop: "{{ vms.resources | selectattr('tags', 'search', 'prod-docker') | list }}"
+  tags: vm_options

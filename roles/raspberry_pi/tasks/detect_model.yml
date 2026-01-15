@@ -24,7 +24,7 @@
     rpi_model: "{{ rpi_model_detected }}"
   when:
     - rpi_model_file.stat.exists
-    - rpi_model | default('auto') == 'auto'
+    - rpi_model == 'auto'
     - rpi_model_detected is defined
 
 - name: Validate Raspberry Pi model
@@ -43,4 +43,3 @@
   ansible.builtin.debug:
     msg: "WARNING: This role is designed for Raspberry Pi. Some features may not work."
   when: not rpi_model_file.stat.exists
-

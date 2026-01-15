@@ -1,95 +1,97 @@
 <img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
 
-# Ansible Collection for Brcak Zmaj - Almir 
+# Ansible Collection for Brcak Zmaj - Almir
 
 [![Ansible Collection](https://img.shields.io/badge/brcak.zmaj-brightgreen)](https://galaxy.ansible.com/ui/repo/published/brcak_zmaj/almir_ansible)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/brcak-zmaj/almir.ansible)](https://github.com/brcak-zmaj/almir.ansible/commits)
 [![GitHub Contributors](https://img.shields.io/github/contributors/brcak-zmaj/almir.ansible)](https://github.com/brcak-zmaj/almir.ansible/graphs/contributors)
 
-
-## Ansible version compatibility
+## Ansible Version Compatibility
 
 The collection is tested and supported with: `ansible >= 2.9`
 
-## Installing the collection
-
-Install the collection using the command below:
+## Installing the Collection
 
 ```shell
 ansible-galaxy collection install brcak_zmaj.almir_ansible
 ```
 
-## Roles included in the collection
+## Roles Included in the Collection
 
-This collection includes the following roles for server management, system optimization, and application deployment:
+### System Management & Tuning
 
-### System Management
-- **brave_browser**: Installs and configures Brave Web Browser on your target hosts.
-- **cifs_utils**: Configures CIFS/SMB mount utilities for network file sharing.
-- **debloat**: Removes unnecessary packages, bloatware, and system components from Linux distributions (Fedora, RHEL, CentOS, Debian, Ubuntu).
-- **my_pc_setup**: Configures and sets up development workstations. Installs packages, sets up mountpoints, and configures appearance.
-- **pc_tuning**: System tuning and optimization for desktop/workstation systems.
-- **virtualbox**: Installs and configures VirtualBox virtualization software.
+| Role | Description |
+|------|-------------|
+| `mullvad_browser` | Is a privacy-focused web browser developed in collaboration between Mullvad VPN and the Tor Project |
+| `debloat` | Removes unnecessary packages and bloatware from Linux distributions |
+| `my_pc_setup` | Configures development workstations with packages, mountpoints, and appearance |
+| `pc_tuning` | System tuning and kernel optimization for desktops/workstations |
+| `cifs_utils` | Manages CIFS/SMB mount utilities for network file sharing |
+| `zram` | Configures compressed RAM swap using systemd zram-generator |
 
 ### Database Tuning
-- **mysql_tuning**: Configures various sysctl parameters to optimize servers running MySQL.
-- **postgresql_tuning**: Configures various sysctl parameters to optimize servers running PostgreSQL.
+
+| Role | Description |
+|------|-------------|
+| `mysql_tuning` | Kernel parameter optimization for MySQL database servers |
+| `postgresql_tuning` | Kernel parameter optimization for PostgreSQL database servers |
 
 ### Container & Virtualization
-- **docker_tuning**: Configures various sysctl parameters to optimize servers running Docker containers.
-- **proxmox**: Comprehensive configuration and optimization for Proxmox Virtual Environment (PVE) servers including repository management, ZFS tuning, GPU passthrough, backup configuration, and more.
-- **proxmox_restore_snapshot**: Easy-to-use role for restoring Proxmox snapshots in playbooks.
+
+| Role | Description |
+|------|-------------|
+| `docker_tuning` | Sysctl parameter optimization for Docker container hosts |
+| `proxmox` | Comprehensive Proxmox VE configuration including ZFS tuning and GPU passthrough |
+| `proxmox_restore_snapshot` | Restore Proxmox snapshots in playbooks |
+| `virtualbox` | Installs and configures VirtualBox virtualization software |
 
 ### Monitoring & Exporters
-- **nvidia_exporter**: Sets up NVIDIA GPU metrics exporter for Prometheus monitoring.
+
+| Role | Description |
+|------|-------------|
+| `netdata` | Deploys Netdata monitoring agent with alerting and notifications |
+| `nvidia_exporter` | NVIDIA GPU metrics exporter for Prometheus |
+| `NUT` | Network UPS Tools for UPS monitoring and automated shutdown |
 
 ### Application Deployment
-- **google_earth**: Installs and configures Google Earth on target systems.
-- **olivetin**: Installs and configures OliveTin web-based interface for running Linux shell commands.
 
-### Embedded Systems
-- **raspberry_pi**: Comprehensive Ansible role for configuring Raspberry Pi 3, 4, and 5 devices with extensive configuration options for swap management, logging optimization, power management, boot settings, hardware interfaces, and system tuning.
+| Role | Description |
+|------|-------------|
+| `google_earth` | Installs Google Earth on target systems |
+| `olivetin` | Web-based interface for running Linux shell commands |
+| `kiwix` | Kiwix offline content server with ZIM file management |
+| `astral_uv` | Fast Python package manager written in Rust |
+
+### Embedded & IoT
+
+| Role | Description |
+|------|-------------|
+| `raspberry_pi` | Comprehensive Raspberry Pi configuration (3, 4, 5) |
 
 ### Geospatial
-- **geospatial_data**: Installs geospatial software (QGIS, Marble, Viking) and downloads offline map datasets.
 
-## Quick Start Examples
-
-### Install a single role from the collection
-
-```yaml
----
-- hosts: all
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.debloat
-```
-
-### Install multiple roles
-
-```yaml
----
-- hosts: all
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.debloat
-    - role: brcak_zmaj.almir_ansible.docker_tuning
-    - role: brcak_zmaj.almir_ansible.mysql_tuning
-```
+| Role | Description |
+|------|-------------|
+| `geospatial_data` | Installs QGIS, Marble, Viking and downloads offline map datasets |
 
 ## Contributing
 
-I am accepting GitHub pull requests and issues. There are many ways in which you can participate in the codebase, for example:
+Contributions are welcome via GitHub pull requests and issues:
 
--   Submit bugs and feature requests, and help me verify them
--   Submit and review source code changes in GitHub pull requests
--   Add new roles, modules, etc for more brcak-zmaj resources
+- Submit bugs and feature requests
+- Review and submit source code changes
+- Add new roles and modules
 
 ## License
 
 GPL-3.0-or-later
 
-> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer. This repo contains "shortened" versions of my personal roles - If interested in full versions or custom roles please contact me at ansible@th2h2f0rt1.33mail.com 
+> Note: This is my personal repository. The license you receive is from me, not my employer. These are "shortened" versions of my personal roles - contact ansible@th2h2f0rt1.33mail.com for full versions or custom roles.
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
+
 
 ## Stats
 

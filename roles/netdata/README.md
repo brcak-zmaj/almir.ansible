@@ -401,14 +401,20 @@ None. This role is self-contained and installs all required dependencies.
 
 ## License
 
-This role follows the same license as the main Ansible project.
+GPL-3.0-or-later
 
 ## Author Information
 
-This role was created and is maintained as part of the `brcak_zmaj.almir_ansible` collection.
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
 - Almir Zohorovic
 
 ## Support
 
-For issues, questions, or contributions, please refer to the collection's repository or issue tracker.
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
 
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

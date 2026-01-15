@@ -1,3 +1,4 @@
+# Ansible Role - Geospatial Data
 
 Ansible role for installing geospatial software and downloading offline map data on Linux systems.
 
@@ -23,6 +24,11 @@ This role provides comprehensive geospatial capabilities for Linux systems, incl
 ### Dependencies
 
 - **community.general** collection (required for Flatpak modules)
+
+Install the collection:
+```bash
+ansible-galaxy collection install community.general
+```
 
 ## Features
 
@@ -199,21 +205,6 @@ None
       - "N35W085"
 ```
 
-### System Package Manager Installation (No Flatpak)
-
-```yaml
----
-- name: Install geospatial software via system package manager
-  hosts: workstations
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.geospatial_data
-  vars:
-    user: "almir"
-    use_flatpak: false
-    install_flatpak: false
-```
-
 ### GPS Hardware Configuration
 
 ```yaml
@@ -228,36 +219,6 @@ None
     install_gps_support: true
     gpsd_enabled: true
     gpsd_device: "/dev/ttyACM0"
-```
-
-### Selective Software Installation
-
-```yaml
----
-- name: Install only QGIS
-  hosts: workstations
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.geospatial_data
-  vars:
-    user: "almir"
-    install_marble: false
-    install_viking: false
-```
-
-### Full Planet File Download
-
-```yaml
----
-- name: Download full OpenStreetMap planet file
-  hosts: workstations
-  become: true
-  roles:
-    - role: brcak_zmaj.almir_ansible.geospatial_data
-  vars:
-    user: "almir"
-    osm_download_regions: false
-    osm_download_planet: true
 ```
 
 ## Map Data Organization
@@ -280,18 +241,22 @@ For SRTM and ASTER elevation data, tile identifiers use the format:
 - **Example**: `N34W084` = 34°N, 84°W (Georgia, USA)
 - **Example**: `N44E018` = 44°N, 18°E (Bosnia-Herzegovina)
 
-## Idempotency
-
-All tasks are designed to be idempotent:
-- **Map Downloads**: Existing files are automatically skipped
-- **Software Installation**: Package managers handle existing installations
-- **Directory Creation**: Directories are created only if they don't exist
-- **Service Management**: Services are configured without unnecessary restarts
-
 ## License
 
-MIT
+GPL-3.0-or-later
 
 ## Author Information
 
-Almir Zohorovic
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
+- Almir Zohorovic
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
+
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

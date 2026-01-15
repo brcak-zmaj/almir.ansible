@@ -7,7 +7,7 @@
     path: /etc/systemd/journald.conf.d
     state: directory
     mode: '0755'
-  when: rpi_journald_enable | default(true)
+  when: rpi_journald_enable | bool
 
 - name: Configure systemd journald
   ansible.builtin.template:
@@ -16,23 +16,23 @@
     mode: '0644'
     owner: root
     group: root
-  when: rpi_journald_enable | default(true)
+  when: rpi_journald_enable | bool
   register: journald_config
   notify: restart systemd-journald
 
 - name: Configure syslog if enabled
   ansible.builtin.include_tasks: logging_syslog.yml
-  when: rpi_syslog_manage | default(true)
+  when: rpi_syslog_manage | bool
 
 - name: Configure logrotate if enabled
   ansible.builtin.include_tasks: logging_logrotate.yml
-  when: rpi_logrotate_enable | default(true)
+  when: rpi_logrotate_enable | bool
 
 - name: Clean old journal logs
   ansible.builtin.command: journalctl --vacuum-time={{ rpi_journald_max_retention_days }}d
+  register: journal_vacuum
   when:
-    - rpi_journald_enable | default(true)
+    - rpi_journald_enable | bool
     - journald_config.changed | default(false)
-  changed_when: true
+  changed_when: "'Vacuuming done' in journal_vacuum.stdout and 'freed 0B' not in journal_vacuum.stdout"
   failed_when: false
-

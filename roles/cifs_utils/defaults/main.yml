@@ -1,0 +1,6 @@
+---
+# cifs_utils role defaults
+
+# Control whether to install or uninstall cifs-utils
+# Set to true to install, false to uninstall
+cifs_utils_install: true

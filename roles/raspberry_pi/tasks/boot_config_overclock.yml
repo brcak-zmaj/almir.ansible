@@ -3,44 +3,43 @@
 
 - name: Configure ARM frequency
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?arm_freq="
     line: "arm_freq={{ rpi_overclock_arm_freq }}"
     state: present
 
 - name: Configure minimum ARM frequency
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?arm_freq_min="
     line: "arm_freq_min={{ rpi_overclock_arm_freq_min }}"
     state: present
 
 - name: Configure GPU frequency
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?gpu_freq="
     line: "gpu_freq={{ rpi_overclock_gpu_freq }}"
     state: present
 
 - name: Configure SDRAM frequency
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?sdram_freq="
     line: "sdram_freq={{ rpi_overclock_sdram_freq }}"
     state: present
 
 - name: Configure overvoltage
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?over_voltage="
     line: "over_voltage={{ rpi_overclock_voltage }}"
     state: "{{ 'present' if rpi_overclock_voltage | int > 0 else 'absent' }}"
 
 - name: Configure force turbo
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?force_turbo="
-    line: "force_turbo={{ 1 if rpi_overclock_force_turbo | default(false) else 0 }}"
-    state: "{{ 'present' if rpi_overclock_force_turbo | default(false) else 'absent' }}"
-  when: rpi_overclock_force_turbo | default(false)
-
+    line: "force_turbo={{ 1 if rpi_overclock_force_turbo | bool else 0 }}"
+    state: "{{ 'present' if rpi_overclock_force_turbo | bool else 'absent' }}"
+  when: rpi_overclock_force_turbo | bool

@@ -1,4 +1,8 @@
 ---
+# Preconfigure the Host
+- name: "Preconfigure the Host"
+  ansible.builtin.include_tasks: preconfig.yml
+
 # Repository and Package Management
 - name: "Configure repositories and install microcode"
   ansible.builtin.include_tasks: ucode.yml
@@ -26,10 +30,6 @@
 # Subscription Nag Removal
 - name: "Remove subscription nag"
   ansible.builtin.include_tasks: subscription-nag.yml
-
-# UV (Python package manager) Installation
-- name: "Install and configure uv"
-  ansible.builtin.include_tasks: uv_install.yml
 
 # ISO and LXC Template Management
 - name: "Manage ISO and LXC templates"

@@ -1,33 +1,46 @@
 
 
+---
 - name: Ensure sysctl.d directory exists
-  file:
+  ansible.builtin.file:
     path: /etc/sysctl.d
     state: directory
+    owner: root
+    group: root
     mode: '0755'
+  tags: [pc_tuning, sysctl]
+
+- name: Load BBR kernel module
+  community.general.modprobe:
+    name: tcp_bbr
+    state: present
+  failed_when: false
+  tags: [pc_tuning, sysctl]
 
 - name: Apply system tuning via sysctl
-  sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
     state: present
     reload: true
   loop: "{{ workstation_sysctl_settings }}"
+  tags: [pc_tuning, sysctl]
 
 - name: Persist workstation sysctl settings
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sysctl.d/99-workstation-tuning.conf
     line: "{{ item.name }} = {{ item.value }}"
     regexp: "^#?{{ item.name }}"
     state: present
-    create: yes
+    create: true
     owner: root
     group: root
     mode: '0644'
   loop: "{{ workstation_sysctl_settings }}"
+  tags: [pc_tuning, sysctl]
 
 - name: Set limits for user sessions
-  copy:
+  ansible.builtin.copy:
     dest: /etc/security/limits.d/99-workstation.conf
     content: |
       * soft nofile {{ user_nofile }}
@@ -39,10 +52,4 @@
     owner: root
     group: root
     mode: '0644'
-
-- name: Enable BBR if available
-  ansible.builtin.shell: |
-    modprobe tcp_bbr
-  register: bbr_modprobe
-  failed_when: false
-  changed_when: bbr_modprobe.rc == 0
+  tags: [pc_tuning, limits]

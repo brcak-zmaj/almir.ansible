@@ -1,5 +1,4 @@
 ---
-# OpenStreetMap Map Data Downloads
 
 - name: Create OSM data directory
   ansible.builtin.file:
@@ -46,4 +45,5 @@
   become: yes
   loop_control:
     label: "{{ item | basename }}"
+
 

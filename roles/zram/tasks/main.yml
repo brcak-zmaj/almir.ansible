@@ -1,0 +1,202 @@
+---
+# =============================================================================
+# ZRAM Role - Main Tasks
+# =============================================================================
+# Manages Linux memory compression using zram via systemd zram-generator
+
+- name: Validate role is enabled
+  ansible.builtin.debug:
+    msg: "zram role is disabled (zram_enabled={{ zram_enabled }})"
+  when: not zram_enabled | bool
+  tags: zram
+
+- name: End play if zram is disabled
+  ansible.builtin.meta: end_host
+  when: not zram_enabled | bool
+  tags: zram
+
+# =============================================================================
+# KERNEL SUPPORT DETECTION
+# =============================================================================
+- name: Check if zram kernel module is available
+  ansible.builtin.stat:
+    path: /sys/module/zram
+  register: zram_module_loaded
+  tags: zram
+
+- name: Check for zram module in kernel modules
+  ansible.builtin.find:
+    paths: "/lib/modules/{{ ansible_kernel }}/kernel/drivers/block"
+    patterns: "zram.ko*"
+    recurse: false
+  register: zram_module_file
+  when: not zram_module_loaded.stat.exists
+  tags: zram
+
+- name: Set zram kernel support fact
+  ansible.builtin.set_fact:
+    zram_kernel_supported: "{{ zram_module_loaded.stat.exists or (zram_module_file.files | default([]) | length > 0) }}"
+  tags: zram
+
+- name: Fail if zram kernel module is not available
+  ansible.builtin.fail:
+    msg: >
+      zram kernel module is not available on this system.
+      Ensure CONFIG_ZRAM is enabled in your kernel configuration.
+  when: not zram_kernel_supported | bool
+  tags: zram
+
+# =============================================================================
+# EXISTING CONFIGURATION DETECTION
+# =============================================================================
+- name: Check for existing zram device
+  ansible.builtin.stat:
+    path: "/dev/{{ zram_device_name }}"
+  register: zram_device_exists
+  tags: zram
+
+# NOTE: Using command is unavoidable here - no native Ansible module for swap inspection
+- name: Check if zram swap is currently active
+  ansible.builtin.command:
+    cmd: "swapon --show=NAME --noheadings"
+  register: zram_swap_output
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  tags: zram
+
+- name: Set zram swap active fact
+  ansible.builtin.set_fact:
+    zram_swap_active_result: "{{ zram_device_name in (zram_swap_output.stdout | default('')) }}"
+  tags: zram
+
+# =============================================================================
+# CURRENT RUNTIME STATE DETECTION
+# =============================================================================
+- name: Get current zram disk size
+  ansible.builtin.slurp:
+    src: "/sys/block/{{ zram_device_name }}/disksize"
+  register: zram_current_disksize_raw
+  when: zram_device_exists.stat.exists
+  failed_when: false
+  tags: zram
+
+- name: Get current zram compression algorithm
+  ansible.builtin.slurp:
+    src: "/sys/block/{{ zram_device_name }}/comp_algorithm"
+  register: zram_current_algorithm_raw
+  when: zram_device_exists.stat.exists
+  failed_when: false
+  tags: zram
+
+- name: Set current zram state facts
+  ansible.builtin.set_fact:
+    zram_current_disksize_bytes: "{{ (zram_current_disksize_raw.content | default('') | b64decode | trim) if zram_current_disksize_raw is defined and zram_current_disksize_raw.content is defined else '0' }}"
+    zram_current_algorithm: >-
+      {%- if zram_current_algorithm_raw is defined and zram_current_algorithm_raw.content is defined -%}
+        {%- set algo_line = zram_current_algorithm_raw.content | b64decode | trim -%}
+        {%- for algo in algo_line.split() -%}
+          {%- if algo.startswith('[') and algo.endswith(']') -%}
+            {{ algo[1:-1] }}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        unknown
+      {%- endif -%}
+  tags: zram
+
+- name: Calculate current zram size in MB
+  ansible.builtin.set_fact:
+    zram_current_size_mb: "{{ (zram_current_disksize_bytes | int / 1024 / 1024) | round(0) | int }}"
+  tags: zram
+
+- name: Check for existing zram-generator configuration
+  ansible.builtin.stat:
+    path: "{{ zram_config_file }}"
+  register: zram_config_exists
+  tags: zram
+
+- name: Read existing zram-generator configuration
+  ansible.builtin.slurp:
+    src: "{{ zram_config_file }}"
+  register: zram_existing_config
+  when: zram_config_exists.stat.exists
+  tags: zram
+
+- name: Set existing configuration fact
+  ansible.builtin.set_fact:
+    zram_is_active: "{{ zram_device_exists.stat.exists and zram_swap_active_result | default(false) | bool }}"
+    zram_existing_config_content: "{{ (zram_existing_config.content | default('') | b64decode) if zram_config_exists.stat.exists else '' }}"
+  tags: zram
+
+# =============================================================================
+# DISPLAY CURRENT STATE
+# =============================================================================
+- name: Display current zram state
+  ansible.builtin.debug:
+    msg: |
+      === Current zram State ===
+      Device exists: {{ zram_device_exists.stat.exists }}
+      Swap active: {{ zram_swap_active_result | default(false) }}
+      Current size: {{ zram_current_size_mb | default('N/A') }} MB
+      Current algorithm: {{ zram_current_algorithm | default('N/A') }}
+      Config file exists: {{ zram_config_exists.stat.exists }}
+
+      === Desired Configuration ===
+      Size formula: {{ zram_size }}
+      Algorithm: {{ zram_compression_algorithm | default('(kernel default)') }}
+      Priority: {{ zram_swap_priority }}
+  when: zram_device_exists.stat.exists
+  tags: zram
+
+# =============================================================================
+# PACKAGE INSTALLATION
+# =============================================================================
+- name: Include OS-specific package installation
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}.yml"
+  tags: zram
+
+# =============================================================================
+# CONFIGURATION DEPLOYMENT
+# =============================================================================
+# Note: The template module handles idempotency - it only changes the file
+# if the content differs. The handler will only run if the config changes.
+- name: Deploy zram-generator configuration
+  ansible.builtin.template:
+    src: zram-generator.conf.j2
+    dest: "{{ zram_config_file }}"
+    owner: root
+    group: root
+    mode: "{{ zram_config_file_mode }}"
+  register: zram_config_deployed
+  notify:
+    - Reload systemd daemon
+    - Restart zram swap
+  tags: zram
+
+- name: Report configuration change status
+  ansible.builtin.debug:
+    msg: |
+      {% if zram_config_deployed.changed %}
+      === Configuration Changed ===
+      The zram-generator configuration has been updated.
+      zram will be restarted to apply the new settings.
+      {% else %}
+      === No Changes Required ===
+      Current zram configuration matches desired state.
+      No restart needed.
+      {% endif %}
+  tags: zram
+
+# =============================================================================
+# VERIFICATION
+# =============================================================================
+- name: Verify zram configuration status
+  ansible.builtin.debug:
+    msg: >
+      zram configuration complete.
+      Device: /dev/{{ zram_device_name }}
+      Size formula: {{ zram_size }}
+      Compression: {{ zram_compression_algorithm | default('kernel default') }}
+      Priority: {{ zram_swap_priority }}
+  tags: zram

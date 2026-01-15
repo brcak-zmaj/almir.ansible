@@ -1,15 +1,10 @@
 <p align="center">
-<a href="https://www.netdata.cloud#gh-light-mode-only">
-  <img src="https://www.netdata.cloud/img/readme-images/netdata_readme_logo_light.png" alt="Netdata" width="300"/>
-</a>
-<a href="https://www.netdata.cloud#gh-dark-mode-only">
-  <img src="https://www.netdata.cloud/img/readme-images/netdata_readme_logo_dark.png" alt="Netdata" width="300"/>
-</a>
+  <img src="https://www.olivetin.app/images/logo.svg" alt="OliveTin" width="300"/>
 </p>
-<h3 align="center">X-Ray Vision for your infrastructure!</h3>
+<h3 align="center">Safe and simple access to predefined shell commands from a web interface</h3>
 
 
-# OliveTin Ansible Role
+# Ansible Role - OliveTin
 
 Lightweight Ansible role to install and configure OliveTin via package or Docker.
 
@@ -23,7 +18,7 @@ Package install (default):
 - hosts: servers
   become: true
   roles:
-    - role: almir.olivetin
+    - role: brcak_zmaj.almir_ansible.olivetin
       vars:
         olivetin_install_method: package
 ```
@@ -35,7 +30,7 @@ Docker install:
   become: true
   roles:
     - role: geerlingguy.docker  # ensure docker present
-    - role: almir.olivetin
+    - role: brcak_zmaj.almir_ansible.olivetin
       vars:
         olivetin_install_method: docker
         olivetin_docker_config_path: /opt/olivetin
@@ -86,7 +81,7 @@ Then reference it in your playbook as:
 - hosts: servers
   become: true
   roles:
-    - role: brcak_zmaj.almir_ansible.almir.olivetin
+    - role: brcak_zmaj.almir_ansible.olivetin
 ```
 
 ## Paths
@@ -139,6 +134,22 @@ This role allows to uninstall and cleanup when `olivetin_uninstall: true` is set
 - [Debian Installation Guide](https://docs.olivetin.app/install/linux_deb.html)
 - [Docker Compose Guide](https://docs.olivetin.app/install/docker_compose.html)
 
+## License
+
+GPL-3.0-or-later
+
 ## Author Information
 
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
 - Almir Zohorovic
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
+
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/7a7fe37d43ef2cab7bdbc23ba8c5cfe3cfbdf832.svg "Repobeats analytics image")

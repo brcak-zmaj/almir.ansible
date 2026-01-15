@@ -1,8 +1,21 @@
 ---
+# Minimal role metadata for Galaxy/portability
 galaxy_info:
-  author: Almir Zohorovic
-  description: Install and configure OliveTin web interface.
+  author: almir
+  description: "Install and configure OliveTin (package or docker)"
+  company: brcak_zmaj
   license: MIT
   min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - webui
+    - olive
+    - tin
 
 dependencies: []

@@ -1,7 +1,6 @@
 <img src="https://raw.githubusercontent.com/geerlingguy/mac-dev-playbook/master/files/Mac-Dev-Playbook-Logo.png" width="250" height="156" alt="Playbook Logo" />
 
 
-
 # Ansible Role - Docker Server Tuning
 
 This Ansible role applies optimized system settings for servers running Docker, ensuring maximum performance, reliability, and efficiency.
@@ -62,9 +61,21 @@ ansible-galaxy collection install brcak_zmaj.almir_ansible
     - role: brcak_zmaj.almir_ansible.docker_tuning
 ```
 
+## License
+
+GPL-3.0-or-later
+
 ## Author Information
 
--   [Almir Zohorovic](https://github.com/brcak-zmaj)
+> Note: I am providing code in the repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not my employer.
+
+This role is maintained as part of the `brcak_zmaj.almir_ansible` collection.
+- Almir Zohorovic
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/brcak-zmaj/almir.ansible/issues) page.
+
 
 ## Stats
 

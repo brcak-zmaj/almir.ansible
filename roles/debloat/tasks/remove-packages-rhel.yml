@@ -1,0 +1,10 @@
+---
+# RHEL/Fedora package removal using DNF
+
+- name: Remove packages (RHEL/Fedora)
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ debloat_packages_final }}"
+    state: absent
+    autoremove: false
+  when: debloat_packages_final | length > 0

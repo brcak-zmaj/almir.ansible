@@ -5,8 +5,15 @@
   ansible.builtin.timezone:
     name: "{{ rpi_timezone }}"
 
+- name: Check if locale is already generated
+  ansible.builtin.command: locale -a
+  register: locale_list
+  changed_when: false
+  failed_when: false
+
 - name: Configure locale
   ansible.builtin.command: locale-gen {{ rpi_locale }}
+  when: rpi_locale | replace('.', '') | replace('-', '') | lower not in (locale_list.stdout | lower)
   changed_when: true
   failed_when: false
 

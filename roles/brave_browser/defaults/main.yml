@@ -1,7 +1,0 @@
----
-## Brave Browser
-brave_repo: "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main"
-brave_baseurl: "https://brave-browser-rpm-release.s3.brave.com/x86_64/"
-brave_gpgkey: "https://brave-browser-rpm-release.s3.brave.com/brave-core.asc"
-brave_keyring: "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"
-brave_pkg_name: "brave-browser"

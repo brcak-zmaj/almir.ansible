@@ -1,11 +1,4 @@
 ---
-# Marble Installation
-# Install Marble Virtual Globe - Virtual globe and world atlas
-
-- name: Get system architecture for Flatpak refs
-  ansible.builtin.set_fact:
-    flatpak_arch: "{{ 'x86_64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
-  when: use_flatpak
 
 - name: Install Marble via Flatpak
   community.general.flatpak:
@@ -27,22 +20,3 @@
     - not use_flatpak
     - install_marble
   become: yes
-
-- name: Verify Marble installation
-  ansible.builtin.command: "{{ 'flatpak run org.kde.marble --version' if use_flatpak else 'marble --version' }}"
-  register: marble_version
-  changed_when: false
-  failed_when: false
-  when: 
-    - install_marble
-    - verify_dependencies
-  become: yes
-
-- name: Display Marble version
-  ansible.builtin.debug:
-    msg: "Marble version: {{ marble_version.stdout }}"
-  when: 
-    - install_marble
-    - verify_dependencies
-    - marble_version.rc == 0
-

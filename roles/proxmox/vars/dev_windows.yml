@@ -1,0 +1,15 @@
+# Variables for Windows tagged VMs
+d_windows_cpu: "x86-64-v4"           # Set CPU model for Windows VMs
+d_windows_cores: 2              # Set number of CPU cores for Windows VMs
+d_windows_memory: 2048          # Set memory for Windows VMs (8GB)
+d_windows_numa: 1               # Enable NUMA for memory management
+d_windows_ballooning: 0         # Disable ballooning for memory
+
+# Additional VM options for Windows VMs
+d_windows_agent: 1              # Enable QEMU Guest Agent
+d_windows_freeze: 0             # Disable CPU freeze at startup
+d_windows_kvm: 1                # Ensure KVM Hardware Virtualization is enabled
+d_windows_spice_enhancements: none  # Disable SPICE enhancements (if not needed)
+d_windows_virtio: 1             # Enable virtio drivers for better performance
+d_windows_disk_interface: "virtio"  # Set disk interface to virtio for speed
+d_windows_machine_type: "pc-q35-7.0"

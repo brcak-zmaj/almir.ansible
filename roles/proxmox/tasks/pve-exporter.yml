@@ -1,0 +1,153 @@
+---
+
+# -------------------------
+# Virtual Environment Setup
+# -------------------------
+
+- name: Ensure pve-exporter venv directory exists
+  ansible.builtin.file:
+    path: "{{ pve_exporter_venv }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create pve-exporter virtual environment
+  ansible.builtin.command:
+    cmd: uv venv "{{ pve_exporter_venv }}"
+    creates: "{{ pve_exporter_venv }}/bin/python"
+
+- name: Install prometheus-pve-exporter in venv
+  ansible.builtin.command:
+    cmd: "{{ pve_exporter_venv }}/bin/uv pip install prometheus-pve-exporter"
+  register: pve_exporter_pip_install
+  changed_when: "'Installed' in pve_exporter_pip_install.stdout"
+
+# -------------------------
+# Proxmox User & Token Setup
+# -------------------------
+
+- name: Check if PVE exporter user exists
+  ansible.builtin.command:
+    cmd: "pveum user list --output-format json"
+  register: pve_user_list
+  changed_when: false
+
+- name: Set fact for user existence
+  ansible.builtin.set_fact:
+    pve_exporter_user_exists: "{{ pve_exporter_user in (pve_user_list.stdout | from_json | map(attribute='userid') | list) }}"
+
+- name: Create PVE exporter user
+  ansible.builtin.command:
+    cmd: >
+      pveum user add {{ pve_exporter_user }}
+      --comment "Prometheus PVE Exporter"
+  when: not pve_exporter_user_exists
+  register: pve_user_create
+  changed_when: pve_user_create.rc == 0
+
+- name: Ensure PVEAuditor role assigned to exporter user
+  ansible.builtin.command:
+    cmd: "pveum acl modify / -user {{ pve_exporter_user }} -role PVEAuditor"
+  register: pve_acl_result
+  changed_when: false
+
+# -------------------------
+# Token Management (Idempotent)
+# -------------------------
+
+- name: Check if pve.yml config exists
+  ansible.builtin.stat:
+    path: /etc/prometheus/pve.yml
+  register: pve_config_stat
+
+- name: Check if token exists for user
+  ansible.builtin.command:
+    cmd: "pveum user token list {{ pve_exporter_user }} --output-format json"
+  register: pve_token_list
+  changed_when: false
+  failed_when: false
+
+- name: Set fact for token existence
+  ansible.builtin.set_fact:
+    pve_exporter_token_exists: >-
+      {{ (pve_token_list.rc == 0) and 
+         (pve_exporter_token_name in (pve_token_list.stdout | from_json | default([]) | map(attribute='tokenid') | map('regex_replace', '^.*!', '') | list)) }}
+
+- name: Determine if token recreation is needed
+  ansible.builtin.set_fact:
+    pve_exporter_recreate_token: >-
+      {{ (not pve_config_stat.stat.exists) or 
+         (not pve_exporter_token_exists) or 
+         pve_exporter_force_token_recreate }}
+
+- name: Delete existing exporter token (when recreating)
+  ansible.builtin.command:
+    cmd: "pveum user token delete {{ pve_exporter_user }} {{ pve_exporter_token_name }}"
+  when:
+    - pve_exporter_recreate_token
+    - pve_exporter_token_exists
+  register: pve_token_delete
+  changed_when: pve_token_delete.rc == 0
+  failed_when: false
+
+- name: Create exporter token
+  ansible.builtin.command:
+    cmd: >
+      pveum user token add {{ pve_exporter_user }}
+      {{ pve_exporter_token_name }}
+      --privsep 0
+  when: pve_exporter_recreate_token
+  register: pve_token_create
+  changed_when: pve_token_create.rc == 0
+  no_log: true
+
+- name: Extract token secret from creation output
+  ansible.builtin.set_fact:
+    pve_exporter_token_secret: "{{ pve_token_create.stdout | regex_search('value\\s+([A-Za-z0-9-]+)', '\\1') | first }}"
+  when: pve_exporter_recreate_token
+  no_log: true
+
+# -------------------------
+# Exporter Configuration
+# -------------------------
+
+- name: Ensure Prometheus config directory exists
+  ansible.builtin.file:
+    path: /etc/prometheus
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Write pve.yml config
+  ansible.builtin.template:
+    src: pve.yml.j2
+    dest: /etc/prometheus/pve.yml
+    mode: '0640'
+    owner: root
+    group: root
+  when: pve_exporter_recreate_token
+  notify: Restart pve-exporter
+
+# -------------------------
+# Systemd Service
+# -------------------------
+
+- name: Install systemd service
+  ansible.builtin.template:
+    src: pve-exporter.service.j2
+    dest: /etc/systemd/system/pve-exporter.service
+    mode: '0644'
+    owner: root
+    group: root
+  notify:
+    - Reload systemd
+    - Restart pve-exporter
+
+- name: Enable and start pve-exporter
+  ansible.builtin.systemd:
+    name: pve-exporter
+    enabled: true
+    state: started
+    daemon_reload: true
