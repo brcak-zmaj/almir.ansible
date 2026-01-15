@@ -1,8 +1,0 @@
-
-- name: Install Rust and Cargo | Dev
-  ansible.builtin.package:
-    name: "{{ rust_pkg }}"
-    state: "{{ 'present' if rust else 'absent' }}"
-  loop: "{{ rust_packages }}"
-  loop_control:
-    loop_var: rust_pkg

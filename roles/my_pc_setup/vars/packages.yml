@@ -1,14 +1,15 @@
+---
+## Package Lists - Organized by Category and Distro
+## These are imported from vars during role execution
+## All packages are configurable via defaults/main.yml toggles
 
-## Dash to dock ---------------------------------------------------------
-gnome_shell_extensions_packages:
-  - gnome-shell-extension-dash-to-dock
-  - gnome-shell-extensions
-
+# GNOME Desktop Packages
 gnome_packages:
   - gnome-extensions-app            # Manage and configure GNOME Shell extensions
   - gnome-tweaks                    # Advanced GNOME desktop configuration tool
 
-# Common system packages to be installed
+# Cross-distro Common Packages
+# Installed when utilities: true
 common_packages:
   # Version Control and Development Tools
   - git                             # Version control system
@@ -34,6 +35,9 @@ common_packages:
   # Media and Audio Tools
   - flac                            # Free Lossless Audio Codec (audio compression tool)
   - kdenlive                        # Non-linear video editor for Linux
+  - mpv                             # Video player
+  - mkvtoolnix                      # Matroska (MKV) file tools
+  - mkvtoolnix-gui                  # GUI for mkvtoolnix
 
   # Miscellaneous Utilities
   - cowsay                          # ASCII art generator with cows
@@ -46,8 +50,17 @@ common_packages:
   - chromium                        # Open-source web browser
   - obs-studio                      # Open source software for video recording and live streaming
   - ripgrep                         # Fast text searcher with regex support
+  - nvtop                           # NVIDIA GPU process monitoring tool
+  - discord                         # Voice, video, and text chat application
+  - thunderbird                     # Email client
+  - p7zip                           # File archiver with high compression ratio
+  - p7zip-gui                       # Graphical user interface for p7zip
+  - p7zip-plugins                   # Additional plugins for p7zip
+  - rpi-imager                      # Raspberry Pi OS imager tool
 
-# Debian-Specific Development and Build Tools
+
+# Debian/Ubuntu-Specific Packages
+# Only installed on ansible_os_family == 'Debian'
 debian_packages:
   - build-essential                 # Essential tools for building software
   - gnupg-agent                     # GNU Privacy Guard agent for key management
@@ -57,16 +70,15 @@ debian_packages:
   - vlc                             # Media player supporting various audio and video formats
   - ffmpeg                          # Multimedia processing tool (audio/video)
   - flameshot                       # Screenshot tool with annotation features
-
-  # Debian-Specific Utilities and System Tools
   - dialog                          # Utility for creating dialog boxes from shell scripts
   - grc                             # Generic colorizer for command outputs
   - ncdu                            # Disk usage analyzer
   - iptraf                          # Real-time network monitoring tool
-  - kdenlive                        # Non-linear video editor for Linux
   - bashtop                         # Resource monitor for Linux
-  
-# RedHat-Specific Development and Build Tools
+
+
+# Red Hat/Fedora-Specific Packages
+# Only installed on ansible_os_family == 'RedHat'
 redhat_packages:
   - kernel-devel                    # Development files for building kernel modules
   - kernel-headers                  # Header files for kernel development
@@ -80,6 +92,9 @@ redhat_packages:
   - btrfs-assistant                 # GUI tool for managing Btrfs volumes
   - snapper                         # Tool for managing Btrfs snapshots
 
-# Nvidia GPU Packages
-  - akmod-nvidia
-  - xorg-x11-drv-nvidia-cuda
+
+# NVIDIA GPU-Specific Packages
+# Only installed when NVIDIA GPU detected
+nvidia_packages:
+  - akmod-nvidia                    # NVIDIA kernel module
+  - xorg-x11-drv-nvidia-cuda        # NVIDIA CUDA support

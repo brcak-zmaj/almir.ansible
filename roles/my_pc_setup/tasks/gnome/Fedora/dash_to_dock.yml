@@ -1,3 +1,4 @@
+---
 
 - name: Ensure GNOME extensions and tools are installed | Dash to Dock
   become: true
@@ -23,7 +24,7 @@
     gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
     gsettings set org.gnome.shell.extensions.dash-to-dock autohide false
     gsettings set org.gnome.shell.extensions.dash-to-dock intellihide false
-    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'BOTTOM'
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
   changed_when: false
 
 - name: Set Dash-to-Dock max icon size via dconf | Dash to Dock

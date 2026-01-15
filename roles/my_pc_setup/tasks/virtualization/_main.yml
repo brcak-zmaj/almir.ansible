@@ -2,7 +2,3 @@
 - name: Include libvirt tasks
   ansible.builtin.include_tasks: libvirt.yml
   when: libvirt is defined and libvirt == true
-
-- name: Include VirtualBox tasks
-  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}_virtualbox.yml"
-  when: virtualbox is defined and virtualbox == true

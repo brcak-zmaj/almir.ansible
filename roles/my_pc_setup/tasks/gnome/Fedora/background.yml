@@ -11,7 +11,7 @@
     key: "/org/gnome/desktop/background/picture-options"
     value: "'zoom'"
 
-- name: Copy wallpaper to user's home directory | Background
+- name: Copy wallpaper to home directory | Background
   become_user: "{{ user }}"
   ansible.builtin.copy:
     src: "{{ wallpaper_src }}"
@@ -19,27 +19,28 @@
     owner: almir
     group: almir
     mode: '0644'
+  when: wallpaper is defined and wallpaper == true
 
 - name: Set picture URI for GNOME desktop background | Backgroundv
   become_user: "{{ user }}"
   community.general.dconf:
     key: "/org/gnome/desktop/background/picture-uri"
-    value: "'file://{{ wallpaper_dest }}/wallpaper.png'"
+    value: "'file:///usr/share/backgrounds/gnome/vnc-l.png'"
 
 - name: Set dark picture URI for GNOME desktop background | Background
   become_user: "{{ user }}"
   community.general.dconf:
     key: "/org/gnome/desktop/background/picture-uri-dark"
-    value: "'file://{{ wallpaper_dest }}/wallpaper.png'"
+    value: "'file:///usr/share/backgrounds/gnome/vnc-d.png'"
 
 - name: Set primary color for GNOME desktop background | Background
   become_user: "{{ user }}"
   community.general.dconf:
     key: "/org/gnome/desktop/background/primary-color"
-    value: "'#000000000000'"
+    value: "'#77767B'"
 
 - name: Set secondary color for GNOME desktop background | Background
   become_user: "{{ user }}"
   community.general.dconf:
     key: "/org/gnome/desktop/background/secondary-color"
-    value: "'#000000000000'"
+    value: "'#000000'"

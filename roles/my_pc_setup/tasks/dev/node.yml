@@ -1,9 +1,19 @@
+---
 
 - name: Install Node.js and npm | Dev
   ansible.builtin.package:
-    name: "{{ node_pkg }}"
+    name: "{{ item }}"
     state: "{{ 'present' if node else 'absent' }}"
-  loop: "{{ nodejs_npm_packages }}"
-  loop_control:
-    loop_var: node_pkg
-  notify: Install NPM Packages
+  loop: "{{ nodejs_npm_packages_debian if ansible_os_family == 'Debian' else nodejs_npm_packages_redhat }}"
+  register: nodejs_install
+
+- name: Install global NPM packages | Dev
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: "{{ 'present' if node else 'absent' }}"
+  loop: "{{ global_npm_packages }}"
+  when: 
+    - node is defined
+    - node | bool
+    - nodejs_install is succeeded

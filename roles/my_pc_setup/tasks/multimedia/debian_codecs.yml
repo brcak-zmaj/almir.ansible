@@ -1,6 +1,0 @@
-
-- name: Install GStreamer codecs for Debian | Multimedia
-  ansible.builtin.package:
-    name: "{{ item }}"
-    state: present
-  loop: "{{ gstreamer_debian_packages }}"

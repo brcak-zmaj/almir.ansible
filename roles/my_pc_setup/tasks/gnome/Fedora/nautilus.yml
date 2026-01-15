@@ -11,6 +11,18 @@
     key: /org/gnome/nautilus/list-view/default-visible-columns
     value: "['name', 'size', 'date_modified', 'date_created', 'detailed_type']"
 
+- name: Set default zoom level in Nautilus list view | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/list-view/default-zoom-level
+    value: "'medium'"
+
+- name: Set default compression format in Nautilus | Nautilus
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/nautilus/compression/default-compression-format
+    value: "'7z'"
+
 - name: Set default folder viewer to list view in Nautilus | Nautilus
   become_user: "{{ user }}"
   community.general.dconf:

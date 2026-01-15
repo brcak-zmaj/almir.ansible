@@ -1,8 +1,0 @@
-
-- name: PHP | Dev
-  ansible.builtin.package:
-    name: "{{ php_pkg }}"
-    state: "{{ 'present' if php else 'absent' }}"
-  loop: "{{ php_dev_packages }}"
-  loop_control:
-    loop_var: php_pkg

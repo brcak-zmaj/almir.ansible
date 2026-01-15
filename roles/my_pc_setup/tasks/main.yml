@@ -1,19 +1,13 @@
 ---
-
-# ---------------------------------------------------
-
-      ## Include additional Vars
-
 - name: Include all vars files
   ansible.builtin.include_vars:
     file: "{{ item }}"
-    name: null  # <-- This makes vars global
+    name: null
   loop:
-    - workstation_vars.yml
     - packages.yml
-    - python_packages.yml
     - flatpak_vars.yml
     - bash_alias.yml
+
 # ---------------------------------------------------
 
       ## Check desktop env
@@ -39,7 +33,6 @@
   include_tasks: "{{ item.file }}"
   tags: "{{ item.tags | default(omit) }}"
   loop:
-#    - { file: "debloat/_main.yml", tags: "package_mgmt" }
     - { file: "prep/_main.yml", tags: "package_mgmt" }
     - { file: "dev/_main.yml" }
     - { file: "games/_main.yml" }

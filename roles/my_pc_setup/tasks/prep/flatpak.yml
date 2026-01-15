@@ -1,4 +1,3 @@
-
 - name: Add flatpak support | Prep
   ansible.builtin.package:
     name: flatpak
@@ -13,22 +12,10 @@
     method: user
     state: present
 
-- name: Install flatpak packages | Prep
+- name: Install regular flatpak packages | Prep
   become_user: "{{ user }}"
   community.general.flatpak:
     method: user
-    name: "{{ flatpak_pkg }}"
+    name: "{{ item }}"
     state: present
   loop: "{{ flatpak_packages }}"
-  loop_control:
-    loop_var: flatpak_pkg
-
-- name: Uninstall flatpak packages | Prep
-  become_user: "{{ user }}"
-  community.general.flatpak:
-    method: user
-    name: "{{ flatpak_pkg }}"
-    state: absent
-  loop: "{{ uninstall_flatpak_packages }}"
-  loop_control:
-    loop_var: flatpak_pkg

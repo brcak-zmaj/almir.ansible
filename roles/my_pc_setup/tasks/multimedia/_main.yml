@@ -1,5 +1,5 @@
 ---
 
 - name: Include codecs tasks
-  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}_codecs.yml"
+  ansible.builtin.include_tasks: codecs.yml
   when: codecs is defined and codecs == true

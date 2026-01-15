@@ -3,10 +3,3 @@
 - name: Include Remmina tasks
   ansible.builtin.include_tasks: reminna.yml
   when: reminna is defined and reminna == true
-
-- name: Include Google Earth tasks
-  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}_google_earth.yml"
-  when:
-    - ansible_distribution in ["Debian", "Pop!_OS", "Ubuntu"]
-    - earth is defined
-    - earth == true  

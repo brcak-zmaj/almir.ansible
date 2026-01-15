@@ -5,14 +5,11 @@
 
 - name: Remove preinstalled clutter from home directory | Prep 
   ansible.builtin.file:
-    path: "{{ home_dir }}/{{ clutter_item }}"
+    path: "{{ home_dir }}/{{ item }}"
     state: absent
   loop: "{{ home_dir_clutter }}"
-  loop_control:
-    loop_var: clutter_item
 
 - name: Copy update script based on OS distribution
-  become: true
   ansible.builtin.copy:
     src: "{{ ansible_os_family | lower }}_update.sh"
     dest: "{{ home_dir }}/update.sh"
@@ -20,59 +17,69 @@
 
 - name: Add multiple aliases to .bashrc | Prep
   ansible.builtin.lineinfile:
-    path: /home/{{ user }}/.bashrc
-    line: "{{ alias_line }}"
+    path: "{{ home_dir }}/.bashrc"
+    line: "{{ item }}"
     state: present
     insertafter: EOF
-  loop: "{{ bash_aliases }}"
-  loop_control:
-    loop_var: alias_line
+  loop: 
+    - "{{ bash_aliases }}"
 
 - name: Ensure .ssh directory exists
-  become: true
   ansible.builtin.file:
-    path: "/home/{{ user }}/.ssh"
+    path: "{{ home_dir }}/.ssh"
     state: directory
     owner: "{{ user }}"
     group: "{{ user }}"
     mode: '0700'
 
 - name: Restore SSH private key
-  become: true
   ansible.builtin.copy:
-    content: "{{ ssh_private_key }}"
-    dest: "/home/{{ user }}/.ssh/id_rsa"
+    content: "{{ user_priv_ssh }}"
+    dest: "{{ home_dir }}/.ssh/id_rsa"
     owner: "{{ user }}"
     group: "{{ user }}"
     mode: '0600'
 
 - name: Copy SSH public key to authorized_keys
-  become: true
   ansible.builtin.copy:
-    src: "id_rsa.pub"
-    dest: "/home/{{ user }}/.ssh/id_rsa.pub"
+    src: "{{ user_pub_ssh }}"
+    dest: "{{ home_dir }}/.ssh/id_rsa.pub"
     owner: "{{ user }}"
     group: "{{ user }}"
     mode: '0600'
-
-#########################  Distro Specific #########################
-
-- name: Include distribution-specific setup task | Prep
-  ansible.builtin.include_tasks: "{{ ansible_distribution | lower }}_specific.yml"
 
 #########################  Packages #########################
 
 - name: Install Python 3 and pip3 | Prep
   ansible.builtin.package:
-    name: "{{ py_pkg }}"
+    name: "{{ item }}"
     state: "{{ 'present' if python else 'absent' }}"
   loop: "{{ python_packages }}"
-  loop_control:
-    loop_var: py_pkg
 
-- name: Include {{ ansible_os_family }} packages installation tasks | Prep
+- name: Install Common Packages | Prep
   tags: [package_mgmt]
-  include_tasks: "{{ ansible_os_family | lower }}_packages.yml"
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ common_packages }}"
+  when: utilities is defined and utilities == true
+  failed_when: false 
+
+- name: Install Debian-specific Packages | Prep
+  tags: [package_mgmt]
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ debian_packages }}"
+  when: ansible_os_family == "Debian"
+
+- name: Install RedHat-specific Packages | Prep
+  tags: [package_mgmt]
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ redhat_packages }}"
+  when: ansible_os_family == "RedHat"
 
 - name: Include LibreOffice tasks | Prep
   tags: [package_mgmt]
@@ -91,24 +98,10 @@
   include_tasks: cron.yml
 
 - name: Configure DNF Settings
-  include_tasks: dnf_config.yml  
+  include_tasks: dnf_config.yml
 
-# ---------------------------------------------------------------------------------
+- name: Configure system locales | Prep
+  include_tasks: locales.yml
 
-# Wifi Settings
-
-#- name: Create known Wi-Fi connections using nmcli module
-#  become: true
-#  community.general.nmcli:
-#    type: wifi
-#    conn_name: "{{ wifi_net.ssid }}"
-#    ifname: "{{ wifi_interface }}"
-#    ssid: "{{ wifi_net.ssid }}"
-#    wifi_sec:
-#      key-mgmt: wpa-psk
-#      psk: "{{ wifi_net.password }}"
-#    autoconnect: true
-#    state: present
-#  loop: "{{ wifi_networks }}"
-#  loop_control:
-#    loop_var: wifi_net
+- name: Include tasks for nvidia GPU
+  include_tasks: nvidia_gpu_drivers.yml

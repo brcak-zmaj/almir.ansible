@@ -1,28 +1,12 @@
 
 - name: Include boto tasks
   ansible.builtin.include_tasks: boto.yml
-  when: boto is defined
-
-- name: Include java tasks
-  ansible.builtin.include_tasks: java.yml
-  when: java is defined
-
-- name: Include linode_cli tasks
-  ansible.builtin.include_tasks: linode_cli.yml
-  when: linode_cli is defined
+  when: boto is defined and boto | bool
 
 - name: Include node tasks
   ansible.builtin.include_tasks: node.yml
-  when: node is defined
-
-- name: Include php tasks
-  ansible.builtin.include_tasks: php.yml
-  when: php is defined
+  when: node is defined and node | bool
 
 - name: Include python tasks
   ansible.builtin.include_tasks: python.yml
-  when: python is defined
-
-- name: Include rust tasks
-  ansible.builtin.include_tasks: rust.yml
-  when: rust is defined
+  when: python is defined and python | bool

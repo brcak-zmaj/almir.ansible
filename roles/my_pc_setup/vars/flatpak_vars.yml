@@ -1,48 +1,37 @@
 # Flatpak ---------------------------------------------------------
 flatpak_repo: https://flathub.org/repo/flathub.flatpakrepo
 
-
 flatpak_packages:
   # 🛠️ Utilities
-  - com.github.qarmin.czkawka          # Duplicate file cleaner
-  - org.fedoraproject.MediaWriter      # Write Fedora ISOs to USB
-  - fr.romainvigier.MetadataCleaner    # Clean file metadata
-  - com.belmoussaoui.Obfuscate         # Redact screenshots
-  - org.torproject.torbrowser-launcher  
+  - com.github.qarmin.czkawka
+  - org.fedoraproject.MediaWriter
+  - org.torproject.torbrowser-launcher
+  - com.github.tchx84.Flatseal
+  - net.nokyan.Resources
 
   # 🎧 Multimedia
-  - net.codeindustry.MasterPDFEditor           # Advanced PDF editor
-  - org.clementine_player.Clementine           # Music player 
-  - org.darktable.Darktable                    # Photography RAW editor
-  - com.github.weclaw1.ImageRoll               # Image management
-  - org.gnome.gitlab.YaLTeR.VideoTrimmer       # Simple video cutter
-  - de.haeckerfelix.Shortwave                  # Internet radio player
-
-  # 🎮 Games & Game Tools
-  - com.jagex.RuneScape                        # RuneScape game client
-  - info.beyondallreason.bar                   # Beyond All Reason RTS
-  - net.pcsx2.PCSX2                            # PS2 emulator
-  - app.xemu.xemu                              # Original Xbox emulator
-  - net.shadps4.shadPS4                        # PS4 emulator
-  - com.ktechpit.torrhunt                      # Torrent client/search
-  - com.github.k4zmu2a.spacecadetpinball
+  - net.codeindustry.MasterPDFEditor
+  - org.clementine_player.Clementine
+  - org.darktable.Darktable
+  - com.github.weclaw1.ImageRoll
+  - org.gnome.gitlab.YaLTeR.VideoTrimmer
+  - de.haeckerfelix.Shortwave
+  - io.github._0xzer0x.qurancompanion
+  - com.spotify.Client
 
   # 🗨️ Communication / Messaging
-  - com.slack.Slack                            # Slack
-  - org.signal.Signal                          # Signal Messenger
-  - org.telegram.desktop                       # Telegram
+  - com.slack.Slack
+  - org.signal.Signal
+  - org.telegram.desktop
 
   # 👨‍💻 Development Tools
-  - io.dbeaver.DBeaverCommunity                # Database GUI
-  - com.getpostman.Postman                     # API dev & testing
-  - com.github.artemanufrij.regextester        # Regex tester
-  - org.zealdocs.Zeal                          # Offline documentation
-  - com.usebottles.bottles                     # Windows app runner for Linux
-  - org.freecad.FreeCAD                        # CAD design
+  - io.dbeaver.DBeaverCommunity
+  - com.usebottles.bottles
+  - org.freecad.FreeCAD
 
   # 🗺️ Mapping / Utilities / Misc
-  - app.organicmaps.desktop                    # Offline maps
-  - io.gitlab.theevilskeleton.Upscaler         # AI image upscaler
-  - com.rtosta.zapzap                          # WhatsApp clone
-  - com.microsoft.Edge                         # Edge browser
-  - io.github.flattool.Warehouse               # Flatpak permissions manager GUI
+  - app.organicmaps.desktop
+  - io.gitlab.theevilskeleton.Upscaler
+  - com.rtosta.zapzap
+  - io.github.flattool.Warehouse
+  - org.kiwix.desktop

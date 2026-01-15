@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo "Refreshing firmware metadata and updating firmware..."
 sudo fwupdmgr refresh
 sudo fwupdmgr get-updates

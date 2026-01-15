@@ -1,8 +1,24 @@
 ---
 
-## Wireless Interface ----------------------------------------------
+## System User Settings ---------------------------------------------------------
+# Override these in your playbook if needed
+user: "almir"
+group: "{{ user }}"
+home_dir: "/home/{{ user }}"
+user_priv_ssh: "{{ lookup('env', 'ALMIR_SSH_PRIV_KEY') }}"
+user_pub_ssh: "{{ lookup('env', 'ALMIR_SSH_PUB_KEY') }}"
 
-wifi_interface: wlp4s0
+## Wallpaper
+wallpaper_src: "wallpaper.png"      # File in files/ directory
+wallpaper_dest: "{{ home_dir }}"    # Where to copy it
+
+## Home dir cleanup
+home_dir_clutter:
+  - Music
+  - Public
+  - Templates
+  - Videos
+
 
 ## Remmina ---------------------------------------------------------
 remmina_debian_pkgs:
@@ -20,26 +36,6 @@ remmina_redhat_pkgs:
   - remmina-plugins-www
   - remmina-plugins-x2go
 
-## Java ---------------------------------------------------------
-java_version: java-11-openjdk
-
-
-## Google Earth ---------------------------------------------------------
-earth_repo: "deb [signed-by=/etc/apt/trusted.gpg.d/google.gpg arch=amd64] http://dl.google.com/linux/earth/deb/ stable main"
-earth_repo_name: "/etc/apt/sources.list.d/google-earth-pro.list"
-earth_gpg: "https://dl.google.com/linux/linux_signing_key.pub"
-earth_gpg_key: "/etc/apt/trusted.gpg.d/google.gpg"
-earth_pkg: "google-earth-pro-stable"
-
-
-## Virtualbox ---------------------------------------------------------
-virtual_box_key_url: "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
-virtual_box_repo: "deb https://download.virtualbox.org/virtualbox/debian buster contrib"
-virtualbox_packages:
-  - virtualbox
-  - virtualbox-dkms
-
-
 ## Libvirt Packages ---------------------------------------------------------
 libvirt_package: libvirtd
 virtualization_packages:
@@ -53,14 +49,15 @@ virtualization_packages:
 
 
 ## posix ---------------------------------------------------------
-smb_mountpoint: [] # Your SMB Share.. ex: 10.123.123.123
+# SMB/CIFS network share config - store credentials in vault
+smb_mountpoint: [] # ex: 10.123.123.123
 mount_point_directories:
   - /mnt/example
 
 smb_mounts:
   - { src: "//{{ smb_mountpoint }}/example", path: "/mnt/example" }
 
-smb_credentials: "username={{ smb_username }},password={{ smb_password }}"
+smb_credentials: "username={{ lookup('env', 'ALMIR_SMB_USR') }},password={{ lookup('env', 'ALMIR_SMB_PWD') }}"
 smb_mount_opts: "noperm,dir_mode=0777,file_mode=0777,iocharset=utf8,_netdev,{{ smb_credentials }}"
 smb_fstype: cifs
 
@@ -87,66 +84,28 @@ gstreamer_redhat_packages:
   - ffmpeg-libs                    # FFmpeg libraries required for multimedia operations with GStreamer
 
 ## npm ---------------------------------------------------------
-npm_global: true
-nodejs_npm_packages:
+nodejs_npm_packages_debian:
   - nodejs
   - npm
+
+nodejs_npm_packages_redhat:
+  - nodejs
+  - npm
+  - nodejs-npm
+
+# Override this list in your playbook or host_vars
 global_npm_packages:
-  - "@gridsome/cli"                 # CLI for Gridsome, a static site generator for Vue.js
-  - "@semantic-release/changelog"   # Automates changelog generation for Semantic Release
-  - "@semantic-release/git"         # Automates Git operations during Semantic Release workflow
-  - "add-gitignore"                 # CLI tool to add a gitignore file to a project
-  - "cloudinary-cli"                # Command-line interface for Cloudinary (cloud-based media management)
-  - "commitizen"                    # Standardizes commit messages for better project documentation
-  - "conduct"                       # Helps manage a project's code of conduct
-  - "conventional-changelog-cli"    # CLI tool to generate changelogs based on conventional commits
-  - "create-nuxt-app"               # CLI tool for creating Nuxt.js apps (Vue.js framework)
-  - "create-react-app"              # CLI tool for creating React.js apps
-  - "eslint"                        # Linter for identifying and fixing JavaScript/TypeScript code issues
-  - "fauna-shell"                   # CLI interface for FaunaDB, a serverless database
-  - "fkill-cli"                     # CLI tool to kill processes by name, PID, or port
-  - "fx"                            # Command-line tool for working with JSON
-  - "gatsby-cli"                    # CLI for Gatsby, a React-based static site generator
-  - "get-port-cli"                  # Finds an available port on the local machine
-  - "localtunnel"                   # Exposes local servers to the internet via HTTP tunnel
-  - "hasha-cli"                     # CLI for hashing files and strings
-  - "mdless"                        # CLI to view Markdown files in terminal without formatting
-  - "mermaid.cli"                   # CLI for generating diagrams from Mermaid markdown syntax
-  - "mklicense"                     # CLI for generating project license files
-  - "nativefier"                    # Convert any web page into a desktop app
-  - "readme-md-generator"           # CLI for generating project README files in markdown format
-  - "semantic-release"              # Automates versioning and package publishing based on commit messages
-  - "serve"                         # Simple static file server
-  - "svgo"                          # CLI tool for optimizing SVG files
-  - "serverless"                    # Framework for building serverless applications
-  - "svg-term-cli"                  # CLI for rendering SVG animations from terminal output
-  - "tablemark-cli"                 # CLI for creating tables in Markdown format
-  - "trash-cli"                     # Command-line tool for moving files to trash
-  - "typescript"                    # TypeScript language tools for JavaScript development
-  - "vuepress"                      # Static site generator powered by Vue.js
-  - "weallcontribute"               # CLI tool to help contributors add their contributions to a project
-  - "yarn"                          # JavaScript package manager
-  - "plop"                          # Micro-generator framework for generating files based on templates
-  - "vercel"                        # CLI tool for deploying serverless applications on Vercel
-  - "@cloudflare/wrangler"          # CLI tool for developing, testing, and deploying Cloudflare Workers
+  # AI & Dev
+  - "@anthropic-ai/claude-code"
 
-
-## php ---------------------------------------------------------
-php_dev_packages:
-  - php-cli               # Command-line interface for PHP
-  - php-curl              # cURL support for PHP (used for making HTTP requests)
-  - php-intl              # Internationalization support for PHP
-  - php-pdo               # PHP Data Objects (database access abstraction layer)
-  - php-mysqlnd           # MySQL Native Driver for PHP (improves MySQL performance)
-  - php-json              # JSON support for PHP (encoding and decoding JSON data)
-  - composer              # Dependency manager for PHP
-
-## rust ---------------------------------------------------------
-rust_packages:
-  - rust
-  - cargo
+  # Code quality
+  - "eslint"
+  - "typescript"
 
 ## Cron ---------------------------------------------------------
+# Scheduled tasks - add your own below
+# Format: minute hour day month weekday
+# Examples: "0 6 * * *" = 6am daily, "30 2 * * 0" = 2:30am Sundays
 cron_jobs:
   - name: "Update all flatpaks"
     user: "root"
@@ -158,7 +117,17 @@ cron_jobs:
     job: "flatpak update -y"
     state: "present"
 
-  # Example: Another cron job a user could define
+  - name: "Sync home directory to backup"
+    user: "root"
+    minute: "0"
+    hour: "3"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "rsync -a --checksum --delete /home/almir/ /mnt/Archive/Backups/MyDesktop/"
+    state: "present"
+
+  # Example: Add your own cron jobs below (uncomment and modify)
   # - name: "Clear temp files"
   #   user: "root"
   #   minute: "30"
@@ -168,3 +137,95 @@ cron_jobs:
   #   weekday: "*"
   #   job: "rm -rf /tmp/*"
   #   state: "present"
+
+## Feature Toggles ---------------------------------------------------------
+# Enable/disable features by setting to true/false
+# These allow you to quickly enable/disable entire feature sets
+
+# Dev tools
+boto: false                # AWS SDK
+node: true                 # Node.js + npm
+python: true               # Python3 + pip
+
+# Gaming
+steam: true
+
+# Multimedia
+codecs: true               # GStreamer codecs
+
+# Internet
+reminna: true              # RDP/VNC client
+
+# System
+fstab: true                # Mount network shares
+
+# Applications
+konsole: true              # Terminal emulator
+flatpak: true              # Flatpak apps
+utilities: true            # Common CLI tools
+
+# Productivity
+libreoffice: true
+gpaste: true               # Clipboard manager
+
+# Virtualization
+libvirt: false             # KVM/QEMU
+
+# Desktop
+gnome: true                # GNOME settings
+autostart_tweaks: true     # Autostart apps
+wallpaper: false           # Copy custom wallpaper
+
+
+## Python Packages ---------------------------------------------------------
+# Core Python packages
+python_packages:
+  - python3
+  - python3-pip
+
+# PIP packages to install globally - verified as valid and maintained
+pip_packages:
+  # Code Quality & Linting
+  - bandit                # Security linter for Python code
+  - flake8                # Tool for enforcing coding style in Python
+  - pyflakes              # Static analysis tool for Python code
+  - pycodestyle           # Style guide checker for Python
+  - yapf                  # Code formatter for Python
+  - pre-commit            # Framework for managing pre-commit hooks
+
+  # API & Web Clients
+  - requests              # Simple HTTP library for Python
+  - docker                # Python SDK for Docker
+  - PyGithub              # Python client for the GitHub API
+  - python-gitlab         # GitLab API client for Python
+  - algoliasearch         # Python client for Algolia search service
+
+  # CLI Tools & Utilities
+  - pwgen                 # Password generator
+  - invoke                # Python task execution library
+  - glob2                 # Enhanced version of the glob module
+
+  # Data Processing & Parsing
+  - dateparser            # Parsing dates from strings in multiple formats
+  - jinja2                # Template engine for Python
+  - python-frontmatter    # Parses front matter from files (e.g., Markdown, YAML)
+
+  # DevOps & Infrastructure
+  - ansible-lint          # Linter for Ansible playbooks
+
+  # HTTP & Network Libraries
+  - urllib3               # HTTP library with connection pooling
+  - chardet               # Universal character encoding detector
+  - certifi               # Python package for providing Mozilla's root certificates
+  - idna                  # International Domain Names (IDN) library
+
+  # Performance & Caching
+  - cachetools            # Extensible memoizing collections and decorators
+  - msgpack               # Efficient binary serialization format
+
+  # Validation & Schema
+  - validator-collection  # Collection of validators for various data types
+
+  # Other Utilities
+  - greenlet              # Lightweight in-process concurrent programming
+  - neovim                # Python client for Neovim editor

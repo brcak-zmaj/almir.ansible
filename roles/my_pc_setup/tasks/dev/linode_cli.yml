@@ -1,8 +1,0 @@
-
-- name: Software | linode-cli | Manage package state
-  become: true
-  become_user: "{{ user }}"
-  ansible.builtin.pip:
-    executable: /usr/bin/pip3
-    name: linode-cli
-    state: "{{ 'present' if linode_cli else 'absent' }}"

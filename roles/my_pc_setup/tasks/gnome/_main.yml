@@ -22,7 +22,6 @@
     - background.yml
     - desktop.yml
     - nautilus.yml
-    - shell.yml
     - screensaver.yml
     - gtk4.yml
   when: ansible_distribution == 'Fedora'

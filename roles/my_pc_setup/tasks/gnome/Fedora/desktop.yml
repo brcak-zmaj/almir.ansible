@@ -1,11 +1,23 @@
 
-- name: GNOME Interface | Set color scheme
+- name: GNOME Interface | Set color scheme to prefer-dark
   become_user: "{{ user }}"
   community.general.dconf:
     key: /org/gnome/desktop/interface/color-scheme
     value: "'prefer-dark'"
 
-- name: GNOME Interface | Show battery percentage (conditional by hostname)
+- name: GNOME Interface | Set accent color
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/accent-color
+    value: "'yellow'"
+
+- name: GNOME Interface | Set icon theme
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/icon-theme
+    value: "'breeze-dark'"
+
+- name: GNOME Interface | Show battery percentage
   become_user: "{{ user }}"
   community.general.dconf:
     key: /org/gnome/desktop/interface/show-battery-percentage
@@ -21,19 +33,19 @@
   become_user: "{{ user }}"
   community.general.dconf:
     key: /org/gnome/desktop/notifications/application-children
-    value: "['org-gnome-nautilus', 'gnome-power-panel']"
+    value: "['org-gnome-nautilus', 'gnome-power-panel', 'com-jagex-runescape', 'org-freedesktop-problems-applet', 'com-rtosta-zapzap', 'org-gnome-software', 'discord', 'net-thunderbird-thunderbird', 'org-clementine-player-clementine', 'net-pcsx2-pcsx2', 'org-gnome-extensions', 'brave-browser', 'gnome-about-panel', 'cursor', 'io-dbeaver-dbeavercommunity', 'org-gnome-texteditor', 'sublime-text', 'org-telegram-desktop', 'com-slack-slack', 'code', 'com-spotify-client', 'mullvad-browser']"
 
-- name: GNOME Notifications | Nautilus application ID
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/notifications/application/org-gnome-nautilus/application-id
-    value: "'org.gnome.Nautilus.desktop'"
-
-- name: GNOME Notifications | Power panel application ID
+- name: GNOME Notifications | gnome-power-panel
   become_user: "{{ user }}"
   community.general.dconf:
     key: /org/gnome/desktop/notifications/application/gnome-power-panel/application-id
     value: "'gnome-power-panel.desktop'"
+
+- name: GNOME Notifications | org-freedesktop-problems-applet
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application/org-freedesktop-problems-applet/application-id
+    value: "'org.freedesktop.problems.applet.desktop'"
 
 - name: GNOME Keyboard | Enable NumLock
   become_user: "{{ user }}"
@@ -70,57 +82,3 @@
   community.general.dconf:
     key: /org/gnome/desktop/privacy/report-technical-problems
     value: "true"
-
-- name: GNOME Screensaver | Set background shading
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/screensaver/color-shading-type
-    value: "'solid'"
-
-- name: GNOME Screensaver | Set picture options
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/screensaver/picture-options
-    value: "'zoom'"
-
-- name: GNOME Screensaver | Set wallpaper image path
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/screensaver/picture-uri
-    value: "'file:////home/almir/wallpaper.png'"
-
-- name: GNOME Screensaver | Set primary color
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/screensaver/primary-color
-    value: "'#000000'"
-
-- name: GNOME Screensaver | Set secondary color
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/screensaver/secondary-color
-    value: "'#000000'"
-
-- name: GNOME Search Providers | Set sort order
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/search-providers/sort-order
-    value: "['org.gnome.Settings.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Nautilus.desktop']"
-
-- name: GNOME Session | Set idle delay (15 minutes)
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/session/idle-delay
-    value: "uint32 900"
-
-- name: GNOME Window Manager | Set button layout
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/wm/preferences/button-layout
-    value: "'appmenu:minimize,maximize,close'"
-
-- name: GNOME Window Manager | Set number of workspaces
-  become_user: "{{ user }}"
-  community.general.dconf:
-    key: /org/gnome/desktop/wm/preferences/num-workspaces
-    value: "1"
