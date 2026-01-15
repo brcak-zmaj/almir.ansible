@@ -1,0 +1,16 @@
+---
+# =============================================================================
+# NUT Role - Debian/Ubuntu Specific Variables
+# =============================================================================
+
+# Internal defaults for Debian service names (prefixed with underscore)
+_nut_driver_service_default: "nut-driver.target"
+_nut_server_service_default: "nut-server"
+_nut_monitor_service_default: "nut-monitor"
+
+# Optional scanner library packages for full nut-scanner functionality
+_nut_optional_packages_debian:
+  - libsnmp40t64
+  - libneon27t64-gnutls
+  - libavahi-client3
+  - libfreeipmi17

@@ -1,0 +1,41 @@
+# {{ ansible_managed }}
+# =============================================================================
+# udev rules for NUT UPS devices
+# =============================================================================
+#
+# This file ensures USB UPS devices are accessible by the nut user/group.
+# Place in /etc/udev/rules.d/99-nut-ups.rules
+#
+
+# Generic USB UPS devices - give nut group access
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", MODE="0664", GROUP="nut"
+
+# USB HID devices (many UPS use HID protocol)
+KERNEL=="hiddev*", MODE="0664", GROUP="nut"
+KERNEL=="hidraw*", MODE="0664", GROUP="nut"
+
+# Common USB UPS Vendor IDs
+# APC (American Power Conversion)
+SUBSYSTEM=="usb", ATTR{idVendor}=="051d", MODE="0664", GROUP="nut"
+
+# CyberPower
+SUBSYSTEM=="usb", ATTR{idVendor}=="0764", MODE="0664", GROUP="nut"
+
+# Eaton / MGE / Powerware
+SUBSYSTEM=="usb", ATTR{idVendor}=="0463", MODE="0664", GROUP="nut"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0592", MODE="0664", GROUP="nut"
+
+# Tripp Lite
+SUBSYSTEM=="usb", ATTR{idVendor}=="09ae", MODE="0664", GROUP="nut"
+
+# Belkin
+SUBSYSTEM=="usb", ATTR{idVendor}=="050d", MODE="0664", GROUP="nut"
+
+# Liebert / Emerson
+SUBSYSTEM=="usb", ATTR{idVendor}=="06da", MODE="0664", GROUP="nut"
+
+# Powercom
+SUBSYSTEM=="usb", ATTR{idVendor}=="0d9f", MODE="0664", GROUP="nut"
+
+# EVER
+SUBSYSTEM=="usb", ATTR{idVendor}=="2e51", MODE="0664", GROUP="nut"

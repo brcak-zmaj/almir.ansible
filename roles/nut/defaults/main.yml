@@ -1,0 +1,529 @@
+---
+# =============================================================================
+# NUT (Network UPS Tools) Role - Default Variables
+# =============================================================================
+
+# =============================================================================
+# ROLE MODE CONFIGURATION
+# =============================================================================
+# Role mode determines the overall behavior of this role:
+# - server: Full NUT server setup (default - installs nut-server, configures UPS drivers, etc.)
+# - client: Minimal NUT client setup (installs only nut-client, monitors remote server)
+#
+# Set nut_role_mode: "client" in your playbook to configure a system as a NUT client
+# that monitors a remote NUT server for shutdown signals.
+nut_role_mode: "server"
+
+# =============================================================================
+# INSTALLATION CONFIGURATION
+# =============================================================================
+nut_install_enabled: true
+
+# NUT mode: standalone, netserver, netclient, none
+# - standalone: UPS connected to this machine, no network sharing
+# - netserver: UPS connected to this machine, shares status over network
+# - netclient: Monitors a remote NUT server
+# - none: NUT is installed but not configured (manual setup)
+# NOTE: When nut_role_mode is "client", this is automatically set to "netclient"
+nut_mode: "netserver"
+
+# =============================================================================
+# PACKAGE CONFIGURATION
+# =============================================================================
+# RedHat-based distributions
+nut_packages_redhat:
+  - nut
+  - nut-client
+
+# Debian-based distributions
+nut_packages_debian:
+  - nut
+  - nut-client
+  - nut-server
+
+# =============================================================================
+# FILE PATHS AND PERMISSIONS
+# =============================================================================
+nut_config_dir: "/etc/nut"
+nut_run_dir: "/run/nut"
+nut_state_dir: "/var/lib/nut"
+
+nut_config_dir_mode: "0755"
+nut_config_file_mode: "0640"
+nut_config_owner: "root"
+nut_config_group: "nut"
+
+# =============================================================================
+# UPS DEVICE CONFIGURATION
+# =============================================================================
+# UPS name (used in ups.conf and for monitoring)
+nut_ups_name: "ups"
+
+# UPS driver - common options:
+# - usbhid-ups: Most USB UPS devices (APC, CyberPower, Eaton, etc.)
+# - blazer_usb: Megatec/Q1 protocol USB devices
+# - nutdrv_qx: Modern replacement for blazer drivers
+# - snmp-ups: SNMP-enabled network UPS
+# - apcsmart: APC Smart-UPS via serial
+# See: https://networkupstools.org/docs/man/nutupsdrv.html
+nut_ups_driver: "usbhid-ups"
+
+# USB port for the UPS device
+# Run these commands to find your UPS port:
+#   lsusb                          # Find UPS vendor/product ID
+#   nut-scanner -U                 # Scan for USB UPS devices
+#   ls -la /dev/usb/hiddev*        # List HID devices
+#   dmesg | grep -i ups            # Check kernel messages
+#
+# Common values:
+#   auto                           # Let NUT auto-detect (recommended)
+#   /dev/usb/hiddev0               # First HID device
+#   /dev/bus/usb/001/002           # Specific USB bus/device
+nut_ups_port: "auto"
+
+# UPS description (optional, for documentation)
+nut_ups_description: "Main UPS"
+
+# Additional driver-specific options (key-value pairs)
+# Example:
+#   nut_ups_driver_options:
+#     vendorid: "051d"
+#     productid: "0002"
+#     pollinterval: "15"
+nut_ups_driver_options: {}
+
+# =============================================================================
+# MULTIPLE UPS SUPPORT
+# =============================================================================
+# For advanced setups with multiple UPS devices
+# When defined, this overrides the single UPS configuration above
+#
+# CHAINED UPS EXAMPLE (Secondary provides extra runtime, Primary triggers shutdown):
+#   nut_ups_devices:
+#     - name: "ups-primary"
+#       driver: "usbhid-ups"
+#       port: "auto"
+#       description: "Primary UPS - triggers shutdown"
+#       options:
+#         serial: "ABC123"           # Use serial to distinguish USB devices
+#     - name: "ups-secondary"
+#       driver: "usbhid-ups"
+#       port: "auto"
+#       description: "Secondary UPS - extra runtime only"
+#       options:
+#         serial: "XYZ789"
+#
+#   # In nut_upsmon_monitors, use powervalue to control shutdown behavior:
+#   #   powervalue: 1 = counts toward shutdown (primary)
+#   #   powervalue: 0 = monitor only, no shutdown trigger (secondary)
+#   nut_upsmon_monitors:
+#     - ups: "ups-primary@localhost"
+#       powervalue: 1                # This UPS triggers shutdown when critical
+#       username: "upsmon"
+#       password: "{{ vault_password }}"
+#       type: "primary"
+#     - ups: "ups-secondary@localhost"
+#       powervalue: 0                # Monitor only - does NOT trigger shutdown
+#       username: "upsmon"
+#       password: "{{ vault_password }}"
+#       type: "primary"
+#
+nut_ups_devices: []
+
+# =============================================================================
+# UPSD SERVER CONFIGURATION (for netserver mode)
+# =============================================================================
+# Listen addresses for upsd (NUT server daemon)
+# Default listens only on localhost; add network IPs for remote access
+nut_upsd_listen:
+  - address: "127.0.0.1"
+    port: 3493
+#  - address: "0.0.0.0"
+#    port: 3493
+
+# Maximum age of data before upsd considers it stale (seconds)
+nut_upsd_maxage: 15
+
+# =============================================================================
+# UPSD USERS CONFIGURATION
+# =============================================================================
+# Users for upsd authentication
+# At minimum, you need a monitor user for upsmon
+# IMPORTANT: You MUST define nut_upsd_users in your playbook/host_vars with secure passwords!
+#
+# Example configuration:
+#   nut_upsd_users:
+#     - username: "upsmon"
+#       password: "{{ vault_nut_upsmon_password }}"
+#       upsmon: "primary"
+#     - username: "upsmon_remote"
+#       password: "{{ vault_nut_upsmon_remote_password }}"
+#       upsmon: "secondary"
+#     - username: "admin"
+#       password: "{{ vault_nut_admin_password }}"
+#       instcmds:
+#         - all
+#       actions:
+#         - set
+#         - fsd
+#
+# User roles:
+#   - upsmon "primary": Can command UPS shutdown (machine with UPS attached)
+#   - upsmon "secondary": Monitor only (remote machines)
+#   - instcmds: Allow instant commands (all, or specific like beeper.disable)
+#   - actions: Allow set (change variables) and/or fsd (forced shutdown)
+#
+nut_upsd_users: []
+
+# =============================================================================
+# UPSMON CONFIGURATION
+# =============================================================================
+# Monitor configuration
+# For standalone/netserver: monitor local UPS
+# For netclient: monitor remote UPS server
+# IMPORTANT: You MUST define nut_upsmon_monitors in your playbook/host_vars!
+# Example:
+#   nut_upsmon_monitors:
+#     - ups: "{{ nut_ups_name }}@localhost"
+#       powervalue: 1
+#       username: "upsmon"
+#       password: "{{ vault_nut_upsmon_password }}"
+#       type: "primary"
+nut_upsmon_monitors: []
+
+# Remote UPS monitoring example (for netclient mode):
+#   nut_upsmon_monitors:
+#     - ups: "ups@remote-server"
+#       powervalue: 1
+#       username: "upsmon"
+#       password: "{{ vault_nut_remote_password }}"
+#       type: "secondary"
+
+# Minimum number of power supplies required to keep running
+# If supplies drop below this, system initiates shutdown
+nut_upsmon_minsupplies: 1
+
+# Shutdown command executed when UPS battery is critical
+nut_upsmon_shutdowncmd: "/sbin/shutdown -h +0"
+
+# Notification command (optional)
+# Example: nut_upsmon_notifycmd: "/usr/local/bin/nut-notify.sh"
+nut_upsmon_notifycmd: ""
+
+# Polling frequency in seconds
+nut_upsmon_pollfreq: 5
+nut_upsmon_pollfreqalert: 5
+
+# Seconds without UPS contact before declaring it dead
+nut_upsmon_deadtime: 15
+
+# How long to wait for primary to set FSD before forcing shutdown
+nut_upsmon_hostsync: 15
+
+# Seconds between shutdown warning messages
+nut_upsmon_finaldelay: 5
+
+# Enable poweroff flag for primary systems
+nut_upsmon_powerdownflag: "/etc/killpower"
+
+# =============================================================================
+# NOTIFICATION SETTINGS
+# =============================================================================
+# Notification flags for each event type
+# Valid flags: SYSLOG, WALL, EXEC, IGNORE
+# SYSLOG: Log to syslog
+# WALL: Broadcast to all logged-in users
+# EXEC: Execute NOTIFYCMD
+# IGNORE: Do nothing
+nut_upsmon_notify_flags:
+  online: "SYSLOG+WALL"
+  onbatt: "SYSLOG+WALL"
+  lowbatt: "SYSLOG+WALL"
+  fsd: "SYSLOG+WALL"
+  commok: "SYSLOG+WALL"
+  commbad: "SYSLOG+WALL"
+  shutdown: "SYSLOG+WALL"
+  replbatt: "SYSLOG+WALL"
+  nocomm: "SYSLOG+WALL"
+  noparent: "SYSLOG+WALL"
+
+# Custom notification messages
+nut_upsmon_notify_messages:
+  online: "UPS %s on line power"
+  onbatt: "UPS %s on battery"
+  lowbatt: "UPS %s battery is low"
+  fsd: "UPS %s: forced shutdown in progress"
+  commok: "Communications with UPS %s established"
+  commbad: "Communications with UPS %s lost"
+  shutdown: "Auto logout and shutdown proceeding"
+  replbatt: "UPS %s battery needs to be replaced"
+  nocomm: "UPS %s is unavailable"
+  noparent: "upsmon parent process died - Loss of shutdown capability"
+
+# =============================================================================
+# CLIENT MODE CONFIGURATION
+# =============================================================================
+# These settings apply ONLY when nut_role_mode: "client"
+# Client mode configures a system to monitor a remote NUT server and shutdown
+# gracefully when the UPS battery is low.
+
+# NUT Server connection settings
+nut_server_host: ""              # IP or hostname of the NUT server (REQUIRED for client mode)
+nut_server_port: 3493            # Default NUT port
+
+# UPS to monitor on the remote server
+nut_client_ups_name: "ups"       # Name of UPS to monitor (as defined on server)
+
+# Authentication credentials for connecting to NUT server
+# Must match a user defined in upsd.users on the server with upsmon: secondary
+nut_client_username: "upsmon_remote"
+nut_client_password: ""          # REQUIRED - use vault or env lookup
+
+# Client packages (minimal installation)
+nut_client_packages_debian:
+  - nut-client
+nut_client_packages_redhat:
+  - nut-client
+
+# Shutdown configuration
+nut_client_shutdown_delay: 0     # FINALDELAY in seconds before shutdown (for ordering)
+nut_client_shutdown_order: ""    # Documentation note (e.g., "1st - VMs")
+nut_client_shutdowncmd: "/sbin/shutdown -h +0"
+
+# Minimum supplies (usually 1 for clients monitoring single server UPS)
+nut_client_minsupplies: 1
+
+# Client polling settings
+nut_client_pollfreq: 5
+nut_client_pollfreqalert: 5
+nut_client_deadtime: 15
+nut_client_hostsync: 15
+
+# =============================================================================
+# SERVICE CONFIGURATION
+# =============================================================================
+nut_services_enabled: true
+nut_services_started: true
+
+# Service names - auto-detected per OS family (Debian vs RedHat)
+# Override these only if your system uses non-standard service names:
+#   nut_driver_service: "nut-driver"      # Debian: nut-driver.target
+#   nut_server_service: "nut-server"
+#   nut_monitor_service: "nut-monitor"
+
+# Install optional libraries for full nut-scanner functionality
+# (SNMP, XML/NetXML, Avahi discovery, IPMI support)
+nut_install_scanner_libs: true
+
+# =============================================================================
+# ADVANCED CONFIGURATION
+# =============================================================================
+# Enable debug mode (for troubleshooting)
+nut_debug_enabled: false
+nut_debug_min: 1
+
+# USB device permissions (udev rules)
+nut_udev_rules_enabled: true
+
+# Firewall configuration (for netserver mode)
+nut_firewall_enabled: false
+nut_firewall_port: 3493
+nut_firewall_zone: "public"
+
+# =============================================================================
+# UPS SETTINGS CONFIGURATION (Runtime Parameter Control)
+# =============================================================================
+# This section allows configuring UPS hardware settings via the upsrw command.
+# These settings are applied at runtime and stored in the UPS firmware.
+#
+# REQUIREMENTS:
+#   - An admin user with 'actions: set' permission in nut_upsd_users
+#   - NUT services must be running
+#   - UPS must support writable variables (most USB UPS devices do)
+#
+# To discover available settings on your UPS, run:
+#   upsrw <ups_name>@localhost
+#
+# To discover available commands, run:
+#   upscmd -l <ups_name>@localhost
+
+# Enable UPS settings management
+nut_ups_settings_enabled: false
+
+# Admin credentials for changing UPS settings
+# IMPORTANT: Store these in vault or host_vars, NOT here!
+# Example:
+#   nut_ups_admin_username: "admin"
+#   nut_ups_admin_password: "{{ vault_nut_admin_password }}"
+nut_ups_admin_username: ""
+nut_ups_admin_password: ""
+
+# Hide passwords in Ansible output
+nut_ups_settings_no_log: true
+
+# Enable debug output for UPS detection and settings
+nut_ups_settings_debug: false
+
+# Verify settings after applying
+nut_ups_settings_verify: true
+
+# =============================================================================
+# UPS SETTINGS - Define your desired UPS parameters here
+# =============================================================================
+# List of settings to apply to the UPS via upsrw command.
+# Each item requires:
+#   - variable: The UPS variable name (from upsrw output)
+#   - value: The desired value
+#
+# Example:
+#   nut_ups_settings:
+#     - variable: "ups.delay.start"
+#       value: "120"
+#     - variable: "battery.charge.low"
+#       value: "15"
+#
+nut_ups_settings: []
+
+# =============================================================================
+# CYBERPOWER UPS SETTINGS REFERENCE
+# =============================================================================
+# CyberPower UPS devices (vendor ID: 0764) support the following settings:
+#
+# TIMING SETTINGS:
+#   ups.delay.start        - Seconds to wait before auto-restart after power
+#                            returns (default: 120). Set lower for faster restart.
+#   ups.delay.shutdown     - Seconds to wait before shutdown on command (default: 60)
+#
+# BATTERY THRESHOLDS:
+#   battery.charge.low     - Battery % when UPS triggers low battery state (default: 10)
+#                            Increase for more shutdown time, decrease for longer runtime.
+#   battery.runtime.low    - Remaining runtime (seconds) for low battery (default: 300)
+#                            Alternative to charge-based threshold.
+#
+# INPUT VOLTAGE SENSITIVITY:
+#   input.sensitivity      - Voltage sensitivity: "low", "normal", "high"
+#                            - high: Switches to battery more often (sensitive equipment)
+#                            - normal: Standard operation
+#                            - low: Only switch on significant voltage problems
+#
+# VOLTAGE TRANSFER POINTS:
+#   input.transfer.high    - High voltage threshold to switch to battery (default: 139V)
+#   input.transfer.low     - Low voltage threshold to switch to battery (default: 100V)
+#
+# AVAILABLE COMMANDS (via upscmd):
+#   beeper.enable          - Enable UPS beeper
+#   beeper.disable         - Disable UPS beeper
+#   beeper.mute            - Temporarily mute beeper
+#   test.battery.start.quick - Start quick battery test
+#   test.battery.start.deep  - Start deep battery test
+#   test.battery.stop      - Stop battery test
+#   shutdown.return        - Shutdown and auto-restart when power returns
+#   shutdown.stayoff       - Shutdown and stay off (manual restart required)
+#   load.off               - Turn off load immediately
+#   load.on                - Turn on load immediately
+#
+# EXAMPLE CYBERPOWER CONFIGURATION:
+# nut_ups_settings:
+#   # Auto-restart 60 seconds after power returns
+#   - variable: "ups.delay.start"
+#     value: "60"
+#   # Shutdown when 15% battery remaining
+#   - variable: "battery.charge.low"
+#     value: "15"
+#   # Or shutdown when 3 minutes runtime left
+#   - variable: "battery.runtime.low"
+#     value: "180"
+#   # High sensitivity for sensitive equipment
+#   - variable: "input.sensitivity"
+#     value: "high"
+#   # Transfer to battery below 105V
+#   - variable: "input.transfer.low"
+#     value: "105"
+#   # Transfer to battery above 135V
+#   - variable: "input.transfer.high"
+#     value: "135"
+
+# =============================================================================
+# NUT EXPORTER CONFIGURATION (Prometheus Metrics)
+# =============================================================================
+# nut_exporter provides Prometheus metrics for NUT UPS data
+# https://github.com/DRuggeri/nut_exporter
+
+# Enable nut_exporter installation
+nut_exporter_enabled: false
+
+# Installation method: "binary" (default) or "docker"
+nut_exporter_install_method: "binary"
+
+# Version to install - use "latest" to auto-fetch from GitHub
+nut_exporter_version: "latest"
+
+# =============================================================================
+# Binary Installation Settings
+# =============================================================================
+# Directory for binary installation
+nut_exporter_install_dir: "/usr/local/bin"
+
+# User/group to run the exporter service
+nut_exporter_user: "nobody"
+nut_exporter_group: "nogroup"
+
+# Service management
+nut_exporter_service_enabled: true
+nut_exporter_service_started: true
+
+# =============================================================================
+# Docker Installation Settings
+# =============================================================================
+# Container name
+nut_exporter_container_name: "nut_exporter"
+
+# Resource limits
+nut_exporter_docker_memory: "128m"
+nut_exporter_docker_cpus: 0.5
+
+# Timezone for container
+nut_exporter_timezone: "America/New_York"
+
+# Docker networks (list of dicts with 'name' key)
+# Example:
+#   nut_exporter_docker_networks:
+#     - name: "monitoring_network"
+nut_exporter_docker_networks: []
+
+# Docker logging (optional)
+# nut_exporter_docker_log_driver: "syslog"
+# nut_exporter_docker_log_options:
+#   syslog-address: "tcp://127.0.0.1:514"
+#   syslog-facility: "daemon"
+
+# =============================================================================
+# Exporter Connection Settings
+# =============================================================================
+# NUT server to connect to
+# For Docker: use host IP or container network address
+# For binary: typically localhost or 127.0.0.1
+nut_exporter_nut_server: "127.0.0.1"
+nut_exporter_nut_port: 3493
+
+# Authentication (must match upsd.users)
+# Leave empty if no auth required
+nut_exporter_nut_username: ""
+nut_exporter_nut_password: ""
+
+# =============================================================================
+# Exporter Web Settings
+# =============================================================================
+# Listen address and port for metrics endpoint
+nut_exporter_listen_address: "0.0.0.0"
+nut_exporter_port: 9199
+
+# Metrics endpoint path
+nut_exporter_metrics_path: "/ups_metrics"
+
+# Log level: error, warn, info, debug
+nut_exporter_log_level: "info"
+
+# Specific UPS variables to export (empty = all available)
+# Example: ["battery.charge", "battery.runtime", "ups.load", "ups.status"]
+nut_exporter_variables: []
