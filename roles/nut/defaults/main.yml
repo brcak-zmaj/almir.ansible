@@ -527,3 +527,10 @@ nut_exporter_log_level: "info"
 # Specific UPS variables to export (empty = all available)
 # Example: ["battery.charge", "battery.runtime", "ups.load", "ups.status"]
 nut_exporter_variables: []
+
+# List of UPS names to monitor (REQUIRED when multiple UPS devices exist)
+# The exporter needs to know which UPS devices to scrape.
+# Auto-populated from nut_ups_devices if defined, otherwise uses nut_ups_name.
+# Example: ["ups-primary", "ups-secondary"]
+# Leave empty to auto-detect from nut_ups_devices or nut_ups_name
+nut_exporter_ups_list: []

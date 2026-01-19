@@ -10,6 +10,27 @@
 #   - Docker: Runs as a container
 
 # =============================================================================
+# AUTO-DETECT UPS LIST FOR MULTI-UPS SUPPORT
+# =============================================================================
+# When multiple UPS devices exist, the exporter needs explicit --ups flags
+# Auto-populate from nut_ups_devices if not explicitly set
+
+- name: Auto-populate UPS list for exporter (multi-UPS support)
+  ansible.builtin.set_fact:
+    nut_exporter_ups_list: >-
+      {%- if nut_exporter_ups_list | length > 0 -%}
+        {{ nut_exporter_ups_list }}
+      {%- elif nut_ups_devices | length > 0 -%}
+        {{ nut_ups_devices | map(attribute='name') | list }}
+      {%- else -%}
+        [ "{{ nut_ups_name }}" ]
+      {%- endif -%}
+  when: nut_exporter_enabled | bool
+  tags:
+    - nut
+    - nut-exporter
+
+# =============================================================================
 # VERSION RESOLUTION
 # =============================================================================
 - name: Get latest nut_exporter version from GitHub
@@ -144,6 +165,7 @@
           NUT_EXPORTER_USERNAME: "{{ nut_exporter_nut_username }}"
           NUT_EXPORTER_PASSWORD: "{{ nut_exporter_nut_password }}"
           NUT_EXPORTER_VARIABLES: "{{ nut_exporter_variables | join(',') if nut_exporter_variables else '' }}"
+          NUT_EXPORTER_UPS: "{{ nut_exporter_ups_list | join(',') if nut_exporter_ups_list | length > 0 else '' }}"
           TZ: "{{ nut_exporter_timezone }}"
         networks: "{{ nut_exporter_docker_networks | default(omit) }}"
         log_driver: "{{ nut_exporter_docker_log_driver | default(omit) }}"

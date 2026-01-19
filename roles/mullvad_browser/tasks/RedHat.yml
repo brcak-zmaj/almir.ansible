@@ -13,8 +13,7 @@
         owner: root
         group: root
         mode: '0644'
-        force: yes
-      become: true
+        force: true
 
     - name: Refresh DNF cache for Mullvad repository
       ansible.builtin.dnf:

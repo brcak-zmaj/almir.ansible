@@ -1,6 +1,6 @@
 ---
 # Astral UV installation role
-# Installs uv Python package manager from official releases
+# Uses official standalone installer: https://docs.astral.sh/uv/getting-started/installation/
 
 - name: Validate supported platform
   ansible.builtin.assert:
@@ -8,11 +8,13 @@
       - ansible_facts['system'] in ['Linux', 'Darwin']
     fail_msg: "Unsupported OS: {{ ansible_facts['system'] }}. Only Linux and macOS are supported."
     quiet: true
+  tags: [astral_uv]
 
 - name: Check if uv is already installed
   ansible.builtin.stat:
     path: "{{ uv_install_dir }}/uv"
   register: _uv_installed
+  tags: [astral_uv]
 
 - name: Get installed uv version
   when: _uv_installed.stat.exists
@@ -21,80 +23,55 @@
   register: _uv_current_version
   changed_when: false
   failed_when: false
+  tags: [astral_uv]
 
-- name: Fetch latest release version from GitHub
-  when: uv_version == 'latest'
-  block:
-    - name: Query GitHub API for latest release
-      ansible.builtin.uri:
-        url: "{{ _uv_releases_url }}/latest"
-        method: GET
-        return_content: false
-        follow_redirects: none
-        status_code: [302]
-      register: _uv_latest_release
-
-    - name: Extract version from redirect URL
-      ansible.builtin.set_fact:
-        _uv_target_version: "{{ _uv_latest_release.location | regex_search('/([0-9]+\\.[0-9]+\\.[0-9]+)$', '\\1') | first }}"
-
-- name: Set target version for pinned release
-  when: uv_version != 'latest'
+- name: Set installation status
   ansible.builtin.set_fact:
-    _uv_target_version: "{{ uv_version }}"
+    _uv_needs_install: "{{ uv_force_reinstall | bool or not _uv_installed.stat.exists }}"
+  tags: [astral_uv]
 
-- name: Determine if installation is needed
-  ansible.builtin.set_fact:
-    _uv_needs_install: >-
-      {{
-        uv_force_reinstall | bool
-        or not _uv_installed.stat.exists
-        or (_uv_current_version.stdout | default('') | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') | default('0.0.0')) != _uv_target_version
-      }}
-
-- name: Install uv
+- name: Install uv using official installer
   when: _uv_needs_install | bool
   block:
-    - name: Include libc detection tasks (Linux only)
-      when: ansible_facts['system'] == 'Linux'
-      ansible.builtin.include_tasks: detect_libc.yml
+    - name: Ensure curl is installed
+      ansible.builtin.package:
+        name: curl
+        state: present
+      become: true
+      tags: [astral_uv, packages]
 
-    - name: Set libc variant for macOS
-      when: ansible_facts['system'] == 'Darwin'
+    - name: Build installer URL
       ansible.builtin.set_fact:
-        _uv_libc: ""
+        _uv_installer_url: >-
+          {{ (uv_version == 'latest') | ternary(
+             'https://astral.sh/uv/install.sh',
+             'https://astral.sh/uv/' ~ uv_version ~ '/install.sh') }}
+      tags: [astral_uv]
 
-    - name: Build platform key
-      ansible.builtin.set_fact:
-        _uv_platform_key: >-
-          {{ ansible_facts['system'] }}_{{ ansible_facts['architecture'] }}{{ '_' + _uv_libc if _uv_libc | default('') else '' }}
+    - name: Run uv installer
+      ansible.builtin.shell:
+        cmd: "curl -LsSf {{ _uv_installer_url }} | sh"
+      environment:
+        UV_INSTALL_DIR: "{{ uv_install_dir }}"
+        UV_NO_MODIFY_PATH: "{{ uv_modify_path | bool | ternary('0', '1') }}"
+      args:
+        executable: /bin/bash
+      register: _uv_install_result
+      changed_when: true
+      tags: [astral_uv]
 
-    - name: Validate platform is supported
-      ansible.builtin.assert:
-        that:
-          - _uv_platform_key in _uv_platform_map
-        fail_msg: >-
-          Unsupported platform: {{ _uv_platform_key }}.
-          Supported platforms: {{ _uv_platform_map.keys() | list | join(', ') }}
-        quiet: true
+    - name: Verify installation
+      ansible.builtin.command:
+        cmd: "{{ uv_install_dir }}/uv --version"
+      register: _uv_verify
+      changed_when: false
+      tags: [astral_uv]
 
-    - name: Set download artifact name
-      ansible.builtin.set_fact:
-        _uv_artifact: "{{ _uv_platform_map[_uv_platform_key] }}"
-
-    - name: Build download URL
-      ansible.builtin.set_fact:
-        _uv_download_url: "{{ _uv_releases_url }}/download/{{ _uv_target_version }}/{{ _uv_artifact }}"
-
-    - name: Include download and install tasks
-      ansible.builtin.include_tasks: install.yml
-
-- name: Include PATH configuration tasks
-  when: uv_modify_path | bool
-  ansible.builtin.include_tasks: configure_path.yml
-
-- name: Display installation summary
+- name: Display installation status
   ansible.builtin.debug:
     msg: >-
-      uv {{ _uv_target_version }} is {{ 'now installed' if _uv_needs_install | bool else 'already installed' }}
+      uv {{ _uv_verify.stdout | default(_uv_current_version.stdout | default('unknown')) }}
+      {{ _uv_needs_install | bool | ternary('installed', 'already present') }}
       at {{ uv_install_dir }}/uv
+    verbosity: 0
+  tags: [astral_uv]
