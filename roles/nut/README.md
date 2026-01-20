@@ -629,6 +629,45 @@ upscmd -u admin -p PASSWORD ups@localhost beeper.disable
 upscmd -u admin -p PASSWORD ups@localhost test.battery.start.quick
 ```
 
+## NUT Exporter (Prometheus)
+
+This role can install and configure the [nut_exporter](https://github.com/DRuggeri/nut_exporter) to expose UPS metrics for Prometheus/Grafana.
+
+- Installation methods: binary (default) or Docker
+- Configurable listen address/port, metrics path, and variables
+- Works with local NUT server (default 127.0.0.1:3493)
+
+### Multi-UPS Scraping Requirement
+
+When multiple UPS devices are connected to the same NUT server, `nut_exporter` requires the UPS name to be specified via a query parameter on the metrics endpoint. Without this, the endpoint will return HTTP 500 with `empty metric collected`.
+
+Scrape each UPS separately, e.g.:
+
+```
+http://<host>:9199/ups_metrics?ups=ups-primary
+http://<host>:9199/ups_metrics?ups=ups-secondary
+```
+
+Prometheus/Alloy scrape examples:
+
+```river
+prometheus.scrape "nut_exporter_primary" {
+  targets      = ["<host>:9199"]
+  metrics_path = "/ups_metrics"
+  params       = { ups = ["ups-primary"] }
+  forward_to   = [prometheus.remote_write.metrics_out.receiver]
+}
+
+prometheus.scrape "nut_exporter_secondary" {
+  targets      = ["<host>:9199"]
+  metrics_path = "/ups_metrics"
+  params       = { ups = ["ups-secondary"] }
+  forward_to   = [prometheus.remote_write.metrics_out.receiver]
+}
+```
+
+Note: The binary exporter does not accept an `--ups` flag; use the query parameter or run separate exporter instances per UPS on different ports.
+
 ## License
 
 GPL-3.0-or-later

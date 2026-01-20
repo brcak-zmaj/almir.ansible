@@ -1,0 +1,11 @@
+
+ - name: Deploy MOTD banner
+   become: true
+   ansible.builtin.template:
+     src: "{{ motd_template_src }}"
+     dest: "{{ motd_path }}"
+     owner: "{{ motd_owner }}"
+     group: "{{ motd_group }}"
+     mode: "{{ motd_mode }}"
+   tags:
+     - motd

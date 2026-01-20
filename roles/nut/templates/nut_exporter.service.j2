@@ -22,11 +22,6 @@ ExecStart={{ nut_exporter_install_dir }}/nut_exporter \
 {% if nut_exporter_nut_username %}
   --nut.username={{ nut_exporter_nut_username }} \
 {% endif %}
-{% if nut_exporter_ups_list | length > 0 %}
-{% for ups_name in nut_exporter_ups_list %}
-  --ups={{ ups_name }} \
-{% endfor %}
-{% endif %}
   --web.listen-address={{ nut_exporter_listen_address }}:{{ nut_exporter_port }} \
   --web.telemetry-path={{ nut_exporter_metrics_path }} \
 {% if nut_exporter_variables | length > 0 %}
