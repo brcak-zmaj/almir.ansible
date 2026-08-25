@@ -1,0 +1,6 @@
+- name: Install Netdata dependencies | RHEL
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ netdata_dependencies_redhat }}"
+    state: present
+  tags: common

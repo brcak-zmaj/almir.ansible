@@ -1,0 +1,6 @@
+---
+- name: vzdump Config
+  ansible.builtin.template:
+    src: vzdump.conf.j2
+    dest: /etc/vzdump.conf
+    mode: 0644

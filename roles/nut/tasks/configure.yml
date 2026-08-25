@@ -1,0 +1,138 @@
+---
+# =============================================================================
+# NUT Configuration Tasks
+# =============================================================================
+
+# =============================================================================
+# VALIDATION - Ensure required variables are defined
+# =============================================================================
+- name: Validate required NUT user configuration
+  ansible.builtin.assert:
+    that:
+      - nut_upsd_users | length > 0
+      - nut_upsd_users | selectattr('username', 'defined') | list | length > 0
+      - nut_upsd_users | selectattr('password', 'defined') | list | length > 0
+    fail_msg: >-
+      nut_upsd_users must be defined with at least one user containing username and password.
+      See role README for configuration examples.
+    success_msg: "NUT user configuration validated"
+  when: nut_mode in ['standalone', 'netserver']
+  tags:
+    - nut
+    - nut-config
+    - nut-validate
+
+- name: Validate required NUT monitor configuration
+  ansible.builtin.assert:
+    that:
+      - nut_upsmon_monitors | length > 0
+      - nut_upsmon_monitors | selectattr('ups', 'defined') | list | length > 0
+      - nut_upsmon_monitors | selectattr('password', 'defined') | list | length > 0
+    fail_msg: >-
+      nut_upsmon_monitors must be defined with at least one monitor entry containing ups and password.
+      See role README for configuration examples.
+    success_msg: "NUT monitor configuration validated"
+  when: nut_mode != 'none'
+  tags:
+    - nut
+    - nut-config
+    - nut-validate
+
+# =============================================================================
+# CONFIGURATION FILES
+# =============================================================================
+- name: Configure NUT mode
+  ansible.builtin.template:
+    src: nut.conf.j2
+    dest: "{{ nut_config_dir }}/nut.conf"
+    owner: "{{ nut_config_owner }}"
+    group: "{{ nut_config_group }}"
+    mode: "{{ nut_config_file_mode }}"
+  notify:
+    - Restart NUT driver
+    - Restart NUT server
+    - Restart NUT monitor
+  tags:
+    - nut
+    - nut-config
+
+- name: Configure UPS devices (ups.conf)
+  ansible.builtin.template:
+    src: ups.conf.j2
+    dest: "{{ nut_config_dir }}/ups.conf"
+    owner: "{{ nut_config_owner }}"
+    group: "{{ nut_config_group }}"
+    mode: "{{ nut_config_file_mode }}"
+  when: nut_mode in ['standalone', 'netserver']
+  notify:
+    - Restart NUT driver
+  tags:
+    - nut
+    - nut-config
+
+- name: Configure upsd server (upsd.conf)
+  ansible.builtin.template:
+    src: upsd.conf.j2
+    dest: "{{ nut_config_dir }}/upsd.conf"
+    owner: "{{ nut_config_owner }}"
+    group: "{{ nut_config_group }}"
+    mode: "{{ nut_config_file_mode }}"
+  when: nut_mode in ['standalone', 'netserver']
+  notify:
+    - Restart NUT server
+  tags:
+    - nut
+    - nut-config
+
+- name: Configure upsd users (upsd.users)
+  ansible.builtin.template:
+    src: upsd.users.j2
+    dest: "{{ nut_config_dir }}/upsd.users"
+    owner: "{{ nut_config_owner }}"
+    group: "{{ nut_config_group }}"
+    mode: "{{ nut_config_file_mode }}"
+  when: nut_mode in ['standalone', 'netserver']
+  notify:
+    - Restart NUT server
+  tags:
+    - nut
+    - nut-config
+
+- name: Configure upsmon (upsmon.conf)
+  ansible.builtin.template:
+    src: upsmon.conf.j2
+    dest: "{{ nut_config_dir }}/upsmon.conf"
+    owner: "{{ nut_config_owner }}"
+    group: "{{ nut_config_group }}"
+    mode: "{{ nut_config_file_mode }}"
+  when: nut_mode != 'none'
+  notify:
+    - Restart NUT monitor
+  tags:
+    - nut
+    - nut-config
+
+- name: Configure firewall for NUT server
+  block:
+    - name: Open NUT port in firewall (firewalld)
+      ansible.posix.firewalld:
+        port: "{{ nut_firewall_port }}/tcp"
+        zone: "{{ nut_firewall_zone }}"
+        permanent: true
+        immediate: true
+        state: enabled
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    - name: Open NUT port in firewall (ufw)
+      community.general.ufw:
+        port: "{{ nut_firewall_port }}"
+        proto: tcp
+        rule: allow
+      when: ansible_facts['os_family'] == 'Debian'
+  when:
+    - nut_firewall_enabled | bool
+    - nut_mode == 'netserver'
+  tags:
+    - nut
+    - nut-config
+    - nut-firewall

@@ -1,0 +1,66 @@
+---
+# Combined task file that builds removal lists and verifies what's actually installed
+
+- name: Build packages to remove (common + OS-specific, filtered by keep list)
+  ansible.builtin.set_fact:
+    debloat_packages_to_remove: >-
+      {{
+        (
+          common_debloat
+          + language_packs
+          + debloat_extra_packages
+          + (
+              redhat_debloat if ansible_os_family == 'RedHat'
+              else (debian_debloat if ansible_os_family == 'Debian' else [])
+            )
+        )
+        | reject('in', keep_packages)
+        | unique
+        | list
+      }}
+
+- name: Build flatpaks to remove (defaults + extras)
+  ansible.builtin.set_fact:
+    debloat_flatpaks_to_remove: >-
+      {{
+        (uninstall_flatpak_packages + debloat_extra_flatpaks)
+        | unique
+      }}
+
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Compute installed package names list
+  ansible.builtin.set_fact:
+    installed_packages: "{{ ansible_facts.packages.keys() | list }}"
+
+- name: Initialize wildcard matches list
+  ansible.builtin.set_fact:
+    debloat_wildcard_matches: []
+
+- name: Find installed packages matching wildcard patterns
+  ansible.builtin.set_fact:
+    debloat_wildcard_matches: "{{ debloat_wildcard_matches + (installed_packages | select('match', item | regex_replace('\\*', '.*') | regex_replace('^', '^') | regex_replace('$', '$')) | list) }}"
+  loop: "{{ debloat_packages_to_remove | select('search', '\\*') | list }}"
+  when: "'*' in item"
+
+- name: Filter exact match packages to only installed ones
+  ansible.builtin.set_fact:
+    debloat_exact_matches: "{{ (debloat_packages_to_remove | reject('search', '\\*') | list) | intersect(installed_packages) | list }}"
+
+- name: Set final package and flatpak lists (installed-only)
+  ansible.builtin.set_fact:
+    debloat_packages_final: >-
+      {{
+        (debloat_exact_matches + debloat_wildcard_matches)
+        | reject('in', keep_packages)
+        | unique
+        | list
+      }}
+    debloat_flatpaks_final: "{{ debloat_flatpaks_to_remove }}"
+
+- name: Display packages to be removed
+  ansible.builtin.debug:
+    msg: "Found {{ debloat_packages_final | length }} packages to remove: {{ debloat_packages_final }}"
+  when: debloat_debug | bool

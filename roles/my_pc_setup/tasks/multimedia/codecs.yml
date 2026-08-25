@@ -1,0 +1,7 @@
+---
+
+- name: Install GStreamer codecs | Multimedia
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ gstreamer_debian_packages if ansible_os_family == 'Debian' else gstreamer_redhat_packages }}"

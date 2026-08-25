@@ -1,0 +1,29 @@
+---
+- name: Apply Debian-specific kernel parameters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: no
+  loop: "{{ debian_sysctl_settings }}"
+  notify: reload sysctl
+  tags: [sysctl]
+
+- name: Persist all sysctl settings
+  lineinfile:
+    path: /etc/sysctl.d/99-docker.conf
+    line: "{{ item.name }} = {{ item.value }}"
+    regexp: "^#?{{ item.name }}"
+    state: present
+    create: yes
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ common_sysctl_settings + debian_sysctl_settings }}"
+  tags: [sysctl]
+
+- name: Ensure required kernel modules
+  apt:
+    name: "linux-modules-extra-{{ ansible_kernel }}"
+    state: present
+  tags: [packages]

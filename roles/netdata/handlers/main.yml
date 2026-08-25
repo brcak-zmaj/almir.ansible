@@ -1,0 +1,7 @@
+---
+- name: Restart netdata
+  become: true
+  ansible.builtin.service:
+    name: netdata
+    state: restarted
+  tags: netdata

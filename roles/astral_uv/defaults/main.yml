@@ -1,0 +1,16 @@
+---
+# Astral UV - Python package manager and environment tool
+# https://docs.astral.sh/uv/getting-started/installation/
+
+# Version to install (set to 'latest' for auto-detect, or pin specific version e.g. "0.9.21")
+uv_version: "latest"
+
+# Installation directory for binaries
+# Use /usr/local/bin for system-wide, ~/.local/bin for user-specific
+uv_install_dir: "{{ ansible_facts['user_dir'] }}/.local/bin"
+
+# Whether installer should modify shell PATH (handled by official installer)
+uv_modify_path: true
+
+# Force reinstall even if uv is already installed
+uv_force_reinstall: false

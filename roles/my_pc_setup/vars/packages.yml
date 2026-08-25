@@ -1,0 +1,100 @@
+---
+## Package Lists - Organized by Category and Distro
+## These are imported from vars during role execution
+## All packages are configurable via defaults/main.yml toggles
+
+# GNOME Desktop Packages
+gnome_packages:
+  - gnome-extensions-app            # Manage and configure GNOME Shell extensions
+  - gnome-tweaks                    # Advanced GNOME desktop configuration tool
+
+# Cross-distro Common Packages
+# Installed when utilities: true
+common_packages:
+  # Version Control and Development Tools
+  - git                             # Version control system
+  - curl                            # Tool for transferring data with URLs
+  - unzip                           # Extract ZIP archives
+  - wget                            # Command-line file downloader
+  - wine                            # Compatibility layer for running Windows applications on Linux
+  - keepassxc                       # Password manager
+
+  # System Monitoring and Optimization
+  - htop                            # Interactive process viewer
+  - iftop                           # Network bandwidth usage monitor
+  - iotop                           # Display I/O usage by processes
+  - tlp                             # Advanced Linux power management tool
+
+  # Network and Security Tools
+  - iperf                           # Network performance testing tool
+  - nmap                            # Network scanning tool
+  - net-tools                       # Deprecated but still-used network utilities (ifconfig, netstat, etc.)
+  - wireshark                       # Network protocol analyzer for troubleshooting and analysis
+  - cifs-utils                      # Tools for mounting and managing CIFS/SMB shares
+
+  # Media and Audio Tools
+  - flac                            # Free Lossless Audio Codec (audio compression tool)
+  - kdenlive                        # Non-linear video editor for Linux
+  - mpv                             # Video player
+  - mkvtoolnix                      # Matroska (MKV) file tools
+  - mkvtoolnix-gui                  # GUI for mkvtoolnix
+
+  # Miscellaneous Utilities
+  - cowsay                          # ASCII art generator with cows
+  - aria2                           # High-speed download utility for HTTP, FTP, and BitTorrent
+  - gparted                         # Graphical partition editor
+  - bleachbit                       # Disk space cleaner and privacy manager
+  - make                            # Utility for building and compiling software
+  - bash-completion                 # Programmable tab completion for bash
+  - blueman                         # Bluetooth manager for GTK desktops
+  - chromium                        # Open-source web browser
+  - obs-studio                      # Open source software for video recording and live streaming
+  - ripgrep                         # Fast text searcher with regex support
+  - nvtop                           # NVIDIA GPU process monitoring tool
+  - discord                         # Voice, video, and text chat application
+  - thunderbird                     # Email client
+  - p7zip                           # File archiver with high compression ratio
+  - p7zip-gui                       # Graphical user interface for p7zip
+  - p7zip-plugins                   # Additional plugins for p7zip
+  - rpi-imager                      # Raspberry Pi OS imager tool
+
+
+# Debian/Ubuntu-Specific Packages
+# Only installed on ansible_os_family == 'Debian'
+debian_packages:
+  - build-essential                 # Essential tools for building software
+  - gnupg-agent                     # GNU Privacy Guard agent for key management
+  - software-properties-common      # Manage software repositories
+  - apt-transport-https             # Transport for accessing HTTPS repositories
+  - neofetch                        # Display system information
+  - vlc                             # Media player supporting various audio and video formats
+  - ffmpeg                          # Multimedia processing tool (audio/video)
+  - flameshot                       # Screenshot tool with annotation features
+  - dialog                          # Utility for creating dialog boxes from shell scripts
+  - grc                             # Generic colorizer for command outputs
+  - ncdu                            # Disk usage analyzer
+  - iptraf                          # Real-time network monitoring tool
+  - bashtop                         # Resource monitor for Linux
+
+
+# Red Hat/Fedora-Specific Packages
+# Only installed on ansible_os_family == 'RedHat'
+redhat_packages:
+  - kernel-devel                    # Development files for building kernel modules
+  - kernel-headers                  # Header files for kernel development
+  - gcc                             # GNU C compiler
+  - dkms                            # Dynamic kernel module support framework
+  - pkgconfig                       # Manage compiler and linker flags for libraries
+  - fastfetch                       # Modern system fetch utility
+  - btop                            # Advanced resource monitor (modern alternative to htop/bashtop)
+  - sos                             # Support utility for system diagnostics
+  - ncdu                            # Disk usage analyzer
+  - btrfs-assistant                 # GUI tool for managing Btrfs volumes
+  - snapper                         # Tool for managing Btrfs snapshots
+
+
+# NVIDIA GPU-Specific Packages
+# Only installed when NVIDIA GPU detected
+nvidia_packages:
+  - akmod-nvidia                    # NVIDIA kernel module
+  - xorg-x11-drv-nvidia-cuda        # NVIDIA CUDA support

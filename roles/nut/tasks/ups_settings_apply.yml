@@ -1,0 +1,52 @@
+---
+# =============================================================================
+# Apply UPS Settings to a Single UPS Device
+# =============================================================================
+# Called by ups_settings.yml for each UPS in the list
+# Uses _current_ups variable for the UPS name
+#
+# Settings priority:
+#   1. Per-UPS settings from nut_ups_devices[].settings (highest priority)
+#   2. Global settings from nut_ups_settings (applied to all UPS)
+# =============================================================================
+
+- name: "Detect UPS make and model [{{ _current_ups }}]"
+  ansible.builtin.command:
+    cmd: "upsc {{ _current_ups }}@localhost device.mfr device.model"
+  register: _nut_ups_info
+  changed_when: false
+  failed_when: false
+
+- name: "Display detected UPS [{{ _current_ups }}]"
+  ansible.builtin.debug:
+    msg: "{{ _current_ups }}: {{ _nut_ups_info.stdout_lines | default(['Unknown']) | join(' ') }}"
+  when: _nut_ups_info.rc == 0
+
+# Find per-UPS settings if defined in nut_ups_devices
+- name: "Get per-UPS settings [{{ _current_ups }}]"
+  ansible.builtin.set_fact:
+    _current_ups_settings: >-
+      {{ (nut_ups_devices | selectattr('name', 'equalto', _current_ups) | first).settings | default([]) }}
+  when: nut_ups_devices | length > 0
+
+# Merge global settings with per-UPS settings (per-UPS takes precedence)
+- name: "Build effective settings list [{{ _current_ups }}]"
+  ansible.builtin.set_fact:
+    _effective_settings: >-
+      {{ nut_ups_settings | default([]) | rejectattr('variable', 'in', (_current_ups_settings | default([]) | map(attribute='variable') | list)) | list + (_current_ups_settings | default([])) }}
+
+- name: "Apply settings to UPS [{{ _current_ups }}]"
+  ansible.builtin.command:
+    cmd: >-
+      upsrw -s {{ item.variable }}={{ item.value }}
+      -u {{ nut_ups_admin_username }}
+      -p {{ nut_ups_admin_password }}
+      {{ _current_ups }}@localhost
+  loop: "{{ _effective_settings }}"
+  loop_control:
+    label: "{{ _current_ups }}: {{ item.variable }}={{ item.value }}"
+  register: _nut_setting_result
+  changed_when: "'OK' in _nut_setting_result.stdout"
+  failed_when: "'ERR' in _nut_setting_result.stdout"
+  no_log: "{{ nut_ups_settings_no_log }}"
+  when: _effective_settings | length > 0

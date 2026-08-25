@@ -1,0 +1,31 @@
+---
+# PostgreSQL-specific tuning defaults
+
+# Kernel settings tuned for PostgreSQL stability
+postgresql_sysctl_overcommit_memory: 1
+postgresql_sysctl_tcp_fin_timeout: 30
+postgresql_sysctl_tcp_keepalive_time: 300
+postgresql_sysctl_tcp_tw_reuse: 1
+postgresql_sysctl_file_max: 2097152
+postgresql_sysctl_shmmax: 68719476736   # Fallback value (will be overridden by calculation)
+postgresql_sysctl_shmall: 4294967296      # Fallback value (will be overridden by calculation)
+
+# Common sysctl settings to apply
+postgresql_common_sysctl_settings:
+  - { name: vm.overcommit_memory, value: "{{ postgresql_sysctl_overcommit_memory }}" }
+  - { name: vm.swappiness, value: 1 }
+  - { name: net.ipv4.tcp_fin_timeout, value: "{{ postgresql_sysctl_tcp_fin_timeout }}" }
+  - { name: net.ipv4.tcp_keepalive_time, value: "{{ postgresql_sysctl_tcp_keepalive_time }}" }
+  - { name: net.ipv4.tcp_tw_reuse, value: "{{ postgresql_sysctl_tcp_tw_reuse }}" }
+  - { name: fs.file-max, value: "{{ postgresql_sysctl_file_max }}" }
+  - { name: kernel.shmmax, value: "{{ postgresql_sysctl_shmmax }}" }
+  - { name: kernel.shmall, value: "{{ postgresql_sysctl_shmall }}" }
+
+# OS-specific additional settings (empty by default, override if needed)
+postgresql_debian_sysctl_settings: []
+postgresql_rhel_sysctl_settings: []
+
+# Increase resource limits for the PostgreSQL user
+postgresql_user_limits:
+  - { user: 'postgres', type: 'nofile', value: '65535' }
+  - { user: 'postgres', type: 'nproc', value: '16384' }

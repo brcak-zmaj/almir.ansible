@@ -1,0 +1,15 @@
+alarm: high_client_error_rate
+on: web_log.nginx.client_errors
+lookup: average {{ netdata_nginx_high_client_error_rate_lookup }} unaligned of 4xx
+units: errors/s
+every: {{ netdata_nginx_high_client_error_rate_every }}
+warn: $this > {{ netdata_nginx_high_client_error_rate_warn }}
+crit: $this > {{ netdata_nginx_high_client_error_rate_crit }}
+
+alarm: high_server_error_rate
+on: web_log.nginx.server_errors
+lookup: average {{ netdata_nginx_high_client_error_rate_lookup }} unaligned of 5xx
+units: errors/s
+every: {{ netdata_nginx_high_client_error_rate_every }}
+warn: $this > {{ netdata_nginx_high_client_error_rate_warn | int / 2 }}
+crit: $this > {{ netdata_nginx_high_client_error_rate_crit | int / 2 }}

@@ -1,0 +1,49 @@
+---
+
+# Locale Configuration for Debian-based systems
+- name: Ensure locales are generated (Debian) | Locales
+  community.general.locale_gen:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "en_US.UTF-8"
+    - "bs_BA.UTF-8"
+  when: ansible_os_family == "Debian"
+
+- name: Set system locale to English (Debian) | Locales
+  ansible.builtin.copy:
+    content: |
+      LANG=en_US.UTF-8
+      LC_ALL=en_US.UTF-8
+    dest: /etc/default/locale
+    mode: '0644'
+  when: ansible_os_family == "Debian"
+
+# Locale Configuration for RedHat-based systems
+- name: Install langpacks for English and Bosnian (RedHat) | Locales
+  ansible.builtin.dnf:
+    name:
+      - glibc-langpack-en
+      - glibc-langpack-bs
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Set system locale to English (RedHat) | Locales
+  ansible.builtin.copy:
+    content: |
+      LANG=en_US.UTF-8
+      LC_ALL=en_US.UTF-8
+    dest: /etc/locale.conf
+    mode: '0644'
+  when: ansible_os_family == "RedHat"
+
+- name: Verify locale settings | Locales
+  ansible.builtin.command: localectl status
+  register: locale_status
+  changed_when: false
+  failed_when: false
+
+- name: Display current locale configuration | Locales
+  ansible.builtin.debug:
+    msg: "{{ locale_status.stdout_lines }}"
+  when: locale_status.stdout_lines is defined

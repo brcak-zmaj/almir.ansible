@@ -1,0 +1,31 @@
+---
+# meta/main.yml - Mullvad Browser role metadata
+
+galaxy_info:
+  author: Almir Zohorovic
+  description: Install and manage Mullvad Browser on RedHat and Debian family systems
+  license: MIT
+  min_ansible_version: "2.14"
+
+  platforms:
+    - name: Fedora
+      versions:
+        - "41"
+        - "42"
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+
+  galaxy_tags:
+    - browser
+    - mullvad
+    - privacy
+    - security
+
+dependencies: []

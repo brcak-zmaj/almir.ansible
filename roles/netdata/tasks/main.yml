@@ -1,0 +1,337 @@
+---
+- name: Check if Netdata is already installed
+  ansible.builtin.stat:
+    path: "{{ netdata_binary_path }}"
+  register: netdata_check
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Check if ZFS is installed
+  ansible.builtin.command: zfs --version
+  register: zfs_check
+  failed_when: false
+  changed_when: false
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Include dependencies based on distribution
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}.yml"
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Build kickstart script command arguments
+  no_log: "{{ kickstart_no_log }}"
+  ansible.builtin.set_fact:
+    netdata_kickstart_args_list: "{{ netdata_kickstart_args_list | default([]) + (item | select('string') | list) }}"
+  vars:
+    args_to_add: >-
+      {%- set args = [] -%}
+      {%- if netdata_non_interactive | bool -%}
+        {{- args.append('--non-interactive') or '' -}}
+      {%- elif netdata_interactive | bool -%}
+        {{- args.append('--interactive') or '' -}}
+      {%- endif -%}
+      {%- if netdata_release_channel == 'stable' -%}
+        {{- args.append('--stable-channel') or '' -}}
+      {%- elif netdata_release_channel == 'nightly' -%}
+        {{- args.append('--nightly-channel') or '' -}}
+      {%- endif -%}
+      {%- if netdata_install_version | length > 0 -%}
+        {{- args.append('--install-version') or '' -}}
+        {{- args.append(netdata_install_version) or '' -}}
+      {%- endif -%}
+      {%- if netdata_auto_update | bool -%}
+        {{- args.append('--auto-update') or '' -}}
+      {%- elif netdata_no_updates | bool -%}
+        {{- args.append('--no-updates') or '' -}}
+      {%- endif -%}
+      {%- if netdata_claim_token | length > 0 -%}
+        {{- args.append('--claim-token') or '' -}}
+        {{- args.append(netdata_claim_token) or '' -}}
+      {%- endif -%}
+      {%- if netdata_claim_rooms | length > 0 -%}
+        {{- args.append('--claim-rooms') or '' -}}
+        {{- args.append(netdata_claim_rooms) or '' -}}
+      {%- endif -%}
+      {%- if netdata_disable_telemetry | bool -%}
+        {{- args.append('--disable-telemetry') or '' -}}
+      {%- endif -%}
+      {%- if netdata_install_prefix | length > 0 -%}
+        {{- args.append('--install-prefix') or '' -}}
+        {{- args.append(netdata_install_prefix) or '' -}}
+      {%- endif -%}
+      {%- if netdata_old_install_prefix | length > 0 -%}
+        {{- args.append('--old-install-prefix') or '' -}}
+        {{- args.append(netdata_old_install_prefix) or '' -}}
+      {%- endif -%}
+      {%- if netdata_reinstall | bool -%}
+        {{- args.append('--reinstall') or '' -}}
+      {%- endif -%}
+      {%- if netdata_uninstall | bool -%}
+        {{- args.append('--uninstall') or '' -}}
+      {%- endif -%}
+      {{- args -}}
+    item: "{{ args_to_add }}"
+  when:
+    - netdata_install_enabled | bool
+    - not netdata_check.stat.exists or netdata_reinstall | bool or netdata_uninstall | bool
+  tags: netdata
+
+- name: Join kickstart script arguments
+  no_log: "{{ kickstart_no_log }}"
+  ansible.builtin.set_fact:
+    netdata_kickstart_args: "{{ netdata_kickstart_args_list | default([]) | join(' ') }}"
+  when:
+    - netdata_install_enabled | bool
+    - not netdata_check.stat.exists or netdata_reinstall | bool or netdata_uninstall | bool
+  tags: netdata
+
+- name: Download Netdata kickstart script
+  ansible.builtin.get_url:
+    url: "{{ netdata_kickstart_url }}"
+    dest: "{{ netdata_kickstart_script_path }}"
+    mode: "{{ netdata_kickstart_script_mode }}"
+    checksum: "md5:39321e7a8e05f0054f93df1824189abd"
+  when:
+    - netdata_install_enabled | bool
+    - not netdata_check.stat.exists or netdata_reinstall | bool
+  tags: netdata
+
+- name: Set environment variables for kickstart script
+  no_log: "{{ kickstart_no_log }}"
+  ansible.builtin.set_fact:
+    netdata_kickstart_env: >-
+      {%- set env_vars = {} -%}
+      {%- if netdata_tmpdir | length > 0 -%}
+        {{- env_vars.update({'TMPDIR': netdata_tmpdir}) or '' -}}
+      {%- endif -%}
+      {%- if netdata_rootcmd | length > 0 -%}
+        {{- env_vars.update({'ROOTCMD': netdata_rootcmd}) or '' -}}
+      {%- endif -%}
+      {%- if netdata_disable_telemetry | bool -%}
+        {{- env_vars.update({'DISABLE_TELEMETRY': '1'}) or '' -}}
+      {%- endif -%}
+      {{- env_vars if env_vars | length > 0 else {} -}}
+  when:
+    - netdata_install_enabled | bool
+    - not netdata_check.stat.exists or netdata_reinstall | bool or netdata_uninstall | bool
+  tags: netdata
+
+- name: Install Netdata (from downloaded script)
+  no_log: "{{ kickstart_no_log }}"
+  ansible.builtin.command:
+    cmd: "sh {{ netdata_kickstart_script_path }} {{ netdata_kickstart_args }}"
+  environment: "{{ netdata_kickstart_env | default({}) }}"
+  become: true
+  when:
+    - netdata_install_enabled | bool
+    - not netdata_check.stat.exists or netdata_reinstall | bool
+  register: netdata_install_result
+  changed_when: netdata_install_result.rc == 0
+  tags: netdata
+
+- name: Clean up Netdata kickstart script
+  ansible.builtin.file:
+    path: "{{ netdata_kickstart_script_path }}"
+    state: absent
+  when:
+    - netdata_install_enabled | bool
+    - netdata_install_result is defined
+  tags: netdata
+
+- name: Ensure Netdata configuration directory exists
+  ansible.builtin.file:
+    path: "{{ netdata_config_dir }}"
+    state: directory
+    mode: "{{ netdata_config_dir_mode }}"
+  become: true
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Ensure Netdata health directory exists
+  ansible.builtin.file:
+    path: "{{ netdata_health_dir }}"
+    state: directory
+    mode: "{{ netdata_health_dir_mode }}"
+  become: true
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Include notification configuration tasks
+  ansible.builtin.include_tasks: notify.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_notifications_enabled | bool
+  tags: netdata
+
+- name: Include bash scripts tasks
+  ansible.builtin.include_tasks: bash_scripts.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+  tags: netdata
+
+- name: Copy custom alarm files
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ netdata_health_dir }}/{{ item | basename }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  loop: "{{ netdata_custom_alarm_files }}"
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_custom_alarm_files | length > 0
+  notify: Restart netdata
+  tags: netdata
+
+- name: Find custom alarm files in directory
+  ansible.builtin.find:
+    paths: "{{ netdata_custom_alarm_dir }}"
+    patterns: "*.conf"
+    file_type: file
+  register: custom_alarm_files_found
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_custom_alarm_dir | length > 0
+  tags: netdata
+
+- name: Copy custom alarm files from directory
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ netdata_health_dir }}/{{ item.path | basename }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  loop: "{{ custom_alarm_files_found.files | default([]) }}"
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_custom_alarm_dir | length > 0
+    - custom_alarm_files_found.files | length > 0
+  notify: Restart netdata
+  tags: netdata
+
+- name: Include general alert tasks
+  ansible.builtin.include_tasks: general.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+  tags: netdata
+
+# Note: Netdata handles missing charts gracefully - alarms for services that aren't installed
+# will simply not trigger. No errors will occur. Users can enable/disable alert categories
+# via the netdata_*_alerts_enabled variables for better control.
+
+- name: Include MySQL alert tasks
+  ansible.builtin.include_tasks: mysql.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_mysql_alerts_enabled | bool
+  tags: netdata
+
+- name: Include Docker alert tasks
+  ansible.builtin.include_tasks: docker.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_docker_alerts_enabled | bool
+  tags: netdata
+
+- name: Include Nginx alert tasks
+  ansible.builtin.include_tasks: nginx.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_nginx_alerts_enabled | bool
+  tags: netdata
+
+- name: Include Apache alert tasks
+  ansible.builtin.include_tasks: apache.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_apache_alerts_enabled | bool
+  tags: netdata
+
+- name: Include Kubernetes alert tasks
+  ansible.builtin.include_tasks: kubernetes.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_kubernetes_alerts_enabled | bool
+  tags: netdata
+
+- name: Include ZFS alert tasks
+  ansible.builtin.include_tasks: zfs.yml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_zfs_alerts_enabled | bool
+    - zfs_check.rc == 0
+  tags: netdata
+
+- name: Include SMARTD alert tasks
+  ansible.builtin.include_tasks: smartd.yaml
+  when:
+    - netdata_install_enabled | bool
+    - netdata_alerts_enabled | bool
+    - netdata_smartd_alerts_enabled | bool
+  tags: netdata
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Copy custom netdata.conf file if specified
+  become: true
+  ansible.builtin.copy:
+    src: "{{ netdata_config_file_custom }}"
+    dest: "{{ netdata_config_dir }}/netdata.conf"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  when:
+    - netdata_install_enabled | bool
+    - netdata_config_file_custom | length > 0
+  notify: Restart netdata
+  tags: netdata
+
+- name: Copy netdata.conf from template
+  become: true
+  ansible.builtin.template:
+    src: netdata.conf.j2
+    dest: "{{ netdata_config_dir }}/netdata.conf"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  when:
+    - netdata_install_enabled | bool
+    - netdata_config_file_custom | length == 0
+  notify: Restart netdata
+  tags: netdata
+
+- name: Flush handlers to restart Netdata after config changes
+  ansible.builtin.meta: flush_handlers
+  when: netdata_install_enabled | bool
+  tags: netdata
+
+- name: Display Netdata access information
+  ansible.builtin.debug:
+    msg: >-
+      Netdata is accessible at:
+      - Root URL (landing page): http://{{ ansible_default_ipv4.address }}:{{ netdata_web_port }} or http://{{ inventory_hostname }}:{{ netdata_web_port }}
+      {% if netdata_enable_anonymous_dashboard | bool %}
+      - Dashboard (anonymous, bypasses landing page): http://{{ ansible_default_ipv4.address }}:{{ netdata_web_port }}/v3 or http://{{ inventory_hostname }}:{{ netdata_web_port }}/v3
+      {% endif %}
+  when:
+    - netdata_install_enabled | bool
+    - netdata_check.stat.exists | default(false)
+    - ansible_default_ipv4.address is defined
+  tags: netdata 

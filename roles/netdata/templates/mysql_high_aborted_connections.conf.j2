@@ -1,0 +1,7 @@
+alarm: high_aborted_connections
+on: mysql.aborted_connections
+lookup: average {{ netdata_mysql_high_aborted_connections_lookup }} unaligned of rate
+units: connections/s
+every: {{ netdata_mysql_high_aborted_connections_every }}
+warn: $this > {{ netdata_mysql_high_aborted_connections_warn }}
+crit: $this > {{ netdata_mysql_high_aborted_connections_crit }}

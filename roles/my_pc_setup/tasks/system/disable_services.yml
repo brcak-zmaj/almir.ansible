@@ -1,0 +1,17 @@
+---
+- name: Disable unnecessary systemd services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop: "{{ disable_services }}"
+  when: disable_services | length > 0
+  tags: [disable_services]
+
+- name: Kill unnecessary processes
+  ansible.builtin.shell: "pkill -9 -f {{ item }} || true"
+  args:
+    warn: false
+  loop: "{{ kill_processes }}"
+  when: kill_processes | length > 0
+  tags: [disable_services]

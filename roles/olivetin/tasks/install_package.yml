@@ -1,0 +1,39 @@
+---
+# Package Manager Installation Tasks
+
+- name: Set OliveTin package facts based on OS family
+  ansible.builtin.set_fact:
+    olivetin_package:
+      url: >-
+        {{ olivetin_package_url_fedora if ansible_os_family == 'RedHat'
+           else olivetin_package_url_debian }}
+      path: >-
+        {{ '/tmp/OliveTin_linux_amd64.rpm' if ansible_os_family == 'RedHat'
+           else '/tmp/OliveTin_linux_amd64.deb' }}
+
+- name: Download OliveTin package
+  ansible.builtin.get_url:
+    url: "{{ olivetin_package.url }}"
+    dest: "{{ olivetin_package.path }}"
+    mode: '0644'
+  become: true
+
+- name: Install or upgrade OliveTin package
+  ansible.builtin.package:
+    name: "{{ olivetin_package.path }}"
+    state: present
+  become: true
+  register: olivetin_package_install
+
+- name: Remove downloaded package file
+  ansible.builtin.file:
+    path: "{{ olivetin_package.path }}"
+    state: absent
+  become: true
+
+- name: Enable OliveTin service
+  ansible.builtin.systemd:
+    name: OliveTin
+    enabled: "{{ olivetin_service_enabled }}"
+    state: stopped
+  become: true

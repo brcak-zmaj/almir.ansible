@@ -1,0 +1,58 @@
+---
+- name: Check if intel-iommu.cfg exists
+  ansible.builtin.stat:
+    path: /etc/default/grub.d/intel-iommu.cfg
+  register: iommu_cfg
+
+- name: Check if VT-d/IOMMU is supported
+  ansible.builtin.command: dmesg | grep -e DMAR -e IOMMU
+  register: dmar_output
+  changed_when: false
+  failed_when: false
+
+- name: Display DMAR/IOMMU information
+  ansible.builtin.debug:
+    var: dmar_output.stdout_lines
+  when:
+    - ('DMAR' in dmar_output.stdout | default('') or 'IOMMU' in dmar_output.stdout | default(''))
+    - not iommu_cfg.stat.exists
+
+- name: Write IOMMU configuration to GRUB
+  block:
+    - name: Create intel-iommu.cfg with complete GPU passthrough parameters
+      ansible.builtin.template:
+        src: intel-iommu.cfg.j2
+        dest: /etc/default/grub.d/intel-iommu.cfg
+        owner: root
+        group: root
+        mode: '0644'
+      register: iommu_cfg_file
+
+    - name: Update GRUB configuration
+      ansible.builtin.command: update-grub
+      register: grub_update
+      changed_when: iommu_cfg_file.changed | default(false)
+      when: iommu_cfg_file.changed | default(false)
+  when: pve_gpu_passthrough_enable | default(false)
+
+- name: vfio kernel modules are enabled
+  ansible.builtin.copy:
+    src: vfio.conf
+    dest: /etc/modules-load.d/vfio.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: pve_gpu_passthrough_enable | default(false)
+  notify:
+    - update initramfs
+
+- name: Create vfio-pci modprobe configuration for GPU passthrough
+  ansible.builtin.template:
+    src: vfio-pci.conf.j2
+    dest: /etc/modprobe.d/vfio-pci.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: pve_gpu_passthrough_enable | default(false)
+  notify:
+    - update initramfs

@@ -1,0 +1,24 @@
+---
+# tasks/main.yml - Mullvad Browser role entry point
+
+- name: Set package name based on version selection
+  changed_when: false
+  ansible.builtin.set_fact:
+    mullvad_browser_package: >-
+      {{ mullvad_browser_package_alpha if mullvad_browser_install_alpha | bool
+         else mullvad_browser_package_stable }}
+  tags:
+    - mullvad_browser
+
+- name: Include OS-specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
+  when: ansible_os_family in ['RedHat', 'Debian']
+  tags:
+    - mullvad_browser
+
+- name: Fail on unsupported OS family
+  ansible.builtin.fail:
+    msg: "Unsupported OS family: {{ ansible_os_family }}. This role supports RedHat and Debian families only."
+  when: ansible_os_family not in ['RedHat', 'Debian']
+  tags:
+    - mullvad_browser

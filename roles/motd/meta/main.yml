@@ -1,0 +1,4 @@
+---
+# Collections required by this role
+collections:
+  - ansible.builtin

@@ -1,0 +1,77 @@
+---
+# Astral UV installation role
+# Uses official standalone installer: https://docs.astral.sh/uv/getting-started/installation/
+
+- name: Validate supported platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['system'] in ['Linux', 'Darwin']
+    fail_msg: "Unsupported OS: {{ ansible_facts['system'] }}. Only Linux and macOS are supported."
+    quiet: true
+  tags: [astral_uv]
+
+- name: Check if uv is already installed
+  ansible.builtin.stat:
+    path: "{{ uv_install_dir }}/uv"
+  register: _uv_installed
+  tags: [astral_uv]
+
+- name: Get installed uv version
+  when: _uv_installed.stat.exists
+  ansible.builtin.command:
+    cmd: "{{ uv_install_dir }}/uv --version"
+  register: _uv_current_version
+  changed_when: false
+  failed_when: false
+  tags: [astral_uv]
+
+- name: Set installation status
+  ansible.builtin.set_fact:
+    _uv_needs_install: "{{ uv_force_reinstall | bool or not _uv_installed.stat.exists }}"
+  tags: [astral_uv]
+
+- name: Install uv using official installer
+  when: _uv_needs_install | bool
+  block:
+    - name: Ensure curl is installed
+      ansible.builtin.package:
+        name: curl
+        state: present
+      become: true
+      tags: [astral_uv, packages]
+
+    - name: Build installer URL
+      ansible.builtin.set_fact:
+        _uv_installer_url: >-
+          {{ (uv_version == 'latest') | ternary(
+             'https://astral.sh/uv/install.sh',
+             'https://astral.sh/uv/' ~ uv_version ~ '/install.sh') }}
+      tags: [astral_uv]
+
+    - name: Run uv installer
+      ansible.builtin.shell:
+        cmd: "curl -LsSf {{ _uv_installer_url }} | sh"
+      environment:
+        UV_INSTALL_DIR: "{{ uv_install_dir }}"
+        UV_NO_MODIFY_PATH: "{{ uv_modify_path | bool | ternary('0', '1') }}"
+      args:
+        executable: /bin/bash
+      register: _uv_install_result
+      changed_when: true
+      tags: [astral_uv]
+
+    - name: Verify installation
+      ansible.builtin.command:
+        cmd: "{{ uv_install_dir }}/uv --version"
+      register: _uv_verify
+      changed_when: false
+      tags: [astral_uv]
+
+- name: Display installation status
+  ansible.builtin.debug:
+    msg: >-
+      uv {{ _uv_verify.stdout | default(_uv_current_version.stdout | default('unknown')) }}
+      {{ _uv_needs_install | bool | ternary('installed', 'already present') }}
+      at {{ uv_install_dir }}/uv
+    verbosity: 0
+  tags: [astral_uv]

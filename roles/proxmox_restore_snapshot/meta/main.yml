@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  author: Almir Zohorovic
+  description: Restore Proxmox VM snapshots.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.9"
+
+dependencies: []

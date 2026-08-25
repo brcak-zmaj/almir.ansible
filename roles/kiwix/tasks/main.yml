@@ -1,0 +1,101 @@
+---
+# Main orchestration for Kiwix role
+
+- name: Include uninstall task
+  ansible.builtin.include_tasks: uninstall.yml
+  when: kiwix_uninstall | bool
+
+- name: Install and configure Kiwix
+  block:
+    - name: Ensure kiwix install directory exists
+      ansible.builtin.file:
+        path: "{{ kiwix_install_path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ kiwix_user }}"
+        group: "{{ kiwix_user }}"
+
+    - name: Ensure zim_files directory exists
+      ansible.builtin.file:
+        path: "{{ kiwix_install_path }}/zim_files"
+        state: directory
+        mode: '0755'
+        owner: "{{ kiwix_user }}"
+        group: "{{ kiwix_user }}"
+
+    - name: Copy pre-downloaded ZIM files from custom source
+      ansible.builtin.copy:
+        src: "{{ kiwix_zim_source_custom }}"
+        dest: "{{ kiwix_install_path }}/zim_files/"
+        owner: "{{ kiwix_user }}"
+        group: "{{ kiwix_user }}"
+        mode: '0644'
+        recurse: yes
+      when: kiwix_zim_source_stat is defined
+
+    - name: Copy Kiwix scripts to install path
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ kiwix_install_path }}/{{ item | basename }}"
+        mode: '0755'
+        owner: "{{ kiwix_user }}"
+        group: "{{ kiwix_user }}"
+      loop:
+        - kiwix_zim_sync.sh
+        - kiwix_zim_fetcher.sh
+
+    - name: Copy user-provided ZIM URLs file to target
+      ansible.builtin.copy:
+        src: "{{ kiwix_local_urls_file }}"
+        dest: "{{ kiwix_install_path }}/zim_files/zim_urls.txt"
+        mode: '0644'
+        owner: "{{ kiwix_user }}"
+        group: "{{ kiwix_user }}"
+      when: kiwix_local_urls_file is not none
+
+    - name: Include package installation
+      ansible.builtin.include_tasks: install_package.yml
+      when: kiwix_install_method == 'package'
+
+    - name: Include Docker installation
+      ansible.builtin.include_tasks: install_docker.yml
+      when: kiwix_install_method == 'docker'
+
+    - name: Include Flatpak installation
+      ansible.builtin.include_tasks: install_flatpak.yml
+      when: kiwix_install_method == 'flatpak'
+
+    - name: Include cron setup task
+      ansible.builtin.include_tasks: setup_cron.yml
+      when: kiwix_enable_cron | bool
+
+    - name: Deploy kiwix-desktop config
+      ansible.builtin.template:
+        src: kiwix-desktop.conf.j2
+        dest: "{{ kiwix_home }}/.config/kiwix-desktop"
+        mode: '0644'
+        owner: "{{ kiwix_user }}"
+        group: "{{ kiwix_user }}"
+      when:
+        - kiwix_deploy_config | bool
+        - kiwix_install_method == 'package'
+
+    - name: Display Kiwix setup information
+      ansible.builtin.debug:
+        msg:
+          - "✓ Kiwix has been installed via {{ kiwix_install_method }}"
+          - ""
+          - "Scripts are available at: {{ kiwix_install_path }}/"
+          - "  - kiwix_zim_fetcher.sh: Generate initial ZIM URLs list from Kiwix mirror"
+          - "  - kiwix_zim_sync.sh: Update ZIM files and keep them current"
+          - ""
+          - "ZIM files directory: {{ kiwix_install_path }}/zim_files"
+          - ""
+          - "Getting started:"
+          - "  1. Run fetcher first: cd {{ kiwix_install_path }} && ./kiwix_zim_fetcher.sh"
+          - "  2. Use sync to download/update: cd {{ kiwix_install_path }} && ./kiwix_zim_sync.sh sync"
+          - "  3. Or enable cron (kiwix_enable_cron: true) for automated updates"
+          - ""
+          - "See scripts for full options and usage: {{ kiwix_install_path }}/kiwix_zim_sync.sh -h"
+
+  when: not (kiwix_uninstall | bool)

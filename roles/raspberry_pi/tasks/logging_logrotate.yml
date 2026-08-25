@@ -1,0 +1,17 @@
+---
+# Logrotate Configuration
+
+- name: Ensure logrotate directory exists
+  ansible.builtin.file:
+    path: /etc/logrotate.d
+    state: directory
+    mode: '0755'
+
+- name: Create general logrotate configuration
+  ansible.builtin.template:
+    src: logrotate.conf.j2
+    dest: /etc/logrotate.d/rpi-general
+    mode: '0644'
+    owner: root
+    group: root
+

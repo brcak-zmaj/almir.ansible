@@ -1,0 +1,62 @@
+---
+# Install Kiwix via Docker
+
+- name: Check if Docker is installed
+  ansible.builtin.command: which docker
+  register: docker_check
+  changed_when: false
+  failed_when: false
+
+- name: Warn if Docker is not installed
+  ansible.builtin.debug:
+    msg: "Docker is not installed. Please install Docker first."
+  when: docker_check.rc != 0
+
+- name: Fail if Docker is not available
+  ansible.builtin.fail:
+    msg: "Docker is required for Docker installation method. Please install Docker first."
+  when: docker_check.rc != 0
+
+- name: Create Docker network
+  community.docker.docker_network:
+    name: "{{ kiwix_docker_network_name }}"
+    state: present
+  when:
+    - docker_check.rc == 0
+    - kiwix_docker_network_create
+
+- name: Check if Docker container exists
+  community.docker.docker_container_info:
+    name: "{{ kiwix_docker_container_name }}"
+  register: docker_container_info
+  when: docker_check.rc == 0
+
+- name: Create Kiwix Docker container
+  community.docker.docker_container:
+    name: "{{ kiwix_docker_container_name }}"
+    image: "{{ kiwix_docker_image }}:{{ kiwix_docker_version }}"
+    state: started
+    restart_policy: "{{ kiwix_docker_restart_policy }}"
+    memory: "{{ kiwix_docker_memory }}"
+    cpus: "{{ kiwix_docker_cpus }}"
+    ports:
+      - "{{ kiwix_docker_port }}:8080"
+    env:
+      PUID: "{{ kiwix_docker_puid }}"
+      PGID: "{{ kiwix_docker_pgid }}"
+      TZ: "{{ kiwix_docker_tz }}"
+    networks:
+      - name: "{{ kiwix_docker_network_name }}"
+    volumes:
+      - "{{ kiwix_install_path }}:/data:{{ 'ro' if kiwix_docker_readonly | default(true) else '' }}"
+  when: docker_check.rc == 0
+
+- name: Display Docker container information
+  ansible.builtin.debug:
+    msg:
+      - "Kiwix Docker container created: {{ kiwix_docker_container_name }}"
+      - "Image: {{ kiwix_docker_image }}:{{ kiwix_docker_version }}"
+      - "Port: {{ kiwix_docker_port }}"
+      - "ZIM files path: {{ kiwix_install_path }}"
+  when: docker_check.rc == 0
+

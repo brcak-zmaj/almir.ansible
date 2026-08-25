@@ -1,0 +1,30 @@
+---
+# =============================================================================
+# NUT UPS Settings Configuration Tasks
+# =============================================================================
+# Detects UPS info and applies user-defined settings via upsrw command.
+# Requires an admin user with 'actions: set' permission in upsd.users
+#
+# Supports both single UPS (nut_ups_name) and multiple UPS (nut_ups_devices)
+# =============================================================================
+
+# Build list of UPS names to configure
+- name: Build UPS device list for settings
+  ansible.builtin.set_fact:
+    _nut_ups_list: >-
+      {{ nut_ups_devices | map(attribute='name') | list
+         if (nut_ups_devices | length > 0)
+         else [nut_ups_name] }}
+  tags:
+    - nut
+    - nut-ups-settings
+
+- name: Detect and configure each UPS
+  ansible.builtin.include_tasks: ups_settings_apply.yml
+  loop: "{{ _nut_ups_list }}"
+  loop_control:
+    loop_var: _current_ups
+    label: "{{ _current_ups }}"
+  tags:
+    - nut
+    - nut-ups-settings

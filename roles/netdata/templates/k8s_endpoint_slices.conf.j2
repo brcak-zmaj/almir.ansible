@@ -1,0 +1,7 @@
+[Endpoint Slices Limit]
+    on = kubernetes.endpoint_slices
+    lookup: average {{ netdata_k8s_endpoint_slices_lookup }} unbound::count
+    every: {{ netdata_k8s_endpoint_slices_every }}
+    warn: $this > {{ netdata_k8s_endpoint_slices_warn }}
+    crit: $this > {{ netdata_k8s_endpoint_slices_crit }}
+    info: High number of endpoint slices might indicate a lot of services or changes

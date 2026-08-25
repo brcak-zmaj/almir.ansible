@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+# =============================================================================
+# UPS Configuration File - /etc/nut/ups.conf
+# =============================================================================
+#
+# Define UPS devices and their drivers here.
+# Each section defines a UPS that NUT will manage.
+#
+
+{% if nut_ups_devices | length > 0 %}
+# Multiple UPS configuration
+{% for ups in nut_ups_devices %}
+[{{ ups.name }}]
+    driver = {{ ups.driver }}
+    port = {{ ups.port }}
+{% if ups.description is defined %}
+    desc = "{{ ups.description }}"
+{% endif %}
+{% if ups.options is defined %}
+{% for key, value in ups.options.items() %}
+    {{ key }} = {{ value }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% else %}
+# Single UPS configuration
+[{{ nut_ups_name }}]
+    driver = {{ nut_ups_driver }}
+    port = {{ nut_ups_port }}
+{% if nut_ups_description is defined and nut_ups_description | length > 0 %}
+    desc = "{{ nut_ups_description }}"
+{% endif %}
+{% if nut_ups_driver_options | length > 0 %}
+{% for key, value in nut_ups_driver_options.items() %}
+    {{ key }} = {{ value }}
+{% endfor %}
+{% endif %}
+{% endif %}

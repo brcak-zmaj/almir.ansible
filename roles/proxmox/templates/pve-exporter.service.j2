@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Prometheus Proxmox VE Exporter
+After=network.target
+
+[Service]
+ExecStart={{ pve_exporter_venv }}/bin/pve_exporter \
+  --config.file /etc/prometheus/pve.yml \
+  --web.listen-address {{ pve_exporter_listen }}
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

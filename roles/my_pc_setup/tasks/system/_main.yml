@@ -1,0 +1,24 @@
+# b43 firmware cleanup for garage-workstation only
+- name: b43 firmware cleanup (garage-workstation only)
+  ansible.builtin.include_tasks: b43_firmware.yml
+  when: ansible_hostname == 'garage-workstation'
+  tags: [b43, firmware, cleanup]
+# KVM/VirtualBox cleanup for my-laptop only
+- name: KVM/VirtualBox cleanup (my-laptop only)
+  ansible.builtin.include_tasks: kvm_virtualbox_cleanup.yml
+  when: ansible_hostname == 'my-laptop'
+  tags: [kvm, virtualbox, cleanup]
+# NVIDIA/GRUB cleanup for my-laptop only
+- name: NVIDIA/GRUB cleanup (my-laptop only)
+  ansible.builtin.include_tasks: nvidia_cleanup.yml
+  when: ansible_hostname == 'my-laptop'
+  tags: [nvidia, cleanup]
+---
+# System-level tasks orchestrator
+
+- name: Disable unnecessary services and kill processes
+  ansible.builtin.include_tasks: disable_services.yml
+  when: disable_services | length > 0 or kill_processes | length > 0
+  tags: [disable_services]
+
+# ...existing includes for kernel params, firewall, etc...

@@ -1,0 +1,167 @@
+---
+#
+
+# User to uninstall user-level flatpaks (e.g., "almir")
+# Leave empty to skip user flatpak removal
+debloat_flatpak_user: "almir"
+
+# Debug mode - prints computed lists before removal
+debloat_debug: false
+
+# Display summary after debloat operations
+debloat_show_summary: true
+
+# =============================================================================
+# ADDITIVE USER OVERRIDES
+# These merge WITH defaults, not replace them
+# =============================================================================
+# Extra system packages to remove (added to all default lists)
+debloat_extra_packages: []
+
+# Extra Flatpak packages to remove (added to default flatpak list)
+debloat_extra_flatpaks: []
+
+# =============================================================================
+# FLATPAK PACKAGES TO UNINSTALL
+# =============================================================================
+# Flatpak application IDs to uninstall
+# Format: org.example.AppName (full application ID)
+uninstall_flatpak_packages: []
+
+# =============================================================================
+# LANGUAGE PACKS TO REMOVE
+# Wildcards (*) are supported
+# =============================================================================
+language_packs:
+  - language-pack-gnome-ar*
+  - language-pack-gnome-de*
+  - language-pack-gnome-es*
+  - language-pack-gnome-fr*
+  - language-pack-gnome-it*
+  - language-pack-gnome-ja*
+  - language-pack-gnome-pt*
+  - language-pack-gnome-ru*
+  - language-pack-gnome-zh*
+
+# =============================================================================
+# REDHAT-SPECIFIC PACKAGES TO REMOVE
+# Wildcards (*) are supported
+# =============================================================================
+redhat_debloat:
+  - anaconda-live
+  - anaconda-webui
+  - ffmpeg-free
+  - podman
+  - simple-scan
+  - toolbox
+  - whoopsie
+
+# =============================================================================
+# DEBIAN-SPECIFIC PACKAGES TO REMOVE
+# Wildcards (*) are supported
+# =============================================================================
+
+debian_debloat: []
+
+# =============================================================================
+# COMMON PACKAGES TO REMOVE (ALL DISTRIBUTIONS)
+# Wildcards (*) are supported
+# =============================================================================
+common_debloat:
+  # GNOME/GTK apps
+  - akregator
+  - gnome-user-docs
+  - akregator-libs
+  - dragon
+  - dragonplayer
+  - elisa-player
+  - emoji-picker
+  - kamoso
+  - kmahjongg
+  - kmines
+  - kmouth
+  - kolourpaint
+  - kontact
+  - kontact-libs
+  - krdc
+  - kwalletmanager
+  - neochat
+  - parole
+  - qrca
+  - skanpage
+  - spectacle
+  - timeshift
+  - totem-video-thumbnailer
+  - cockpit-bridge
+  - cockpit-storaged
+  - cockpit-system
+  - cockpit-ws
+  - cockpit-ws-selinux
+  - banshee
+  - brasero
+  - claws-mail
+  - empathy
+  - gnome-boxes
+  - gnome-calendar
+  - gnome-characters
+  - gnome-clocks
+  - gnome-contacts
+  - gnome-maps
+  - gnome-mines
+  - gnome-music
+  - gnome-photos
+  - gnome-sudoku
+  - gnome-tour
+  - gnome-weather
+  - gpodder
+  - hexchat
+  - libqqwing2v5
+  - pidgin
+  - pidgin-data
+  - pidgin-otr
+  - rhythmbox
+  - sgt-puzzles
+  - sound-juicer
+  - tali
+  - xfburn
+  - aisleriot
+  - boxes
+  - iagno
+  - ristretto.x86_64
+  - transmission-remote-gtk
+  - open-vm-tools
+  - open-vm-tools-desktop
+  - desktop-backgrounds-gnome
+  - firefox
+  - firefox-langpacks*
+
+  # LibreOffice help packs
+  - libreoffice-help-de
+  - libreoffice-help-en-gb
+  - libreoffice-help-es
+  - libreoffice-help-fr
+  - libreoffice-help-it
+  - libreoffice-help-ja
+  - libreoffice-help-pt
+  - libreoffice-help-pt-br
+  - libreoffice-help-ru
+  - libreoffice-help-zh-cn
+  - libreoffice-help-zh-tw
+
+  # LibreOffice localization packs
+  - libreoffice-l10n-de
+  - libreoffice-l10n-es
+  - libreoffice-l10n-fr
+  - libreoffice-l10n-it
+  - libreoffice-l10n-ja
+  - libreoffice-l10n-pt
+  - libreoffice-l10n-pt-br
+  - libreoffice-l10n-ru
+  - libreoffice-l10n-zh-cn
+  - libreoffice-l10n-zh-tw
+
+# =============================================================================
+# PACKAGES TO KEEP (EXCLUDE FROM REMOVAL)
+# These packages will never be removed even if in debloat lists
+# =============================================================================
+keep_packages: []

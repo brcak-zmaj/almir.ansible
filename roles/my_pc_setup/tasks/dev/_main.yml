@@ -1,0 +1,12 @@
+
+- name: Include boto tasks
+  ansible.builtin.include_tasks: boto.yml
+  when: boto is defined and boto | bool
+
+- name: Include node tasks
+  ansible.builtin.include_tasks: node.yml
+  when: node is defined and node | bool
+
+- name: Include python tasks
+  ansible.builtin.include_tasks: python.yml
+  when: python is defined and python | bool

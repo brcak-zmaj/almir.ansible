@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  author: Almir Zohorovic
+  description: Setup nvidia exporter agent for GPU metrics.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.9"
+
+dependencies: []

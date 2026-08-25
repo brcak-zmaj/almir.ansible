@@ -1,0 +1,25 @@
+---
+- name: Copy Kubernetes alarm configurations
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ netdata_health_dir }}/{{ item | basename | regex_replace('.j2$', '') }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  loop:
+    - k8s_pod_failures.conf.j2
+    - k8s_node_status.conf.j2
+    - k8s_disk_pressure.conf.j2
+    - k8s_memory_pressure.conf.j2
+    - k8s_cpu_pressure.conf.j2
+    - k8s_network_issues.conf.j2
+    - k8s_pv_usage.conf.j2
+    - k8s_api_latency.conf.j2
+    - k8s_kubelet_issues.conf.j2
+    - k8s_evicted_pods.conf.j2
+    - k8s_unscheduled_pods.conf.j2
+    - k8s_endpoint_slices.conf.j2
+    - k8s_unusual_network_traffic.conf.j2
+  notify: Restart netdata
+  tags: netdata

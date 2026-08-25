@@ -1,0 +1,16 @@
+---
+# =============================================================================
+# ZRAM Role - Main Tasks
+# =============================================================================
+# Manages Linux memory compression using zram via systemd zram-generator
+
+- name: Validate role is enabled
+  ansible.builtin.debug:
+    msg: "zram role is disabled (zram_enabled={{ zram_enabled }})"
+  when: not zram_enabled | bool
+  tags: zram
+
+- name: Configure zram
+  ansible.builtin.include_tasks: configure.yml
+  when: zram_enabled | bool
+  tags: zram

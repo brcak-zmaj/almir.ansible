@@ -1,0 +1,5 @@
+---
+
+- name: Include Remmina tasks
+  ansible.builtin.include_tasks: reminna.yml
+  when: reminna is defined and reminna == true

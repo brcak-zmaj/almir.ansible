@@ -1,0 +1,14 @@
+---
+- name: Remove b43-firmware package (garage-workstation only)
+  ansible.builtin.package:
+    name: b43-firmware
+    state: absent
+  when: ansible_hostname == 'garage-workstation'
+  tags: [b43, firmware, cleanup]
+
+- name: Install b43-firmware via dnf (garage-workstation only)
+  ansible.builtin.dnf:
+    name: b43-firmware
+    state: present
+  when: ansible_hostname == 'garage-workstation'
+  tags: [b43, firmware, install]

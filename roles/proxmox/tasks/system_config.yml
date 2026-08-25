@@ -1,0 +1,130 @@
+---
+# CPU Governor Configuration
+- name: linux-cpupower is installed
+  ansible.builtin.apt:
+    name: linux-cpupower
+    state: present
+  when: pve_set_cpu | default(false)
+
+- name: cpu-governor service is installed
+  ansible.builtin.template:
+    src: cpu-governor.service.j2
+    dest: /etc/systemd/system/cpu-governor.service
+    owner: root
+    group: root
+    mode: "0644"
+  when: pve_set_cpu | default(false)
+  notify: restart cpu-governor service
+
+- name: cpu-governor service is enabled and running
+  ansible.builtin.systemd:
+    name: cpu-governor.service
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  when: pve_set_cpu | default(false)
+
+# KSM (Kernel Same-page Merging) Configuration
+- name: Calculate RAM size in GB from gathered facts for KSM
+  ansible.builtin.set_fact:
+    ram_size_gb: "{{ (ansible_memtotal_mb | int / 1024) | int }}"
+
+- name: Ensure ksm-control-daemon package is installed
+  ansible.builtin.apt:
+    name: ksm-control-daemon
+    state: present
+
+- name: Calculate KSM_THRES_COEF based on RAM size
+  ansible.builtin.set_fact:
+    ksm_thres_coef: "{{ 50 }}"
+  when: ram_size_gb | int <= 16
+
+- name: Calculate KSM_THRES_COEF for 16-32GB RAM
+  ansible.builtin.set_fact:
+    ksm_thres_coef: "{{ 40 }}"
+  when: 
+    - ram_size_gb | int > 16
+    - ram_size_gb | int <= 32
+
+- name: Calculate KSM_THRES_COEF for 32-64GB RAM
+  ansible.builtin.set_fact:
+    ksm_thres_coef: "{{ 30 }}"
+  when: 
+    - ram_size_gb | int > 32
+    - ram_size_gb | int <= 64
+
+- name: Calculate KSM_THRES_COEF for 64-128GB RAM
+  ansible.builtin.set_fact:
+    ksm_thres_coef: "{{ 20 }}"
+  when: 
+    - ram_size_gb | int > 64
+    - ram_size_gb | int <= 128
+
+- name: Calculate KSM_THRES_COEF for >128GB RAM
+  ansible.builtin.set_fact:
+    ksm_thres_coef: "{{ 10 }}"
+  when: ram_size_gb | int > 128
+
+- name: Calculate KSM_SLEEP_MSEC based on RAM size
+  ansible.builtin.set_fact:
+    ksm_sleep_msec: "{{ 80 }}"
+  when: ram_size_gb | int <= 16
+
+- name: Calculate KSM_SLEEP_MSEC for 16-32GB RAM
+  ansible.builtin.set_fact:
+    ksm_sleep_msec: "{{ 60 }}"
+  when: 
+    - ram_size_gb | int > 16
+    - ram_size_gb | int <= 32
+
+- name: Calculate KSM_SLEEP_MSEC for 32-64GB RAM
+  ansible.builtin.set_fact:
+    ksm_sleep_msec: "{{ 40 }}"
+  when: 
+    - ram_size_gb | int > 32
+    - ram_size_gb | int <= 64
+
+- name: Calculate KSM_SLEEP_MSEC for 64-128GB RAM
+  ansible.builtin.set_fact:
+    ksm_sleep_msec: "{{ 20 }}"
+  when: 
+    - ram_size_gb | int > 64
+    - ram_size_gb | int <= 128
+
+- name: Calculate KSM_SLEEP_MSEC for >128GB RAM
+  ansible.builtin.set_fact:
+    ksm_sleep_msec: "{{ 10 }}"
+  when: ram_size_gb | int > 128
+
+- name: Update KSM_THRES_COEF in ksmtuned.conf
+  ansible.builtin.lineinfile:
+    path: /etc/ksmtuned.conf
+    regexp: '^#?\s*KSM_THRES_COEF='
+    line: "KSM_THRES_COEF={{ ksm_thres_coef }}"
+    backup: yes
+  register: ksm_thres_coef_result
+  notify: restart ksmtuned service
+
+- name: Update KSM_SLEEP_MSEC in ksmtuned.conf
+  ansible.builtin.lineinfile:
+    path: /etc/ksmtuned.conf
+    regexp: '^#?\s*KSM_SLEEP_MSEC='
+    line: "KSM_SLEEP_MSEC={{ ksm_sleep_msec }}"
+    backup: yes
+  register: ksm_sleep_msec_result
+  notify: restart ksmtuned service
+
+- name: Add tuned marker to ksmtuned.conf
+  ansible.builtin.lineinfile:
+    path: /etc/ksmtuned.conf
+    regexp: '^#tuned$'
+    line: "#tuned"
+    insertafter: EOF
+  when: ksm_thres_coef_result.changed or ksm_sleep_msec_result.changed
+
+- name: Enable and start ksmtuned service
+  ansible.builtin.systemd:
+    name: ksmtuned
+    enabled: yes
+    state: started
+

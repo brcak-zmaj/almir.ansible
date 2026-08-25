@@ -1,0 +1,7 @@
+[PV Usage High]
+    on = kubernetes.persistentvolumes
+    lookup: average {{ netdata_k8s_pv_usage_lookup }} unbound::usage
+    every: {{ netdata_k8s_pv_usage_every }}
+    warn: $this > {{ netdata_k8s_pv_usage_warn }}
+    crit: $this > {{ netdata_k8s_pv_usage_crit }}
+    info: Persistent Volume usage high

@@ -1,0 +1,35 @@
+---
+# =============================================================================
+# ZRAM Role - Handlers
+# =============================================================================
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+# NOTE: Shell usage is unavoidable here - no native Ansible modules exist for
+# zram device reset operations. This handler orchestrates swap deactivation,
+# device reset, and service restart in the correct sequence.
+- name: Restart zram swap
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      DEVICE="{{ zram_device_name }}"
+      # Disable existing zram swap if active (exact match, not substring —
+      # zram1 must not match zram10/zram11).
+      if swapon --show=NAME --noheadings | grep -qx "/dev/$DEVICE"; then
+        swapoff "/dev/$DEVICE" || true
+      fi
+      # Reset zram device if it exists
+      if [ -e "/sys/block/$DEVICE/reset" ]; then
+        echo 1 > "/sys/block/$DEVICE/reset" 2>/dev/null || true
+      fi
+      # Regenerate systemd units and start zram. Not swallowed with `|| true`:
+      # a real failure here (bad config, kernel refusing the device, etc.)
+      # must fail the play loudly rather than report a silent no-op success.
+      systemctl daemon-reload
+      systemctl restart "systemd-zram-setup@${DEVICE}.service"
+    executable: /bin/bash
+  become: true
+  changed_when: true

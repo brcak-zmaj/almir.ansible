@@ -1,0 +1,31 @@
+---
+# Docker Installation Tasks
+
+- name: Create OliveTin Docker network
+  tags: [docker]
+  community.docker.docker_network:
+    name: "{{ olivetin_docker_network_name }}"
+  when: olivetin_docker_network_create
+
+# Config file is handled in configure.yml, no need to duplicate here
+
+- name: Create OliveTin Docker container (don't start yet - config must be ready first)
+  tags: [docker, olivetin]
+  community.docker.docker_container:
+    name: "{{ olivetin_docker_container_name }}"
+    image: "{{ olivetin_docker_image }}:{{ olivetin_docker_version }}"
+    pull: "{{ olivetin_docker_pull_image }}"
+    state: created
+    restart_policy: "{{ olivetin_docker_restart_policy }}"
+    memory: "{{ olivetin_docker_memory }}"
+    cpus: "{{ olivetin_docker_cpus }}"
+    user: "{{ olivetin_docker_user }}"
+    ports:
+      - "{{ olivetin_docker_port }}:1337"
+    env: "{{ olivetin_docker_env }}"
+    volumes:
+      - "{{ olivetin_docker_config_mount }}"
+      - "{{ olivetin_docker_sock_mount }}"
+    networks:
+      - name: "{{ olivetin_docker_network_name }}"
+

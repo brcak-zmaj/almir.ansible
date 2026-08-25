@@ -1,0 +1,21 @@
+- name: Add flatpak support | Prep
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+
+- name: Add flathub remote | Prep
+  tags: packages,flatpak,workstation-packages
+  become_user: "{{ user }}"
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: "{{ flatpak_repo }}"
+    method: user
+    state: present
+
+- name: Install regular flatpak packages | Prep
+  become_user: "{{ user }}"
+  community.general.flatpak:
+    method: user
+    name: "{{ item }}"
+    state: present
+  loop: "{{ flatpak_packages }}"

@@ -1,0 +1,7 @@
+alarm: table_lock_contention
+on: mysql.table_locks_waited
+lookup: average {{ netdata_mysql_table_lock_contention_lookup }} unaligned of rate
+units: locks/s
+every: {{ netdata_mysql_table_lock_contention_every }}
+warn: $this > {{ netdata_mysql_table_lock_contention_warn }}
+crit: $this > {{ netdata_mysql_table_lock_contention_crit }}

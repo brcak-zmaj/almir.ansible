@@ -1,0 +1,24 @@
+---
+
+- name: Install Viking via Flatpak
+  community.general.flatpak:
+    method: user
+    name: "app/org.viking.Viking/{{ flatpak_arch }}/stable"
+    state: present
+  when: 
+    - use_flatpak
+    - install_viking
+  become_user: "{{ user }}"
+  become: yes
+
+- name: Install Viking via system package manager (if available)
+  ansible.builtin.package:
+    name: viking
+    state: present
+    update_cache: yes
+  when: 
+    - not use_flatpak
+    - install_viking
+  become: yes
+  ignore_errors: yes
+  register: viking_package_install

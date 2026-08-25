@@ -1,0 +1,6 @@
+alarm: docker_image_pull_failures
+on: docker.images
+lookup: average {{ netdata_docker_image_pull_failures_lookup }} of pull_errors
+every: {{ netdata_docker_image_pull_failures_every }}
+warn: $this > {{ netdata_docker_image_pull_failures_warn }}
+crit: $this > {{ netdata_docker_image_pull_failures_crit }}

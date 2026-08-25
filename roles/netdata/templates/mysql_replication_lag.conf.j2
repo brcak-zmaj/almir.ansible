@@ -1,0 +1,7 @@
+alarm: replication_lag
+on: mysql.slave_seconds_behind_master
+lookup: max {{ netdata_mysql_replication_lag_lookup }} unaligned
+units: seconds
+every: {{ netdata_mysql_replication_lag_every }}
+warn: $this > {{ netdata_mysql_replication_lag_warn }}
+crit: $this > {{ netdata_mysql_replication_lag_crit }}

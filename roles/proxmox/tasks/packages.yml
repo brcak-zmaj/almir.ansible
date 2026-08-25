@@ -1,0 +1,7 @@
+---
+- name: Install common system utilities
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ pve_system_packages }}"
+  ignore_errors: yes

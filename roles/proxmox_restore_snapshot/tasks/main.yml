@@ -1,0 +1,32 @@
+---
+
+- name: Stopping {{ vms }}
+  command: "qm stop {{ item.key }}"
+  with_dict: "{{ vms }}"
+  when: item.value.snapshot_name is defined
+
+- name: Restoring {{ vms }} from snapshot
+  command: "qmrestore {{ backup_path }}/{{ item.value.snapshot_name }} {{ item.key }} --force"
+  with_dict: "{{ vms }}"
+
+- name: Apply CPU and memory override if specified
+  command: "qm set {{ item.key }} --cores {{ item.value.cpus }} --memory {{ item.value.memory }}"
+  with_dict: "{{ vms }}"
+  when: item.value.cpus is defined and item.value.memory is defined
+
+- name: Starting {{ vms }}
+  command: "qm start {{ item.key }}"
+  with_dict: "{{ vms }}"
+
+- name: Cleanup unused disks for {{ vms }}
+  shell: |
+    unused_disks=$(pvesh get /nodes/$(hostname)/storage/local/content | jq -r '.[] | select(.vmid == null) | .volid')
+    if [[ -z "$unused_disks" ]]; then
+        echo "No unused disks found."
+    else
+        for disk in $unused_disks; do
+            echo "Removing unused disk: $disk"
+            pvesh delete "/nodes/$(hostname)/storage/local/content/$disk"
+        done
+    fi
+  when: cleanup_unused_disks == true

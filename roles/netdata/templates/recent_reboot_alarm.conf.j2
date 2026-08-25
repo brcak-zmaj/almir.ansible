@@ -1,0 +1,10 @@
+{% if netdata_recent_reboot_enabled | bool %}
+alarm: recent_reboot
+  on: system.uptime
+  lookup: average {{ netdata_recent_reboot_lookup_period }} unaligned of uptime
+  units: seconds
+  every: {{ netdata_recent_reboot_every }}
+  delay: {{ netdata_recent_reboot_delay }}
+  warn: $this < 3600
+  crit: $this < 1800
+{% endif %}

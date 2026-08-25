@@ -1,0 +1,16 @@
+---
+# Defaults for motd role
+# All values are configurable and referenced directly in tasks.
+
+# Path to the system MOTD file
+motd_path: "/etc/motd"
+
+# File permissions for MOTD
+motd_mode: "0644"
+
+# Ownership for MOTD
+motd_owner: "root"
+motd_group: "root"
+
+# Template source filename (located in templates/)
+motd_template_src: "motd.j2"

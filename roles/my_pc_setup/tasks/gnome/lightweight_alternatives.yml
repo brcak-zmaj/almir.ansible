@@ -1,0 +1,12 @@
+---
+# Guidance for lightweight desktop alternatives (manual step)
+- name: Recommend lightweight desktop alternatives for low-powered machines
+  ansible.builtin.debug:
+    msg: |
+      GNOME Shell is heavy for low-powered hardware. Consider these alternatives:
+        - XFCE: "sudo dnf install @xfce-desktop-environment"
+        - MATE: "sudo dnf install @mate-desktop-environment"
+        - LXQt: "sudo dnf install @lxqt-desktop-environment"
+      You can select at login screen (gear icon). XFCE is the best balance of features and performance.
+  when: ansible_hostname != 'my-laptop'
+  tags: [desktop, guidance]

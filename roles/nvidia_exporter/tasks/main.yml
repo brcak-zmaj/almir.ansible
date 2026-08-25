@@ -1,0 +1,31 @@
+---
+
+- name: Ensure nvidia_gpu_exporter group exists
+  ansible.builtin.group:
+    name: "{{ nvidia_gpu_exporter_group }}"
+    state: present
+
+- name: Ensure nvidia_gpu_exporter user exists
+  ansible.builtin.user:
+    name: "{{ nvidia_gpu_exporter_user }}"
+    group: "{{ nvidia_gpu_exporter_group }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Download Nvidia GPU Exporter .deb package using wget
+  ansible.builtin.shell:
+    cmd: |
+      wget -q "{{ gpu_exporter_url }}" -O /tmp/nvidia-gpu-exporter.deb
+  become: yes  # Ensure root privileges for system-level operations
+
+- name: Install Nvidia GPU Exporter .deb package
+  ansible.builtin.command:
+    cmd: dpkg -i /tmp/nvidia-gpu-exporter.deb
+  become: yes  # Ensure root privileges for installing packages
+
+- name: Enable Nvidia GPU Exporter service
+  ansible.builtin.systemd:
+    name: "{{ nvidia_exporter_service_name }}"
+    enabled: yes
+    state: started

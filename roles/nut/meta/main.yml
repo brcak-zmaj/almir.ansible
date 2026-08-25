@@ -1,0 +1,13 @@
+---
+# =============================================================================
+# NUT Role Metadata
+# =============================================================================
+
+dependencies:
+  - role: brcak_zmaj.almir_ansible.motd
+    vars: {}
+
+collections:
+  - ansible.builtin
+  - ansible.posix
+  - community.general

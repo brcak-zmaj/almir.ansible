@@ -1,0 +1,52 @@
+---
+# OliveTin Uninstall Tasks
+# Handles both package and Docker uninstallation
+
+- name: Stop and disable OliveTin service (package)
+  ansible.builtin.systemd:
+    name: OliveTin
+    enabled: false
+    state: stopped
+  become: true
+  when: olivetin_install_method == 'package'
+
+- name: Remove OliveTin package (RPM)
+  ansible.builtin.command:
+    cmd: rpm -e OliveTin
+  become: true
+  when:
+    - olivetin_install_method == 'package'
+    - ansible_os_family == 'RedHat'
+
+- name: Remove OliveTin package (DEB)
+  ansible.builtin.apt:
+    name: olivetin
+    state: absent
+    purge: true
+    autoclean: true
+    autoremove: true
+  become: true
+  when:
+    - olivetin_install_method == 'package'
+    - ansible_os_family == 'Debian'
+
+- name: Remove OliveTin config directory (package)
+  ansible.builtin.file:
+    path: "{{ olivetin_config_dir }}"
+    state: absent
+  become: true
+  when: olivetin_install_method == 'package'
+
+- name: Stop and remove OliveTin Docker container
+  community.docker.docker_container:
+    name: "{{ olivetin_docker_container_name }}"
+    state: absent
+  when: olivetin_install_method == 'docker'
+
+- name: Remove OliveTin Docker config directory
+  ansible.builtin.file:
+    path: "{{ olivetin_docker_config_path }}"
+    state: absent
+  become: true
+  when: olivetin_install_method == 'docker'
+

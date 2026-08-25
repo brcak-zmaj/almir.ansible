@@ -1,0 +1,78 @@
+
+- name: Set GTK4 Color Chooser selected color | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/gtk4/settings/color-chooser/selected-color
+    value: "'(true, 0.60392159223556519, 0.60000002384185791, 0.58823531866073608, 1.0)'"
+
+- name: Set GTK4 File Chooser show-hidden | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/gtk4/settings/file-chooser/show-hidden
+    value: "false"
+
+- name: Set GTK4 File Chooser sort-directories-first | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/gtk4/settings/file-chooser/sort-directories-first
+    value: "false"
+
+- name: Set GTK File Chooser date format | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/date-format
+    value: "'regular'"
+
+- name: Set GTK File Chooser location mode | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/location-mode
+    value: "'path-bar'"
+
+- name: Set GTK File Chooser show-hidden | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/show-hidden
+    value: "false"
+
+- name: Set GTK File Chooser show size column | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/show-size-column
+    value: "true"
+
+- name: Set GTK File Chooser show type column | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/show-type-column
+    value: "true"
+
+- name: Set GTK File Chooser sidebar width | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/sidebar-width
+    value: "237"
+
+- name: Set GTK File Chooser sort column | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/sort-column
+    value: "'name'"
+
+- name: Set GTK File Chooser sort directories first | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/sort-directories-first
+    value: "false"
+
+- name: Set GTK File Chooser sort order | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/sort-order
+    value: "'ascending'"
+
+- name: Set GTK File Chooser type format | GTK
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/type-format
+    value: "'category'"

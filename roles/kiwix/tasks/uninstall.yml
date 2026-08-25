@@ -1,0 +1,84 @@
+---
+# Uninstall Kiwix based on installation method
+
+# Package Manager Uninstall
+- name: Remove Kiwix package (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: "{{ kiwix_package_name }}"
+    state: absent
+  when:
+    - kiwix_install_method == 'package'
+    - ansible_os_family == 'Debian'
+
+- name: Remove Kiwix package (RedHat/CentOS/Fedora)
+  ansible.builtin.yum:
+    name: "{{ kiwix_package_name }}"
+    state: absent
+  when:
+    - kiwix_install_method == 'package'
+    - ansible_os_family == 'RedHat'
+
+- name: Remove Kiwix package (Arch Linux)
+  ansible.builtin.pacman:
+    name: "{{ kiwix_package_name }}"
+    state: absent
+  when:
+    - kiwix_install_method == 'package'
+    - ansible_os_family == 'Archlinux'
+
+# Docker Uninstall
+- name: Check if Docker is installed
+  ansible.builtin.command: which docker
+  register: docker_check
+  changed_when: false
+  failed_when: false
+  when: kiwix_install_method == 'docker'
+
+- name: Stop Kiwix Docker container
+  community.docker.docker_container:
+    name: "{{ kiwix_docker_container_name }}"
+    state: stopped
+  when:
+    - kiwix_install_method == 'docker'
+    - docker_check.rc == 0
+  ignore_errors: true
+
+- name: Remove Kiwix Docker container
+  community.docker.docker_container:
+    name: "{{ kiwix_docker_container_name }}"
+    state: absent
+  when:
+    - kiwix_install_method == 'docker'
+    - docker_check.rc == 0
+  ignore_errors: true
+
+# Flatpak Uninstall
+- name: Check if Flatpak is installed
+  ansible.builtin.command: which flatpak
+  register: flatpak_check
+  changed_when: false
+  failed_when: false
+  when: kiwix_install_method == 'flatpak'
+
+- name: Uninstall Kiwix via Flatpak
+  ansible.builtin.command: "flatpak uninstall -y {{ kiwix_flatpak_app_id }}"
+  register: flatpak_uninstall
+  when:
+    - kiwix_install_method == 'flatpak'
+    - flatpak_check.rc == 0
+  ignore_errors: true
+
+# Common Cleanup
+- name: Remove cron job
+  ansible.builtin.cron:
+    name: "Kiwix ZIM sync"
+    state: absent
+  when: kiwix_enable_cron | bool
+
+- name: Display Kiwix uninstall information
+  ansible.builtin.debug:
+    msg:
+      - "✓ Kiwix has been uninstalled ({{ kiwix_install_method }})"
+      - ""
+      - "Install directory: {{ kiwix_install_path }}"
+      - "To remove scripts and ZIM files: rm -rf {{ kiwix_install_path }}"

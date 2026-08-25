@@ -1,0 +1,82 @@
+# {{ ansible_managed }}
+# =============================================================================
+# UPSMON Configuration - Client Mode
+# =============================================================================
+# This system monitors a remote NUT server for shutdown signals.
+#
+# Server: {{ nut_server_host }}:{{ nut_server_port }}
+# UPS: {{ nut_client_ups_name }}
+{% if nut_client_shutdown_order is defined and nut_client_shutdown_order %}
+# Shutdown Order: {{ nut_client_shutdown_order }}
+{% endif %}
+# Shutdown Delay: {{ nut_client_shutdown_delay }} seconds (FINALDELAY)
+# =============================================================================
+
+# Monitor the remote UPS
+# Format: MONITOR <ups>@<host>[:<port>] <powervalue> <username> <password> <type>
+# - powervalue: Usually 1 (counts toward MINSUPPLIES)
+# - type: secondary (we don't control the UPS, just monitor it)
+MONITOR {{ nut_client_ups_name }}@{{ nut_server_host }}:{{ nut_server_port }} 1 {{ nut_client_username }} {{ nut_client_password }} secondary
+
+# Minimum number of power supplies needed to keep running
+# When available supplies drop below this, shutdown begins
+MINSUPPLIES {{ nut_client_minsupplies }}
+
+# Shutdown command
+# This is executed when the UPS battery becomes critical
+SHUTDOWNCMD "{{ nut_client_shutdowncmd }}"
+
+# Polling intervals
+POLLFREQ {{ nut_client_pollfreq }}
+POLLFREQALERT {{ nut_client_pollfreqalert }}
+
+# How long to wait after comms loss before declaring UPS dead
+DEADTIME {{ nut_client_deadtime }}
+
+# Seconds to wait for primary to set FSD
+HOSTSYNC {{ nut_client_hostsync }}
+
+# =============================================================================
+# FINALDELAY - Shutdown Ordering Control
+# =============================================================================
+# This is the KEY setting for multi-system shutdown ordering.
+# Lower values = shutdown first, Higher values = shutdown later
+#
+# After receiving the shutdown signal, upsmon waits FINALDELAY seconds
+# before executing SHUTDOWNCMD. This allows you to orchestrate which
+# systems shutdown first (e.g., VMs before storage).
+#
+# Example ordering (values in seconds):
+#   Proxmox VMs:    0   (shutdown immediately)
+#   TrueNAS:       60   (wait for VMs to finish)
+#   pfSense:       90   (wait for storage shutdown)
+#   NUT Server:   120   (shutdown last)
+# =============================================================================
+FINALDELAY {{ nut_client_shutdown_delay }}
+
+# Notification settings
+NOTIFYCMD /usr/sbin/upssched
+NOTIFYMSG ONLINE    "UPS %s on line power"
+NOTIFYMSG ONBATT    "UPS %s on battery"
+NOTIFYMSG LOWBATT   "UPS %s battery is low - shutdown imminent"
+NOTIFYMSG FSD       "UPS %s: Forced shutdown in progress"
+NOTIFYMSG COMMOK    "Communications with UPS %s established"
+NOTIFYMSG COMMBAD   "Communications with UPS %s lost"
+NOTIFYMSG SHUTDOWN  "Auto logout and shutdown proceeding"
+NOTIFYMSG REPLBATT  "UPS %s battery needs to be replaced"
+NOTIFYMSG NOCOMM    "UPS %s is unavailable"
+NOTIFYMSG NOPARENT  "upsmon parent process died - Loss of shutdown capability"
+
+NOTIFYFLAG ONLINE   SYSLOG+WALL
+NOTIFYFLAG ONBATT   SYSLOG+WALL
+NOTIFYFLAG LOWBATT  SYSLOG+WALL
+NOTIFYFLAG FSD      SYSLOG+WALL
+NOTIFYFLAG COMMOK   SYSLOG+WALL
+NOTIFYFLAG COMMBAD  SYSLOG+WALL
+NOTIFYFLAG SHUTDOWN SYSLOG+WALL
+NOTIFYFLAG REPLBATT SYSLOG+WALL
+NOTIFYFLAG NOCOMM   SYSLOG+WALL
+NOTIFYFLAG NOPARENT SYSLOG+WALL
+
+# Run in background
+RUN_AS_USER nut

@@ -1,0 +1,8 @@
+alarm: dropped_packets
+  on: net.dropped
+  lookup: average {{ netdata_dropped_packets_lookup_period }} unaligned of dropped
+  units: packets/s
+  every: {{ netdata_dropped_packets_every }}
+  delay: {{ netdata_dropped_packets_delay }}
+  warn: $this > {{ netdata_dropped_packets_warn_threshold }}
+  crit: $this > {{ netdata_dropped_packets_crit_threshold }}

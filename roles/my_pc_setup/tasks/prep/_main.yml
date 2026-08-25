@@ -1,0 +1,98 @@
+---
+
+
+#########################  General #########################
+
+- name: Remove preinstalled clutter from home directory | Prep 
+  ansible.builtin.file:
+    path: "{{ home_dir }}/{{ item }}"
+    state: absent
+  loop: "{{ home_dir_clutter }}"
+
+- name: Copy update script based on OS distribution
+  ansible.builtin.copy:
+    src: "{{ ansible_os_family | lower }}_update.sh"
+    dest: "{{ home_dir }}/update.sh"
+    mode: '0644'
+
+- name: Add multiple aliases to .bashrc | Prep
+  ansible.builtin.lineinfile:
+    path: "{{ home_dir }}/.bashrc"
+    line: "{{ item }}"
+    state: present
+    insertafter: EOF
+  loop: "{{ bash_aliases }}"
+
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: "{{ home_dir }}/.ssh"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0700'
+
+- name: Copy SSH public key to authorized_keys
+  ansible.builtin.copy:
+    src: "{{ user_pub_ssh }}"
+    dest: "{{ home_dir }}/.ssh/id_rsa.pub"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: '0600'
+
+#########################  Packages #########################
+
+- name: Install Python 3 and pip3 | Prep
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: "{{ 'present' if python else 'absent' }}"
+  loop: "{{ python_packages }}"
+
+- name: Install Common Packages | Prep
+  tags: [package_mgmt]
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ common_packages }}"
+  when: utilities is defined and utilities == true
+  failed_when: false 
+
+- name: Install Debian-specific Packages | Prep
+  tags: [package_mgmt]
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ debian_packages }}"
+  when: ansible_os_family == "Debian"
+
+- name: Install RedHat-specific Packages | Prep
+  tags: [package_mgmt]
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ redhat_packages }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Include LibreOffice tasks | Prep
+  tags: [package_mgmt]
+  include_tasks: "libreoffice.yml"
+
+- name: Include Flatpak task | Prep
+  tags: [package_mgmt]
+  include_tasks: flatpak.yml
+
+- name: Include konsole task | Prep
+  tags: [package_mgmt]
+  include_tasks: konsole.yml
+
+- name: Include Cron task | Prep
+  tags: [package_mgmt]
+  include_tasks: cron.yml
+
+- name: Configure DNF Settings
+  include_tasks: dnf_config.yml
+
+- name: Configure system locales | Prep
+  include_tasks: locales.yml
+
+- name: Include tasks for nvidia GPU
+  include_tasks: nvidia_gpu_drivers.yml

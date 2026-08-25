@@ -1,0 +1,11 @@
+---
+# Debian/Ubuntu package removal using APT
+
+- name: Remove packages (Debian/Ubuntu)
+  become: true
+  ansible.builtin.apt:
+    name: "{{ debloat_packages_final }}"
+    state: absent
+    autoremove: false
+    purge: false
+  when: debloat_packages_final | length > 0

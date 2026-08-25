@@ -1,0 +1,7 @@
+alarm: dropped_connections
+on: nginx.dropped
+lookup: average {{ netdata_nginx_dropped_connections_lookup }} unaligned
+units: connections
+every: {{ netdata_nginx_dropped_connections_every }}
+warn: $this > {{ netdata_nginx_dropped_connections_warn }}
+crit: $this > {{ netdata_nginx_dropped_connections_crit }}

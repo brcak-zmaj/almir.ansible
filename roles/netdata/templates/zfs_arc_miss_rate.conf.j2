@@ -1,0 +1,10 @@
+# checks if ARC miss rate is high
+template: zfs_arc_miss_rate
+      on: zfs.arcmisrate
+   every: {{ netdata_zfs_arc_miss_rate_every }}
+    calc: $this
+    warn: $this > {{ netdata_zfs_arc_miss_rate_warn }}
+   crit: $this > {{ netdata_zfs_arc_miss_rate_crit }}
+   units: misses/sec
+    info: high ARC miss rate indicating cache inefficiencies
+      to: sysadmin

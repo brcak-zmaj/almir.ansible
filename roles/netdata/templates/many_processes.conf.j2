@@ -1,0 +1,8 @@
+alarm: many_processes
+  on: system.processes
+  lookup: average {{ netdata_many_processes_lookup_period }} unaligned of processes
+  units: processes
+  every: {{ netdata_many_processes_every }}
+  delay: {{ netdata_many_processes_delay }}
+  warn: $this > {{ netdata_many_processes_warn_threshold }}
+  crit: $this > {{ netdata_many_processes_crit_threshold }}

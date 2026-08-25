@@ -1,0 +1,7 @@
+alarm: low_available_connections
+on: mysql.available_connections
+lookup: average {{ netdata_mysql_low_available_connections_lookup }} unaligned
+units: %
+every: {{ netdata_mysql_low_available_connections_every }}
+warn: $this < {{ netdata_mysql_low_available_connections_warn }}
+crit: $this < {{ netdata_mysql_low_available_connections_crit }}

@@ -1,0 +1,240 @@
+
+- name: GNOME App Folders | Set folder children
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folder-children
+    value: "['Utilities', 'YaST', 'Pardus', 'd48e5d24-feaf-4854-8214-0644eb706f87', 'b2fdf8f7-2b31-4fd1-bfda-a2ee8bedd8d4', 'f9abc26b-76b0-42bd-b474-a45cea59e5a3', '7efc5a72-b182-4c9d-82fa-99a327c3cf3a', 'cffb9d05-ad64-407b-8a7f-13e2958c3d57', '3c79ef2d-9662-4c5c-a65a-55f92fcc8384', 'System', '3f939857-24c1-4364-8767-e6c84eb9b48e', 'b1dd445c-7e66-439b-893c-64771b64b73f', '96753670-f1f8-48fb-94bd-181515224a3d', 'e487cb59-56bb-42a6-a621-30ee6a1ee8e6']"
+
+- name: App Folder | Snapshots apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/3c79ef2d-9662-4c5c-a65a-55f92fcc8384/apps
+    value: "['timeshift-gtk.desktop']"
+
+- name: App Folder | Snapshots name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/3c79ef2d-9662-4c5c-a65a-55f92fcc8384/name
+    value: "'Snapshots'"
+
+- name: App Folder | Snapshots translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/3c79ef2d-9662-4c5c-a65a-55f92fcc8384/translate
+    value: "false"
+
+- name: App Folder | Terminal apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/7efc5a72-b182-4c9d-82fa-99a327c3cf3a/apps
+    value: "['org.gnome.Ptyxis.desktop', 'org.kde.konsole.desktop', 'btop.desktop']"
+
+- name: App Folder | Terminal name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/7efc5a72-b182-4c9d-82fa-99a327c3cf3a/name
+    value: "'Terminal'"
+
+- name: App Folder | Terminal translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/7efc5a72-b182-4c9d-82fa-99a327c3cf3a/translate
+    value: "false"
+
+- name: App Folder | Pardus categories
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/Pardus/categories
+    value: "['X-Pardus-Apps']"
+
+- name: App Folder | Pardus name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/Pardus/name
+    value: "'X-Pardus-Apps.directory'"
+
+- name: App Folder | Pardus translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/Pardus/translate
+    value: "true"
+
+- name: App Folder | System apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/System/apps
+    value: "['org.gnome.baobab.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.Logs.desktop', 'org.freedesktop.MalcontentControl.desktop', 'org.freedesktop.GnomeAbrt.desktop', 'org.gnome.SystemMonitor.desktop', 'org.gnome.tweaks.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Yelp.desktop', 'nvtop.desktop', 'org.gnome.Software.desktop']"
+
+- name: App Folder | System name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/System/name
+    value: "'X-GNOME-Shell-System.directory'"
+
+- name: App Folder | System translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/System/translate
+    value: "true"
+
+- name: App Folder | Utilities apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/Utilities/apps
+    value: "['org.fedoraproject.MediaWriter.desktop', 'gparted.desktop', 'org.bleachbit.BleachBit.desktop', 'org.gnome.Connections.desktop', 'org.gnome.Evince.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Loupe.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.baobab.desktop', 'org.freedesktop.MalcontentControl.desktop', 'org.freedesktop.GnomeAbrt.desktop', 'htop.desktop', 'com.github.artemanufrij.regextester.desktop', 'org.gnome.SystemMonitor.desktop']"
+
+- name: App Folder | Utilities name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/Utilities/name
+    value: "'X-GNOME-Shell-Utilities.directory'"
+
+- name: App Folder | Utilities translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/Utilities/translate
+    value: "true"
+
+- name: App Folder | YaST categories
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/YaST/categories
+    value: "['X-SuSE-YaST']"
+
+- name: App Folder | YaST name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/YaST/name
+    value: "'suse-yast.directory'"
+
+- name: App Folder | YaST translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/YaST/translate
+    value: "true"
+
+- name: App Folder | Games apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/b2fdf8f7-2b31-4fd1-bfda-a2ee8bedd8d4/apps
+    value: "['net.shadps4.shadPS4.desktop', 'com.jagex.RuneScape.desktop', 'steam.desktop', 'net.pcsx2.PCSX2.desktop', 'app.xemu.xemu.desktop', 'info.beyondallreason.bar.desktop', 'com.github.k4zmu2a.spacecadetpinball.desktop']"
+
+- name: App Folder | Games name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/b2fdf8f7-2b31-4fd1-bfda-a2ee8bedd8d4/name
+    value: "'Games'"
+
+- name: App Folder | Media Editors apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/cffb9d05-ad64-407b-8a7f-13e2958c3d57/apps
+    value: "['org.gnome.gitlab.YaLTeR.VideoTrimmer.desktop', 'org.kde.kdenlive.desktop', 'io.gitlab.theevilskeleton.Upscaler.desktop', 'com.github.weclaw1.ImageRoll.desktop', 'org.gnome.Snapshot.desktop', 'org.darktable.Darktable.desktop']"
+
+- name: App Folder | Media Editors name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/cffb9d05-ad64-407b-8a7f-13e2958c3d57/name
+    value: "'Media Editors'"
+
+- name: App Folder | Media Editors translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/cffb9d05-ad64-407b-8a7f-13e2958c3d57/translate
+    value: "false"
+
+- name: App Folder | Office apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/d48e5d24-feaf-4854-8214-0644eb706f87/apps
+    value: "['libreoffice-calc.desktop', 'libreoffice-writer.desktop', 'libreoffice-impress.desktop', 'libreoffice-base.desktop', 'libreoffice-draw.desktop', 'libreoffice-math.desktop', 'net.code_industry.MasterPDFEditor.desktop', 'org.gnome.Papers.desktop', 'sublime_text.desktop', 'com.slack.Slack.desktop']"
+
+- name: App Folder | Office name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/d48e5d24-feaf-4854-8214-0644eb706f87/name
+    value: "'Office'"
+
+- name: App Folder | Wine apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/f9abc26b-76b0-42bd-b474-a45cea59e5a3/apps
+    value: "['wine-winecfg.desktop', 'wine-wineboot.desktop', 'wine-winefile.desktop', 'wine-winhelp.desktop', 'wine-oleview.desktop', 'wine-winemine.desktop', 'wine-uninstaller.desktop', 'wine-wordpad.desktop', 'wine-regedit.desktop', 'wine-notepad.desktop']"
+
+- name: App Folder | Wine name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/f9abc26b-76b0-42bd-b474-a45cea59e5a3/name
+    value: "'Wine'"
+
+- name: App Folder | Wine translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/f9abc26b-76b0-42bd-b474-a45cea59e5a3/translate
+    value: "false"
+
+- name: App Folder | Internet apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/3f939857-24c1-4364-8767-e6c84eb9b48e/apps
+    value: "['org.mozilla.firefox.desktop', 'brave-browser.desktop', 'com.microsoft.Edge.desktop', 'org.torproject.torbrowser-launcher.desktop', 'org.torproject.torbrowser-launcher.settings.desktop']"
+
+- name: App Folder | Internet name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/3f939857-24c1-4364-8767-e6c84eb9b48e/name
+    value: "'Internet'"
+
+- name: App Folder | Mgmt apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/b1dd445c-7e66-439b-893c-64771b64b73f/apps
+    value: "['org.remmina.Remmina.desktop', 'virtualbox.desktop', 'nvidia-settings.desktop', 'com.usebottles.bottles.desktop', 'blueman-manager.desktop', 'btrfs-assistant.desktop']"
+
+- name: App Folder | Mgmt name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/b1dd445c-7e66-439b-893c-64771b64b73f/name
+    value: "'Mgmt'"
+
+- name: App Folder | Mgmt translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/b1dd445c-7e66-439b-893c-64771b64b73f/translate
+    value: "false"
+
+- name: App Folder | Media apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/96753670-f1f8-48fb-94bd-181515224a3d/apps
+    value: "['de.haeckerfelix.Shortwave.desktop', 'mpv.desktop', 'org.gnome.Decibels.desktop', 'org.gnome.Showtime.desktop', 'org.clementine_player.Clementine.desktop', 'io.github._0xzer0x.qurancompanion.desktop']"
+
+- name: App Folder | Media name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/96753670-f1f8-48fb-94bd-181515224a3d/name
+    value: "'Media'"
+
+- name: App Folder | Media translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/96753670-f1f8-48fb-94bd-181515224a3d/translate
+    value: "false"
+
+- name: App Folder | Flatpak Tools apps
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/e487cb59-56bb-42a6-a621-30ee6a1ee8e6/apps
+    value: "['io.github.flattool.Warehouse.desktop', 'org.zealdocs.Zeal.desktop', 'com.github.tchx84.Flatseal.desktop']"
+
+- name: App Folder | Flatpak Tools name
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/e487cb59-56bb-42a6-a621-30ee6a1ee8e6/name
+    value: "'Flatpak Tools'"
+
+- name: App Folder | Flatpak Tools translate
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/app-folders/folders/e487cb59-56bb-42a6-a621-30ee6a1ee8e6/translate
+    value: "false"

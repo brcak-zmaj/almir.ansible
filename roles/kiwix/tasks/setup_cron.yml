@@ -1,0 +1,12 @@
+---
+
+- name: Create cron job for ZIM sync
+  ansible.builtin.cron:
+    name: "Kiwix ZIM sync"
+    minute: "{{ (kiwix_cron_schedule.split() | list)[0] }}"
+    hour: "{{ (kiwix_cron_schedule.split() | list)[1] }}"
+    day: "{{ (kiwix_cron_schedule.split() | list)[2] }}"
+    month: "{{ (kiwix_cron_schedule.split() | list)[3] }}"
+    weekday: "{{ (kiwix_cron_schedule.split() | list)[4] }}"
+    job: "{{ kiwix_cron_cmd }}"
+    state: present

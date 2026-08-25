@@ -1,0 +1,60 @@
+---
+# =============================================================================
+# NUT Service Management Tasks
+# =============================================================================
+
+- name: Enable and start NUT driver service
+  ansible.builtin.systemd:
+    name: "{{ nut_driver_service }}"
+    enabled: "{{ nut_services_enabled | bool }}"
+    state: "{{ 'started' if nut_services_started | bool else 'stopped' }}"
+    daemon_reload: true
+  when: nut_mode in ['standalone', 'netserver']
+  tags:
+    - nut
+    - nut-service
+
+- name: Enable and start NUT server service
+  ansible.builtin.systemd:
+    name: "{{ nut_server_service }}"
+    enabled: "{{ nut_services_enabled | bool }}"
+    state: "{{ 'started' if nut_services_started | bool else 'stopped' }}"
+    daemon_reload: true
+  when: nut_mode in ['standalone', 'netserver']
+  tags:
+    - nut
+    - nut-service
+
+- name: Enable and start NUT monitor service
+  ansible.builtin.systemd:
+    name: "{{ nut_monitor_service }}"
+    enabled: "{{ nut_services_enabled | bool }}"
+    state: "{{ 'started' if nut_services_started | bool else 'stopped' }}"
+    daemon_reload: true
+  when: nut_mode != 'none'
+  tags:
+    - nut
+    - nut-service
+
+- name: Display UPS status
+  ansible.builtin.command: upsc {{ nut_ups_name }}@localhost
+  register: nut_ups_status
+  changed_when: false
+  failed_when: false
+  when:
+    - nut_mode in ['standalone', 'netserver']
+    - nut_services_started | bool
+  tags:
+    - nut
+    - nut-service
+
+- name: Show UPS status
+  ansible.builtin.debug:
+    msg: "{{ nut_ups_status.stdout_lines | default(['UPS status not available']) }}"
+  when:
+    - nut_mode in ['standalone', 'netserver']
+    - nut_services_started | bool
+    - nut_ups_status.rc == 0
+  tags:
+    - nut
+    - nut-service

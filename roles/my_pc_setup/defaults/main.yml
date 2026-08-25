@@ -1,0 +1,243 @@
+---
+
+## System User Settings ---------------------------------------------------------
+# Override these in your playbook if needed
+user: "almir"
+group: "{{ user }}"
+home_dir: "/home/{{ user }}"
+user_pub_ssh: "{{ lookup('env', 'ALMIR_SSH_PUB_KEY') }}"
+
+## Wallpaper
+wallpaper_src: "wallpaper.png"      # File in files/ directory
+wallpaper_dest: "{{ home_dir }}"    # Where to copy it
+
+## Home dir cleanup
+home_dir_clutter:
+  - Music
+  - Public
+  - Templates
+  - Videos
+
+
+## Remmina ---------------------------------------------------------
+remmina_debian_pkgs:
+  - remmina                   # A remote desktop client supporting RDP, VNC, SPICE, and other protocols
+  - remmina-plugin-x2go       # Plugin for Remmina to support the X2Go remote desktop protocol
+  - remmina-plugin-spice      # Plugin for Remmina to support the SPICE remote desktop protocol
+  - remmina-plugin-exec       # Plugin for Remmina to execute commands over remote desktop sessions
+  - pyhoca-gui                # GUI for managing and accessing X2Go sessions (complementing Remmina)
+
+remmina_redhat_pkgs:
+  - remmina
+  - remmina-plugins-rdp
+  - remmina-plugins-spice
+  - remmina-plugins-vnc
+  - remmina-plugins-www
+  - remmina-plugins-x2go
+
+## Libvirt Packages ---------------------------------------------------------
+libvirt_package: libvirtd
+virtualization_packages:
+  - bridge-utils              # Utilities for managing network bridges, required for virtual networking
+  - libvirt                   # API for managing virtualized platforms (e.g., KVM, QEMU, Xen)
+  - virt-install              # Command-line tool for installing virtual machines using libvirt
+  - qemu-kvm                  # Provides QEMU emulator with KVM support for virtualization
+  - virt-top                  # Monitoring tool for virtual machines running with libvirt
+  - libguestfs-tools          # Tools for accessing and modifying virtual machine disk images
+  - virt-manager              # GUI application for managing virtual machines and virtualization infrastructure
+
+
+## posix ---------------------------------------------------------
+# SMB/CIFS network share config - store credentials in vault
+smb_mountpoint: [] # ex: 10.123.123.123
+mount_point_directories:
+  - /mnt/example
+
+smb_mounts:
+  - { src: "//{{ smb_mountpoint }}/example", path: "/mnt/example" }
+
+smb_credentials: "username={{ lookup('env', 'ALMIR_SMB_USR') }},password={{ lookup('env', 'ALMIR_SMB_PWD') }}"
+smb_mount_opts: "noperm,dir_mode=0777,file_mode=0777,iocharset=utf8,_netdev,{{ smb_credentials }}"
+smb_fstype: cifs
+
+
+## codecs ---------------------------------------------------------
+gstreamer_debian_packages:
+  - gstreamer1.0-plugins-base      # Core plugins for GStreamer, providing essential functionalities
+  - gstreamer1.0-plugins-good      # Good quality plugins for GStreamer (e.g., audio/video decoders, filters)
+  - gstreamer1.0-plugins-bad       # Experimental and non-free plugins for GStreamer
+  - gstreamer1.0-plugins-ugly      # Plugins for GStreamer that are useful but may have licensing issues
+  - gstreamer1.0-plugins-base-apps # Additional apps for GStreamer plugins base (e.g., gst-launch-1.0)
+  - gstreamer1-plugins-bad-freeworld  
+  - libavcodec-extra               # Extra codecs from FFmpeg for multimedia processing in GStreamer
+
+gstreamer_redhat_packages:
+  - gstreamer1-plugins-base        # Core plugins for GStreamer, providing essential functionalities
+  - gstreamer1-plugins-good        # Good quality plugins for GStreamer (e.g., audio/video decoders, filters)
+  - gstreamer1-plugins-bad-free    # Free, but not officially supported, plugins for GStreamer
+  - gstreamer1-plugins-ugly        # Plugins for GStreamer that may have licensing or quality concerns
+  - gstreamer1-plugin-openh264      # GStreamer plugin for H.264 video
+  - gstreamer1-plugins-ugly-free    # Ugly quality GStreamer plugins (free license)
+  - gstreamer1-libav                # GStreamer plugin for libav (FFmpeg backend)  
+  - faac                           # AAC encoder plugin for GStreamer (Advanced Audio Codec)
+  - ffmpeg-libs                    # FFmpeg libraries required for multimedia operations with GStreamer
+
+## npm ---------------------------------------------------------
+nodejs_npm_packages_debian:
+  - nodejs
+  - npm
+
+nodejs_npm_packages_redhat:
+  - nodejs
+  - npm
+  - nodejs-npm
+
+# Override this list in your playbook or host_vars
+global_npm_packages:
+  # Code quality
+  - "eslint"
+  - "typescript"
+
+## Cron ---------------------------------------------------------
+# Scheduled tasks - add your own below
+# Format: minute hour day month weekday
+# Examples: "0 6 * * *" = 6am daily, "30 2 * * 0" = 2:30am Sundays
+cron_jobs:
+  - name: "Update all flatpaks"
+    user: "root"
+    minute: "0"
+    hour: "6"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "flatpak update -y"
+    state: "present"
+
+  # Example: Add your own cron jobs below (uncomment and modify)
+  # - name: "Sync home directory to backup"
+  #   user: "root"
+  #   minute: "0"
+  #   hour: "3"
+  #   day: "*"
+  #   month: "*"
+  #   weekday: "*"
+  #   job: "rsync -a --checksum --delete {{ home_dir }}/ /mnt/backup/destination/"
+  #   state: "present"
+  # - name: "Clear temp files"
+  #   user: "root"
+  #   minute: "30"
+  #   hour: "2"
+  #   day: "*"
+  #   month: "*"
+  #   weekday: "*"
+  #   job: "rm -rf /tmp/*"
+  #   state: "present"
+
+## Feature Toggles ---------------------------------------------------------
+# Enable/disable features by setting to true/false
+# These allow you to quickly enable/disable entire feature sets
+
+# Dev tools
+boto: false                # AWS SDK
+node: true                 # Node.js + npm
+python: true               # Python3 + pip
+
+# Gaming
+steam: true
+
+# Multimedia
+codecs: true               # GStreamer codecs
+
+# Internet
+reminna: true              # RDP/VNC client
+
+# System
+fstab: true                # Mount network shares
+
+# Applications
+konsole: true              # Terminal emulator
+flatpak: true              # Flatpak apps
+utilities: true            # Common CLI tools
+
+# Productivity
+libreoffice: true
+gpaste: true               # Clipboard manager
+
+# Virtualization
+libvirt: false             # KVM/QEMU
+
+# Desktop
+gnome: true                # GNOME settings
+autostart_tweaks: true     # Autostart apps
+wallpaper: false           # Copy custom wallpaper
+
+# List of systemd services to disable (except smartd)
+disable_services:
+  - abrtd
+  - abrt-journal-core
+  - abrt-oops
+  - abrt-vmcore
+  - abrt-xorg
+  - avahi-daemon
+  - ModemManager
+  - cups
+  - pcscd
+  # Add more as needed
+
+# List of processes to kill (by name)
+kill_processes:
+  - spotify
+  # Add more as needed
+
+## Python Packages ---------------------------------------------------------
+# Core Python packages
+python_packages:
+  - python3
+  - python3-pip
+
+# PIP packages to install globally - verified as valid and maintained
+pip_packages:
+  # Code Quality & Linting
+  - bandit                # Security linter for Python code
+  - flake8                # Tool for enforcing coding style in Python
+  - pyflakes              # Static analysis tool for Python code
+  - pycodestyle           # Style guide checker for Python
+  - yapf                  # Code formatter for Python
+  - pre-commit            # Framework for managing pre-commit hooks
+
+  # API & Web Clients
+  - requests              # Simple HTTP library for Python
+  - docker                # Python SDK for Docker
+  - PyGithub              # Python client for the GitHub API
+  - python-gitlab         # GitLab API client for Python
+  - algoliasearch         # Python client for Algolia search service
+
+  # CLI Tools & Utilities
+  - pwgen                 # Password generator
+  - invoke                # Python task execution library
+  - glob2                 # Enhanced version of the glob module
+
+  # Data Processing & Parsing
+  - dateparser            # Parsing dates from strings in multiple formats
+  - jinja2                # Template engine for Python
+  - python-frontmatter    # Parses front matter from files (e.g., Markdown, YAML)
+
+  # DevOps & Infrastructure
+  - ansible-lint          # Linter for Ansible playbooks
+
+  # HTTP & Network Libraries
+  - urllib3               # HTTP library with connection pooling
+  - chardet               # Universal character encoding detector
+  - certifi               # Python package for providing Mozilla's root certificates
+  - idna                  # International Domain Names (IDN) library
+
+  # Performance & Caching
+  - cachetools            # Extensible memoizing collections and decorators
+  - msgpack               # Efficient binary serialization format
+
+  # Validation & Schema
+  - validator-collection  # Collection of validators for various data types
+
+  # Other Utilities
+  - greenlet              # Lightweight in-process concurrent programming
+  - neovim                # Python client for Neovim editor

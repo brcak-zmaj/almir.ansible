@@ -1,0 +1,53 @@
+---
+- name: Include all vars files
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+    name: null
+  loop:
+    - packages.yml
+    - flatpak_vars.yml
+    - bash_alias.yml
+
+# ---------------------------------------------------
+
+      ## Check desktop env
+
+- name: Check for KDE/GNOME packages
+  ansible.builtin.shell: |
+    if rpm -q gnome-shell &>/dev/null; then echo GNOME;
+    elif rpm -q plasma-desktop &>/dev/null; then echo KDE;
+    else echo NONE; fi
+  register: de_detect
+  changed_when: false
+  when: ansible_os_family == "RedHat"
+
+- name: Set fact for desktop environment
+  ansible.builtin.set_fact:
+    desktop_environment: "{{ de_detect.stdout | trim }}"
+
+# ---------------------------------------------------
+
+      # Include Tasks
+
+- name: Include grouped task files
+  include_tasks: "{{ item.file }}"
+  tags: "{{ item.tags | default(omit) }}"
+  loop:
+    - { file: "prep/_main.yml", tags: "package_mgmt" }
+    - { file: "dev/_main.yml" }
+    - { file: "games/_main.yml" }
+    - { file: "internet/_main.yml" }
+    - { file: "multimedia/_main.yml" }
+
+    - { file: "posix/_main.yml", tags: "posix,fstab" }
+
+    - { file: "system/_main.yml", tags: "system,disable_services" }
+    - { file: "virtualization/_main.yml" }
+
+# ---------------------------------------------------
+
+      # Desktop Environment Tasks
+
+- name: Include GNOME tasks
+  ansible.builtin.include_tasks: gnome/_main.yml
+  when: desktop_environment == "GNOME"

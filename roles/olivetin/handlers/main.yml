@@ -1,0 +1,21 @@
+---
+# Handlers for OliveTin role
+
+- name: restart olivetin service
+  ansible.builtin.systemd:
+    name: OliveTin
+    state: restarted
+  become: true
+  when: olivetin_install_method == 'package'
+
+- name: restart olivetin container
+  community.docker.docker_container:
+    name: "{{ olivetin_docker_container_name }}"
+    state: started
+    restart: true
+  become: false
+  when: olivetin_install_method == 'docker'
+  tags:
+    - docker
+    - olivetin
+

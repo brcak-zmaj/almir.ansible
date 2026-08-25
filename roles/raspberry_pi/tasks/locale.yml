@@ -1,0 +1,34 @@
+---
+# Timezone and Locale Configuration
+
+- name: Configure timezone
+  ansible.builtin.timezone:
+    name: "{{ rpi_timezone }}"
+
+- name: Check if locale is already generated
+  ansible.builtin.command: locale -a
+  register: locale_list
+  changed_when: false
+  failed_when: false
+
+- name: Configure locale
+  ansible.builtin.command: locale-gen {{ rpi_locale }}
+  when: rpi_locale | replace('.', '') | replace('-', '') | lower not in (locale_list.stdout | lower)
+  changed_when: true
+  failed_when: false
+
+- name: Set system locale
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    regexp: "^LANG="
+    line: "LANG={{ rpi_locale }}"
+    state: present
+
+- name: Configure keyboard layout
+  ansible.builtin.debconf:
+    name: keyboard-configuration
+    question: keyboard-configuration/layoutcode
+    value: "{{ rpi_keyboard_layout }}"
+    vtype: select
+  failed_when: false
+

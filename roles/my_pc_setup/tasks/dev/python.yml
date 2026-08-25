@@ -1,0 +1,6 @@
+
+- name: Python Install PIP packages | Dev
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: "{{ 'present' if python else 'absent' }}"
+  loop: "{{ pip_packages }}"

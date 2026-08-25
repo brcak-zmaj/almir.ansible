@@ -1,0 +1,31 @@
+---
+# MySQL-specific tuning defaults
+
+# Kernel settings tuned for MySQL stability
+mysql_sysctl_overcommit_memory: 1
+mysql_sysctl_tcp_fin_timeout: 30
+mysql_sysctl_tcp_keepalive_time: 300
+mysql_sysctl_tcp_tw_reuse: 1
+mysql_sysctl_file_max: 2097152
+mysql_sysctl_shmmax: []
+mysql_sysctl_shmall: 4294967296
+
+# Common sysctl settings to apply
+mysql_common_sysctl_settings:
+  - { name: vm.overcommit_memory, value: "{{ mysql_sysctl_overcommit_memory }}" }
+  - { name: vm.swappiness, value: 1 }
+  - { name: net.ipv4.tcp_fin_timeout, value: "{{ mysql_sysctl_tcp_fin_timeout }}" }
+  - { name: net.ipv4.tcp_keepalive_time, value: "{{ mysql_sysctl_tcp_keepalive_time }}" }
+  - { name: net.ipv4.tcp_tw_reuse, value: "{{ mysql_sysctl_tcp_tw_reuse }}" }
+  - { name: fs.file-max, value: "{{ mysql_sysctl_file_max }}" }
+  - { name: kernel.shmmax, value: "{{ mysql_sysctl_shmmax }}" }
+  - { name: kernel.shmall, value: "{{ mysql_sysctl_shmall }}" }
+
+# OS-specific additional settings (empty by default, override as needed)
+mysql_debian_sysctl_settings: []
+mysql_rhel_sysctl_settings: []
+
+# Increase resource limits for the MySQL user
+mysql_user_limits:
+  - { user: 'mysql', type: 'nofile', value: '65535' }
+  - { user: 'mysql', type: 'nproc', value: '16384' }

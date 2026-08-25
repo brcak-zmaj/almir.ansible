@@ -1,0 +1,28 @@
+
+# vikidia
+https://download.kiwix.org/zim/vikidia/vikidia_en_all_maxi_2025-12.zim
+
+# wikibooks
+https://download.kiwix.org/zim/wikibooks/wikibooks_en_all_maxi_2025-10.zim
+
+# wikinews
+https://download.kiwix.org/zim/wikinews/wikinews_en_all_maxi_2025-10.zim
+
+# wikipedia
+https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_2025-08.zim
+
+# wikiquote
+https://download.kiwix.org/zim/wikiquote/wikiquote_en_all_maxi_2025-09.zim
+
+# wikisource
+https://download.kiwix.org/zim/wikisource/wikisource_en_all_maxi_2025-11.zim
+
+# wikiversity
+https://download.kiwix.org/zim/wikiversity/wikiversity_en_all_maxi_2025-11.zim
+
+# wikivoyage
+https://download.kiwix.org/zim/wikivoyage/wikivoyage_en_all_maxi_2025-12.zim
+https://download.kiwix.org/zim/wikivoyage/wikivoyage_en_europe_maxi_2025-12.zim
+
+# wiktionary
+https://download.kiwix.org/zim/wiktionary/wiktionary_en_all_nopic_2025-09.zim

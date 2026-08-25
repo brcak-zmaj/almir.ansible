@@ -1,0 +1,33 @@
+---
+
+# Only apply NVIDIA cleanup for garage-workstation
+- name: Disable NVIDIA-related services and autostart (garage-workstation only)
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop:
+    - nvidia_gpu_exporter
+    - nvidia-hibernate
+    - nvidia-powerd
+    - nvidia-resume
+    - nvidia-suspend
+    - nvidia-suspend-then-hibernate
+  when: ansible_hostname == 'garage-workstation'
+  tags: [nvidia, cleanup]
+
+- name: Remove NVIDIA autostart desktop entry (garage-workstation only)
+  ansible.builtin.file:
+    path: "/etc/xdg/autostart/nvidia-settings-user.desktop"
+    state: absent
+  when: ansible_hostname == 'garage-workstation'
+  tags: [nvidia, cleanup]
+
+- name: Remove nouveau blacklist from GRUB (garage-workstation only)
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: 'rd.driver.blacklist=nouveau modprobe.blacklist=nouveau'
+    replace: ''
+  when: ansible_hostname == 'garage-workstation'
+  notify: Regenerate GRUB configuration
+  tags: [nvidia, cleanup]

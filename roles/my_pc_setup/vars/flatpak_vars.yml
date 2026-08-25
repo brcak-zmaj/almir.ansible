@@ -1,0 +1,37 @@
+# Flatpak ---------------------------------------------------------
+flatpak_repo: https://flathub.org/repo/flathub.flatpakrepo
+
+flatpak_packages:
+  # 🛠️ Utilities
+  - com.github.qarmin.czkawka
+  - org.fedoraproject.MediaWriter
+  - org.torproject.torbrowser-launcher
+  - com.github.tchx84.Flatseal
+  - net.nokyan.Resources
+
+  # 🎧 Multimedia
+  - net.codeindustry.MasterPDFEditor
+  - org.clementine_player.Clementine
+  - org.darktable.Darktable
+  - com.github.weclaw1.ImageRoll
+  - org.gnome.gitlab.YaLTeR.VideoTrimmer
+  - de.haeckerfelix.Shortwave
+  - io.github._0xzer0x.qurancompanion
+  - com.spotify.Client
+
+  # 🗨️ Communication / Messaging
+  - com.slack.Slack
+  - org.signal.Signal
+  - org.telegram.desktop
+
+  # 👨‍💻 Development Tools
+  - io.dbeaver.DBeaverCommunity
+  - com.usebottles.bottles
+  - org.freecad.FreeCAD
+
+  # 🗺️ Mapping / Utilities / Misc
+  - app.organicmaps.desktop
+  - io.gitlab.theevilskeleton.Upscaler
+  - com.rtosta.zapzap
+  - io.github.flattool.Warehouse
+  - org.kiwix.desktop

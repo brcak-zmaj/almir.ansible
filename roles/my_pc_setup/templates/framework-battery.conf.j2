@@ -1,0 +1,11 @@
+# Framework Fedora Battery Tweaks
+# See: https://knowledgebase.frame.work/optimizing-fedora-battery-life-r1baXZh
+
+# Example: Set runtime power management for PCI devices
+w /sys/bus/pci/devices/*/power/control - - - - auto
+
+# Example: USB autosuspend
+w /sys/bus/usb/devices/*/power/autosuspend - - - - 1
+w /sys/bus/usb/devices/*/power/autosuspend_delay_ms - - - - 0
+
+# Add more tweaks as needed from the Framework KB

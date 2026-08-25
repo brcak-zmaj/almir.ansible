@@ -1,0 +1,22 @@
+---
+# Install Kiwix via Flatpak
+
+- name: Check if Flatpak is installed
+  ansible.builtin.command: which flatpak
+  register: flatpak_check
+  changed_when: false
+  failed_when: false
+
+- name: Warn if Flatpak is not installed
+  ansible.builtin.debug:
+    msg: "Flatpak is not installed. Please install Flatpak first using a Flatpak role or manually."
+  when: flatpak_check.rc != 0
+
+- name: Fail if Flatpak is not available
+  ansible.builtin.fail:
+    msg: "Flatpak is required for Flatpak installation method. Please install Flatpak first."
+  when: flatpak_check.rc != 0
+
+- name: Install Kiwix via Flatpak
+  ansible.builtin.command: "flatpak install -y flathub {{ kiwix_flatpak_app_id }}"
+  when: flatpak_check.rc == 0

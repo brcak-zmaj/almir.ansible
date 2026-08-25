@@ -1,0 +1,8 @@
+alarm: high_cpu_15min
+   on: system.cpu
+lookup: average {{ netdata_cpu_lookup_period }} unaligned of used
+ units: %
+ every: {{ netdata_cpu_every }}
+ delay: {{ netdata_cpu_delay }}
+  warn: $this > {{ netdata_cpu_warn_threshold }}
+  crit: $this > {{ netdata_cpu_crit_threshold }}

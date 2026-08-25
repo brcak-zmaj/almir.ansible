@@ -1,0 +1,84 @@
+
+- name: GNOME Interface | Set color scheme to prefer-dark
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/color-scheme
+    value: "'prefer-dark'"
+
+- name: GNOME Interface | Set accent color
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/accent-color
+    value: "'yellow'"
+
+- name: GNOME Interface | Set icon theme
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/icon-theme
+    value: "'breeze-dark'"
+
+- name: GNOME Interface | Show battery percentage
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/show-battery-percentage
+    value: "true"
+
+- name: GNOME Interface | Disable toolkit accessibility
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/toolkit-accessibility
+    value: "false"
+
+- name: GNOME Notifications | Set application-children
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application-children
+    value: "['org-gnome-nautilus', 'gnome-power-panel', 'com-jagex-runescape', 'org-freedesktop-problems-applet', 'com-rtosta-zapzap', 'org-gnome-software', 'discord', 'net-thunderbird-thunderbird', 'org-clementine-player-clementine', 'net-pcsx2-pcsx2', 'org-gnome-extensions', 'brave-browser', 'gnome-about-panel', 'io-dbeaver-dbeavercommunity', 'org-gnome-texteditor', 'sublime-text', 'org-telegram-desktop', 'com-slack-slack', 'code', 'com-spotify-client', 'mullvad-browser']"
+
+- name: GNOME Notifications | gnome-power-panel
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application/gnome-power-panel/application-id
+    value: "'gnome-power-panel.desktop'"
+
+- name: GNOME Notifications | org-freedesktop-problems-applet
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/notifications/application/org-freedesktop-problems-applet/application-id
+    value: "'org.freedesktop.problems.applet.desktop'"
+
+- name: GNOME Keyboard | Enable NumLock
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/peripherals/keyboard/numlock-state
+    value: "true"
+
+- name: GNOME Touchpad | Enable two-finger scrolling
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/peripherals/touchpad/two-finger-scrolling-enabled
+    value: "true"
+
+- name: GNOME Privacy | Set recent files max age
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/recent-files-max-age
+    value: "30"
+
+- name: GNOME Privacy | Remove old temp files
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/remove-old-temp-files
+    value: "true"
+
+- name: GNOME Privacy | Remove old trash files
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/remove-old-trash-files
+    value: "true"
+
+- name: GNOME Privacy | Report technical problems
+  become_user: "{{ user }}"
+  community.general.dconf:
+    key: /org/gnome/desktop/privacy/report-technical-problems
+    value: "true"

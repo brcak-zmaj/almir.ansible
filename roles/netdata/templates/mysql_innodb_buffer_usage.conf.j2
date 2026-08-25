@@ -1,0 +1,8 @@
+alarm: innodb_buffer_usage
+on: mysql.innodb_buffer_pool_pages_data
+lookup: average {{ netdata_mysql_innodb_buffer_usage_lookup }} unaligned
+formula: $mysql.innodb_buffer_pool_pages_data * 100 / $mysql.innodb_buffer_pool_pages_total
+units: %
+every: {{ netdata_mysql_innodb_buffer_usage_every }}
+warn: $this > {{ netdata_mysql_innodb_buffer_usage_warn }}
+crit: $this > {{ netdata_mysql_innodb_buffer_usage_crit }}

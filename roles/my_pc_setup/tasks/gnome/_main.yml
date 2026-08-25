@@ -1,0 +1,53 @@
+---
+
+# ----------------------------------------------------------------------------
+
+- name: Install Gnome Packages | Gnome
+  ansible.builtin.package:
+    pkg: "{{ gnome_pkg }}"
+    state: present
+  loop: "{{ gnome_packages }}"
+  loop_control:
+    loop_var: gnome_pkg
+
+# ----------------------------------------------------------------------------
+
+# Fedora Specific
+
+- name: Include Fedora configuration tasks | Gnome
+  ansible.builtin.include_tasks: "Fedora/{{ item }}"
+  loop:
+    - dash_to_dock.yml
+    - app_folders.yml
+    - background.yml
+    - desktop.yml
+    - nautilus.yml
+    - screensaver.yml
+    - gtk4.yml
+  when: ansible_distribution == 'Fedora'
+
+# ----------------------------------------------------------------------------
+
+# POP OS Specific
+
+- name: Include Pop!_OS GNOME configuration tasks | Gnome
+  ansible.builtin.include_tasks: "PopOS/{{ item }}"
+  loop:
+    - pop-os_app_folders.yml
+    - peripherals.yml
+    - nautilus.yml
+    - appearance.yml
+    - autostart.yml
+    - background.yml
+    - file_chooser.yml
+    - gpaste.yml
+    - interface.yml
+    - power.yml
+    - preferences.yml
+    - privacy.yml
+    - screensaver.yml
+    - shell.yml
+    - weather.yml
+  when: ansible_distribution == 'Pop!_OS'
+
+# ----------------------------------------------------------------------------

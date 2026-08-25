@@ -1,0 +1,6 @@
+alarm: docker_swarm_service_tasks
+on: docker.swarm_service_tasks
+lookup: average {{ netdata_docker_swarm_service_desired_lookup }} of difference
+every: {{ netdata_docker_swarm_service_desired_every }}
+warn: $this >= {{ netdata_docker_swarm_service_desired_warn }}
+crit: $this >= {{ netdata_docker_swarm_service_desired_crit }}

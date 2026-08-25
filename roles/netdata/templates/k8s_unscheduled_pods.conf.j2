@@ -1,0 +1,7 @@
+[Unscheduled Pods]
+    on = kubernetes.pods_scheduling
+    lookup: average {{ netdata_k8s_unscheduled_pods_lookup }} unbound::status.unscheduled
+    every: {{ netdata_k8s_unscheduled_pods_every }}
+    warn: $this > {{ netdata_k8s_unscheduled_pods_warn }}
+    crit: $this > {{ netdata_k8s_unscheduled_pods_crit }}
+    info: Number of pods that couldn't be scheduled on a node

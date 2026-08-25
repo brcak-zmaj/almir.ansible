@@ -1,0 +1,86 @@
+---
+# tasks/Debian.yml - Mullvad Browser tasks for Debian family
+
+- name: Install Mullvad Browser repository and package
+  when: mullvad_browser_state == 'present'
+  block:
+    - name: Ensure apt keyrings directory exists
+      ansible.builtin.file:
+        path: /usr/share/keyrings
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      become: true
+
+    - name: Download Mullvad signing key
+      ansible.builtin.get_url:
+        url: "{{ mullvad_browser_debian_keyring_url }}"
+        dest: "{{ mullvad_browser_debian_keyring_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+      become: true
+      when: mullvad_browser_add_repository | bool
+
+    - name: Add Mullvad apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by={{ mullvad_browser_debian_keyring_path }} arch={{ ansible_architecture | replace('x86_64', 'amd64') | replace('aarch64', 'arm64') }}] {{ mullvad_browser_debian_repo_url }} stable main"
+        filename: mullvad
+        state: present
+      become: true
+      when: mullvad_browser_add_repository | bool
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      become: true
+      when: mullvad_browser_add_repository | bool
+
+    - name: Install Mullvad Browser package
+      ansible.builtin.apt:
+        name: "{{ mullvad_browser_package }}"
+        state: present
+      become: true
+  tags:
+    - mullvad_browser
+
+- name: Remove Mullvad Browser
+  when: mullvad_browser_state == 'absent'
+  block:
+    - name: Remove Mullvad Browser stable package
+      ansible.builtin.apt:
+        name: "{{ mullvad_browser_package_stable }}"
+        state: absent
+        purge: true
+      become: true
+
+    - name: Remove Mullvad Browser alpha package
+      ansible.builtin.apt:
+        name: "{{ mullvad_browser_package_alpha }}"
+        state: absent
+        purge: true
+      become: true
+
+    - name: Remove Mullvad apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by={{ mullvad_browser_debian_keyring_path }} arch={{ ansible_architecture | replace('x86_64', 'amd64') | replace('aarch64', 'arm64') }}] {{ mullvad_browser_debian_repo_url }} stable main"
+        filename: mullvad
+        state: absent
+      become: true
+      when: mullvad_browser_add_repository | bool
+
+    - name: Remove Mullvad signing key
+      ansible.builtin.file:
+        path: "{{ mullvad_browser_debian_keyring_path }}"
+        state: absent
+      become: true
+      when: mullvad_browser_add_repository | bool
+
+    - name: Remove Mullvad repository list file
+      ansible.builtin.file:
+        path: "{{ mullvad_browser_debian_repo_file }}"
+        state: absent
+      become: true
+  tags:
+    - mullvad_browser

@@ -1,0 +1,7 @@
+alarm: apache_high_conn
+    on: apache.connections
+lookup: average {{ netdata_apache_high_conn_lookup }} unaligned of active
+ units: connections
+ every: {{ netdata_apache_high_conn_every }}
+  warn: $this > {{ netdata_apache_high_conn_warn }}
+  crit: $this > {{ netdata_apache_high_conn_crit }}

@@ -1,0 +1,21 @@
+---
+# Power Management Configuration
+
+- name: Configure WiFi power saving
+  ansible.builtin.lineinfile:
+    path: /etc/NetworkManager/conf.d/99-rpi-wifi-power.conf
+    regexp: "^wifi.powersave="
+    line: "wifi.powersave={{ 2 if rpi_power_save_wifi | bool else 3 }}"
+    create: true
+    mode: '0644'
+  when: rpi_power_save_enable | bool
+
+- name: Configure USB autosuspend
+  ansible.builtin.lineinfile:
+    path: /etc/modprobe.d/rpi-usb-autosuspend.conf
+    regexp: "^options usbcore autosuspend="
+    line: "options usbcore autosuspend={{ 1 if rpi_power_save_usb | bool else -1 }}"
+    create: true
+    mode: '0644'
+  when: rpi_power_save_enable | bool
+  notify: update initramfs

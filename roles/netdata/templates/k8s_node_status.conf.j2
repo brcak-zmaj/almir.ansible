@@ -1,0 +1,7 @@
+[Node Not Ready]
+    on = kubernetes.node_status
+    lookup: average {{ netdata_k8s_node_status_lookup }} unbound::status.not_ready
+    every: {{ netdata_k8s_node_status_every }}
+    warn: $this > {{ netdata_k8s_node_status_warn }}
+    crit: $this > {{ netdata_k8s_node_status_crit }}
+    info: Number of nodes not in Ready state

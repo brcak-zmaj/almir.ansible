@@ -1,0 +1,18 @@
+{% if netdata_multi_services_check_enabled | bool %}
+template: multi_services_check
+      on: system.services
+      os: linux
+   hosts: *
+{% if netdata_multi_services_list | length > 0 %}
+  lookup: max -10s unaligned of {{ netdata_multi_services_list | join(',') }}
+{% else %}
+  lookup: max -10s unaligned of apache2,mysql,nginx,redis,plexmediaserver,graylog-server,openvpn@server,openvpn@client,docker,dockerd,kube-apiserver,kube-controller-manager,kube-scheduler,etcd,kubelet,kube-proxy,systemd-journald,httpd,mysqld,mongod,postgresql,postfix,dovecot,memcached,fail2ban,ufw,networking,network-manager,sshd
+{% endif %}
+   units: boolean
+   every: 10s
+    warn: $this > 0
+    crit: $this > 1
+   delay: up 0 down 15m multiplier 1.5 max 1h
+    info: check if services are running
+      to: sysadmin
+{% endif %}

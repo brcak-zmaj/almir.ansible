@@ -1,0 +1,39 @@
+---
+- name: Check if TLP is best for Fedora
+  ansible.builtin.debug:
+    msg: |
+      TLP is generally the best all-in-one power management tool for Fedora laptops. If you want to use the advanced method from the Framework KB, set `use_framework_battery_tweaks: true` in your playbook or host_vars.
+  tags: [battery, tlp, guidance]
+
+- name: Install and enable TLP (default)
+  ansible.builtin.package:
+    name: tlp
+    state: present
+  when: not (use_framework_battery_tweaks | default(false))
+  tags: [battery, tlp]
+
+- name: Enable and start TLP service
+  ansible.builtin.systemd:
+    name: tlp
+    enabled: true
+    state: started
+  when: not (use_framework_battery_tweaks | default(false))
+  tags: [battery, tlp]
+
+- name: Disable TLP if using Framework tweaks
+  ansible.builtin.systemd:
+    name: tlp
+    enabled: false
+    state: stopped
+  when: use_framework_battery_tweaks | default(false)
+  tags: [battery, tlp]
+
+- name: Apply Framework KB battery optimizations (if enabled)
+  ansible.builtin.template:
+    src: framework-battery.conf.j2
+    dest: /etc/tmpfiles.d/framework-battery.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: use_framework_battery_tweaks | default(false)
+  tags: [battery, framework]

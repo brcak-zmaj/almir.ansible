@@ -1,0 +1,26 @@
+
+- name: Software | virtualbox | install apt key (debian)
+  ansible.builtin.apt_key:
+    url: "{{ virtual_box_key_url }}"
+    state: present
+  when:
+    - virtualbox is defined
+    - virtualbox == true
+
+- name: Software | virtualbox | install repository (debian)
+  ansible.builtin.apt_repository:
+    repo: "{{ virtual_box_repo }}"
+    state: present
+    filename: virtualbox
+  register: virtualbox_repo_debian
+  when:
+    - virtualbox is defined
+    - virtualbox == true
+
+- name: Software | virtualbox | install package
+  ansible.builtin.package:
+    name: "{{ item }}"
+  when:
+    - virtualbox is defined
+    - virtualbox == true
+  loop: "{{ virtualbox_packages }}"

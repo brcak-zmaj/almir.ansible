@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+# =============================================================================
+# UPSD Configuration File - /etc/nut/upsd.conf
+# =============================================================================
+#
+# Network server configuration for the NUT daemon (upsd).
+# This controls how upsd listens for connections and handles data.
+#
+
+# Maximum age of data (seconds) before marking it stale
+MAXAGE {{ nut_upsd_maxage }}
+
+# Listen addresses and ports
+{% for listen in nut_upsd_listen %}
+LISTEN {{ listen.address }} {{ listen.port | default(3493) }}
+{% endfor %}
+
+{% if nut_debug_enabled | bool %}
+# Debug settings
+DEBUG_MIN {{ nut_debug_min }}
+{% endif %}

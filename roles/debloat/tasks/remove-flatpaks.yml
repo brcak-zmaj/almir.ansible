@@ -1,0 +1,26 @@
+---
+
+- name: Remove flatpak applications (user installation)
+  become: true
+  become_user: "{{ debloat_flatpak_user }}"
+  community.general.flatpak:
+    method: user
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ debloat_flatpaks_final }}"
+  register: debloat_flatpaks_removal
+  failed_when: false
+  when:
+    - debloat_flatpaks_final | length > 0
+    - debloat_flatpak_user | length > 0
+
+- name: Remove flatpak applications (system installation)
+  become: true
+  community.general.flatpak:
+    method: system
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ debloat_flatpaks_final }}"
+  register: debloat_flatpaks_removal_system
+  failed_when: false
+  when: debloat_flatpaks_final | length > 0

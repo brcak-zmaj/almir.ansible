@@ -1,0 +1,7 @@
+[Evicted Pods]
+    on = kubernetes.pods
+    lookup: average {{ netdata_k8s_evicted_pods_lookup }} unbound::status.evicted
+    every: {{ netdata_k8s_evicted_pods_every }}
+    warn: $this > {{ netdata_k8s_evicted_pods_warn }}
+    crit: $this > {{ netdata_k8s_evicted_pods_crit }}
+    info: Pods being evicted from nodes

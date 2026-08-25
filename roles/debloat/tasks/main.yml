@@ -1,0 +1,15 @@
+---
+
+- name: Prepare removal lists (build + verify installed)
+  ansible.builtin.include_tasks: prepare-removal-lists.yml
+
+- name: Remove packages (Debian/Ubuntu)
+  ansible.builtin.include_tasks: remove-packages-debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Remove packages (RHEL/Fedora)
+  ansible.builtin.include_tasks: remove-packages-rhel.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Remove flatpaks
+  ansible.builtin.include_tasks: remove-flatpaks.yml

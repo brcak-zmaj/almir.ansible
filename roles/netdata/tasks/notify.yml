@@ -1,0 +1,11 @@
+---
+- name: Copy health_alarm_notify.conf
+  become: true
+  ansible.builtin.template:
+    src: health_alarm_notify.conf.j2
+    dest: "{{ netdata_config_file }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  notify: Restart netdata
+  tags: netdata

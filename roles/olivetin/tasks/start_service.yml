@@ -1,0 +1,15 @@
+---
+
+- name: Start OliveTin service (package)
+  ansible.builtin.systemd:
+    name: OliveTin
+    state: "{{ olivetin_service_state }}"
+  become: true
+  when: olivetin_install_method == 'package'
+
+- name: Start OliveTin container (docker)
+  community.docker.docker_container:
+    name: "{{ olivetin_docker_container_name }}"
+    state: started
+  when: olivetin_install_method == 'docker'
+

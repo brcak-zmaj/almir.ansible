@@ -1,0 +1,4 @@
+---
+- name: Include libvirt tasks
+  ansible.builtin.include_tasks: libvirt.yml
+  when: libvirt is defined and libvirt == true

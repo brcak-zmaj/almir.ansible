@@ -1,0 +1,41 @@
+---
+# Deploy VM and LXC configurations from files directory
+# This task copies pre-backed-up VM/LXC configs to the target Proxmox server
+# Use the backup_proxmox_configs.sh script first to backup configs from old server
+
+- name: Ensure VM configs directory exists on target
+  ansible.builtin.file:
+    path: /etc/pve/qemu-server
+    state: directory
+    mode: "0755"
+
+- name: Ensure LXC configs directory exists on target
+  ansible.builtin.file:
+    path: /etc/pve/lxc
+    state: directory
+    mode: "0755"
+
+- name: Copy VM configurations to target server
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/pve/qemu-server/{{ item | basename }}"
+    mode: "0640"
+    owner: root
+    group: www-data
+    remote_src: false
+  loop: "{{ lookup('ansible.builtin.fileglob', 'files/vm_configs/*.conf', wantlist=True) }}"
+  when: lookup('ansible.builtin.fileglob', 'files/vm_configs/*.conf', wantlist=True) | length > 0
+  no_log: false
+
+- name: Copy LXC configurations to target server
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/pve/lxc/{{ item | basename }}"
+    mode: "0640"
+    owner: root
+    group: www-data
+    remote_src: false
+  loop: "{{ lookup('ansible.builtin.fileglob', 'files/lxc_configs/*.conf', wantlist=True) }}"
+  when: lookup('ansible.builtin.fileglob', 'files/lxc_configs/*.conf', wantlist=True) | length > 0
+  no_log: false
+

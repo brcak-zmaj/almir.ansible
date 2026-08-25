@@ -1,0 +1,8 @@
+{% if netdata_docker_swarm_manager_lost_enabled | bool %}
+alarm: docker_swarm_manager_lost
+on: docker.swarm_managers
+lookup: average {{ netdata_docker_swarm_nodes_down_lookup }} of lost
+every: {{ netdata_docker_swarm_nodes_down_every }}
+warn: $this >= 1
+crit: $this >= 2
+{% endif %}

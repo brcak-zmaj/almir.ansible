@@ -1,0 +1,26 @@
+---
+
+# Only apply KVM/VirtualBox cleanup for garage-workstation
+- name: Blacklist kvm_amd module (garage-workstation only)
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/blacklist-kvm-amd.conf
+    content: "blacklist kvm_amd\n"
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_hostname == 'garage-workstation'
+  tags: [kvm, cleanup]
+
+- name: Remove VirtualBox and kernel modules (garage-workstation only)
+  ansible.builtin.package:
+    name:
+      - VirtualBox
+      - virtualbox-guest-additions
+      - virtualbox-guest-utils
+      - virtualbox-guest-x11
+      - vboxdrv
+      - vboxnetflt
+      - vboxnetadp
+    state: absent
+  when: ansible_hostname == 'garage-workstation'
+  tags: [virtualbox, cleanup]

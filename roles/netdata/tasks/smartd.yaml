@@ -1,0 +1,11 @@
+---
+- name: Copy SMARTD alarm configuration
+  become: true
+  ansible.builtin.template:
+    src: smartd.conf.j2
+    dest: "{{ netdata_health_dir }}/smartd.conf"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  notify: Restart netdata
+  tags: netdata

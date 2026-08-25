@@ -1,0 +1,11 @@
+---
+- name: Recommend Spotify Flatpak stability tips
+  ansible.builtin.debug:
+    msg: |
+      For best stability with Spotify Flatpak:
+        - Use the latest Flatpak runtime: "flatpak update"
+        - Disable hardware acceleration: "flatpak override com.spotify.Client --env=LIBGL_ALWAYS_SOFTWARE=1"
+        - Limit background animations in Spotify settings
+        - Avoid running with GNOME extensions that affect window management
+        - If issues persist, try the web player (lighter)
+  tags: [flatpak, spotify, guidance]

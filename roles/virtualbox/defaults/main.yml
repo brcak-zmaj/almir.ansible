@@ -1,0 +1,7 @@
+---
+## Virtualbox
+virtual_box_key_url: "https://www.virtualbox.org/download/oracle_vbox_2016.asc"
+virtual_box_repo: "deb https://download.virtualbox.org/virtualbox/debian buster contrib"
+virtualbox_packages:
+  - virtualbox
+  - virtualbox-dkms

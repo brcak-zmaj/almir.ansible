@@ -1,0 +1,7 @@
+alarm: high_workers
+on: apache_local.workers
+lookup: average {{ netdata_apache_high_workers_lookup }} of idle,waiting,busy
+units: %
+every: {{ netdata_apache_high_workers_every }}
+warn: $this > {{ netdata_apache_high_workers_warn }}
+crit: $this > {{ netdata_apache_high_workers_crit }}

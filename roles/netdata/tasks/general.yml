@@ -1,0 +1,24 @@
+---
+- name: Copy General alarm configurations
+  become: true
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ netdata_health_dir }}/{{ item | basename | regex_replace('.j2$', '') }}"
+    mode: "{{ netdata_config_file_mode }}"
+    owner: root
+    group: root
+  loop:
+    - custom_cpu_alarm.conf.j2
+    - dropped_packets.conf.j2
+    - high_disk_usage_alarm.conf.j2
+    - high_load_average.conf.j2
+    - high_memory_alarm.conf.j2
+    - high_net_latency.conf.j2
+    - high_swap_useage.conf.j2
+    - login_failures.conf.j2
+    - many_processes.conf.j2
+    - out_of_inodes.conf.j2
+    - recent_reboot_alarm.conf.j2
+    - multi_services_check.conf.j2
+  notify: Restart netdata
+  tags: netdata
