@@ -65,6 +65,7 @@
     mode: "{{ nut_config_file_mode }}"
   when: nut_mode in ['standalone', 'netserver']
   notify:
+    - Reconfigure NUT driver instances
     - Restart NUT driver
   tags:
     - nut

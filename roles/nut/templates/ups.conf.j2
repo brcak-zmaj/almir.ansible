@@ -6,6 +6,10 @@
 # Define UPS devices and their drivers here.
 # Each section defines a UPS that NUT will manage.
 #
+# Driver options are rendered as "key = value". Options that NUT expects as a
+# bare flag (ignorelb, nolock, pollonly, ...) must be declared with an empty
+# value, null, or true, and are rendered without the "=" separator.
+#
 
 {% if nut_ups_devices | length > 0 %}
 # Multiple UPS configuration
@@ -18,7 +22,11 @@
 {% endif %}
 {% if ups.options is defined %}
 {% for key, value in ups.options.items() %}
+{% if value is none or value is sameas true or value | string | length == 0 %}
+    {{ key }}
+{% else %}
     {{ key }} = {{ value }}
+{% endif %}
 {% endfor %}
 {% endif %}
 
@@ -33,7 +41,11 @@
 {% endif %}
 {% if nut_ups_driver_options | length > 0 %}
 {% for key, value in nut_ups_driver_options.items() %}
+{% if value is none or value is sameas true or value | string | length == 0 %}
+    {{ key }}
+{% else %}
     {{ key }} = {{ value }}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endif %}

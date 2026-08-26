@@ -36,8 +36,17 @@
     - nut
     - nut-service
 
+# Query every configured UPS. Falls back to nut_ups_name for the single-UPS
+# form, so the reported name always matches what was actually written to
+# ups.conf rather than the nut_ups_name default.
 - name: Display UPS status
-  ansible.builtin.command: upsc {{ nut_ups_name }}@localhost
+  ansible.builtin.command: upsc {{ item }}@localhost
+  loop: >-
+    {{ nut_ups_devices | map(attribute='name') | list
+       if (nut_ups_devices | length > 0)
+       else [nut_ups_name] }}
+  loop_control:
+    label: "{{ item }}"
   register: nut_ups_status
   changed_when: false
   failed_when: false
@@ -50,11 +59,15 @@
 
 - name: Show UPS status
   ansible.builtin.debug:
-    msg: "{{ nut_ups_status.stdout_lines | default(['UPS status not available']) }}"
+    msg: "{{ item.item }}: {{ item.stdout_lines | default(['UPS status not available']) }}"
+  loop: "{{ nut_ups_status.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
   when:
     - nut_mode in ['standalone', 'netserver']
     - nut_services_started | bool
-    - nut_ups_status.rc == 0
+    - item.rc is defined
+    - item.rc == 0
   tags:
     - nut
     - nut-service
