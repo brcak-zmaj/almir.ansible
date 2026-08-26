@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+# =============================================================================
+# VM Tuning for Raspberry Pi - SD Card Wear Reduction
+# =============================================================================
+# Deployed to /etc/sysctl.d/ (NOT /etc/sysctl.conf) so systemd-sysctl.service
+# actually applies it at boot. Modern systemd (v256+) only reads
+# /etc/sysctl.d/*.conf, /run/sysctl.d/*.conf and /usr/lib/sysctl.d/*.conf at
+# boot; it does not read the legacy /etc/sysctl.conf compatibility file.
+#
+# Applied to swap regardless of whether rpi_swap_enable uses a swap file -
+# these also govern zram-backed swap when a separate zram role is in use.
+
+# Swappiness: lower = prefer reclaiming page cache over swapping (default: 60)
+vm.swappiness = {{ rpi_swap_swappiness }}
+
+# VFS cache pressure: lower = keep dentry/inode caches longer, fewer re-reads
+# from storage (default: 100)
+vm.vfs_cache_pressure = {{ rpi_swap_vfs_cache_pressure }}
+
+{% if rpi_fs_commit is defined %}
+# Dirty page writeback interval, in centiseconds. Longer interval batches
+# more writes together before flushing to storage (default: 500 = 5s).
+vm.dirty_writeback_centisecs = {{ rpi_fs_commit | int * 100 }}
+{% endif %}
+
+{% if rpi_vm_dirty_ratio is defined %}
+# Max % of RAM that can hold dirty pages before a synchronous flush is
+# forced on the writing process. Higher = more writes coalesced into fewer,
+# larger flushes (default: 20).
+vm.dirty_ratio = {{ rpi_vm_dirty_ratio }}
+{% endif %}
+
+{% if rpi_vm_dirty_background_ratio is defined %}
+# Max % of RAM that can hold dirty pages before the kernel starts
+# background writeback. Higher = fewer, larger background flushes
+# (default: 10).
+vm.dirty_background_ratio = {{ rpi_vm_dirty_background_ratio }}
+{% endif %}

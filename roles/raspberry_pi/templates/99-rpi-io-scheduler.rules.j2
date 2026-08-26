@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+# =============================================================================
+# I/O Scheduler for Raspberry Pi storage
+# =============================================================================
+# Sets the block layer I/O scheduler via udev instead of the (non-functional
+# on modern kernels) elevator= boot parameter. Applies on every device
+# add/change event, so it also covers devices hot-plugged after boot.
+
+# SD card / eMMC (the Pi's built-in storage)
+ACTION=="add|change", KERNEL=="mmcblk[0-9]", ATTR{queue/scheduler}="{{ rpi_io_scheduler }}"
+
+# Non-rotational USB/NVMe storage (e.g. Pi booting from a USB SSD)
+ACTION=="add|change", KERNEL=="sd[a-z]|nvme[0-9]n[0-9]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="{{ rpi_io_scheduler }}"

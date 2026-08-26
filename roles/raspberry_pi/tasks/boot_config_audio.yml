@@ -4,7 +4,11 @@
 - name: Configure audio driver (Pi 4/5)
   ansible.builtin.lineinfile:
     path: "{{ rpi_boot_config_file }}"
-    regexp: "^#?dtoverlay="
+    # Anchored to the specific overlay value, not a bare "dtoverlay=" prefix.
+    # config.txt commonly has multiple unrelated dtoverlay= lines (e.g.
+    # dtoverlay=dwc2 for USB); an unanchored regexp would match and replace
+    # whichever one appears first in the file instead of the audio overlay.
+    regexp: "^#?dtoverlay={{ rpi_audio_driver | regex_escape() }}(,.*)?$"
     line: "dtoverlay={{ rpi_audio_driver }}"
     state: present
   when: rpi_model in ['pi4', 'pi5']

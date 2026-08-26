@@ -149,6 +149,14 @@ rpi_fs_trim_enable: true             # Enable TRIM for SD cards (weekly)
 rpi_fs_noatime: true                # Mount with noatime (reduce writes)
 rpi_fs_commit: 5                    # Ext4 commit interval (seconds, default: 5)
 
+# Advanced: dirty page writeback thresholds (% of RAM). Left undefined by
+# default - opt in per-host. Raising both batches more writes into fewer,
+# larger flushes (less SD card wear), at the cost of more unwritten data
+# sitting in RAM if power is lost before a flush. Only raise these on hosts
+# with UPS-protected graceful shutdown.
+# rpi_vm_dirty_ratio: 60              # Force sync writeback above this (default: 20)
+# rpi_vm_dirty_background_ratio: 10   # Start background writeback above this (default: 10)
+
 # CPU Governor
 rpi_cpu_governor: "ondemand"        # CPU governor: ondemand, performance, powersave, conservative
 rpi_cpu_min_freq: 600               # Minimum CPU frequency (MHz)

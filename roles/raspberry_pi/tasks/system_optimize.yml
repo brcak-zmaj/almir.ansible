@@ -17,22 +17,21 @@
     - rpi_fs_noatime | bool
     - noatime_check.rc != 0
 
-- name: Configure ext4 commit interval
-  ansible.builtin.sysctl:
-    name: vm.dirty_writeback_centisecs
-    value: "{{ rpi_fs_commit | int * 100 }}"
-    state: present
-    sysctl_set: true
-    reload: true
-  when: rpi_fs_commit is defined
-
-- name: Make ext4 commit persistent
-  ansible.builtin.lineinfile:
-    path: /etc/sysctl.conf
-    regexp: "^vm.dirty_writeback_centisecs="
-    line: "vm.dirty_writeback_centisecs={{ rpi_fs_commit | int * 100 }}"
-    state: present
-  when: rpi_fs_commit is defined
+# Consolidated VM tuning (swappiness, vfs_cache_pressure, dirty writeback).
+# Written to /etc/sysctl.d/ rather than /etc/sysctl.conf: on modern systemd
+# (v256+), systemd-sysctl.service - the unit that applies sysctls at boot -
+# only reads /etc/sysctl.d/*.conf, /run/sysctl.d/*.conf and
+# /usr/lib/sysctl.d/*.conf. It does not read /etc/sysctl.conf, so settings
+# written there are silently lost on every reboot even though they remain
+# correct in the file.
+- name: Configure VM tuning (swappiness, cache pressure, dirty writeback)
+  ansible.builtin.template:
+    src: sysctl.conf.j2
+    dest: /etc/sysctl.d/99-rpi-optimize.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload sysctl
 
 - name: Configure CPU governor
   ansible.builtin.apt:
@@ -76,24 +75,23 @@
     mode: '0644'
   when: rpi_cpu_max_freq is defined and rpi_cpu_max_freq | int > 0
 
-- name: Configure I/O scheduler
-  ansible.builtin.lineinfile:
-    path: /etc/default/grub
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*elevator="
-    backrefs: true
-    line: '\1 elevator={{ rpi_io_scheduler }}'
+# The elevator= kernel command-line parameter was removed from the kernel
+# around 5.3 (legacy single-queue I/O scheduler API removal) - it has no
+# effect on any current kernel. It also required /etc/default/grub, which
+# doesn't exist on Raspberry Pi OS or Ubuntu-on-Pi (both boot via
+# flash-kernel/u-boot, not GRUB). A udev rule is the portable, modern
+# mechanism: it works on any bootloader, takes effect immediately without a
+# reboot, and is reapplied automatically for any matching device that's
+# hot-added later.
+- name: Configure I/O scheduler via udev rule
+  ansible.builtin.template:
+    src: 99-rpi-io-scheduler.rules.j2
+    dest: /etc/udev/rules.d/99-rpi-io-scheduler.rules
+    owner: root
+    group: root
+    mode: '0644'
   when: rpi_io_scheduler is defined
-  failed_when: false
-  register: grub_scheduler_config
-
-- name: Update GRUB after I/O scheduler change
-  ansible.builtin.command: update-grub
-  when:
-    - rpi_io_scheduler is defined
-    - ansible_pkg_mgr == 'apt'
-    - grub_scheduler_config.changed | default(false)
-  changed_when: true
-  failed_when: false
+  notify: reload udev rules
 
 - name: Configure TRIM for SD cards (weekly cron)
   ansible.builtin.cron:

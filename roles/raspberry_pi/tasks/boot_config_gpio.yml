@@ -3,7 +3,7 @@
 
 - name: Configure GPIO pull
   ansible.builtin.lineinfile:
-    path: /boot/config.txt
+    path: "{{ rpi_boot_config_file }}"
     regexp: "^#?gpio="
     line: "gpio={{ rpi_gpio_pull }}"
     state: present

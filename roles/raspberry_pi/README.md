@@ -44,12 +44,11 @@ This role provides comprehensive configuration management for Raspberry Pi devic
 ### ⚙️ System Optimizations
 - **Filesystem**: `noatime` mount option to reduce writes
 - **CPU Governor**: Configurable CPU frequency scaling (ondemand, performance, powersave, conservative)
-- **I/O Scheduler**: Optimized I/O scheduler for SD cards (mq-deadline recommended)
+- **I/O Scheduler**: Set via a udev rule (portable across bootloaders, applies immediately, no reboot needed) - mq-deadline recommended for SD cards
 - **TRIM**: Weekly automatic TRIM for SD cards
 - **Ext4 Commit**: Configurable filesystem commit intervals
 
 ### 🔌 Hardware Interfaces
-- **Watchdog Timer**: Hardware watchdog with configurable timeout
 - **I2C**: Enable I2C interface with configurable baudrate
 - **SPI**: Enable SPI interface
 - **UART**: Serial console and UART configuration
@@ -127,13 +126,14 @@ All configuration is done via variables in `defaults/main.yml`. All variables ca
 ### Swap Configuration
 
 ```yaml
-rpi_swap_manage: true              # Enable swap management
-rpi_swap_enable: true              # Enable/disable swap
+rpi_swap_enable: true              # Enable/disable a swap FILE
 rpi_swap_size_mb: 100              # Swap file size in MB
 rpi_swap_file: /var/swap           # Swap file location
 rpi_swap_swappiness: 10            # Swappiness (0-100, lower = less swap usage)
 rpi_swap_vfs_cache_pressure: 50   # VFS cache pressure (1-100)
 ```
+
+`rpi_swap_swappiness` and `rpi_swap_vfs_cache_pressure` are applied regardless of `rpi_swap_enable` (they're written by `system_optimize.yml`, not gated on the swap file), since they also govern zram-backed swap and general cache behaviour when no swap file is used. Both are persisted to `/etc/sysctl.d/99-rpi-optimize.conf`, not `/etc/sysctl.conf` - modern systemd's `systemd-sysctl.service` only reads `/etc/sysctl.d/*.conf` at boot.
 
 **Recommended for SD cards**: `rpi_swap_swappiness: 10` or lower to minimize swap usage.
 

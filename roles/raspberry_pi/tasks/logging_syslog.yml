@@ -7,15 +7,17 @@
   changed_when: false
   failed_when: false
 
-- name: Configure rsyslog rotation
-  ansible.builtin.template:
-    src: rsyslog.conf.j2
-    dest: /etc/rsyslog.d/99-rpi-optimize.conf
-    mode: '0644'
-    owner: root
-    group: root
+# Rotation is handled entirely by logrotate (rpi-syslog, below). rsyslog
+# itself is left on its distro defaults: earlier versions of this role
+# deployed a custom rsyslog.d conf that set $ActionFileEnableSync on (forces
+# fsync() on every write - the worst possible setting for flash wear and
+# latency) plus an unused disk-backed action queue. Remove it if present so
+# hosts that already have it get cleaned up.
+- name: Remove legacy custom rsyslog conf (superseded by logrotate-only rotation)
+  ansible.builtin.file:
+    path: /etc/rsyslog.d/99-rpi-optimize.conf
+    state: absent
   when: rsyslog_check.rc == 0
-  register: rsyslog_config
   notify: restart rsyslog
 
 - name: Create logrotate config for syslog
@@ -25,5 +27,15 @@
     mode: '0644'
     owner: root
     group: root
+  when: rsyslog_check.rc == 0
+
+# Ubuntu/Debian ship their own /etc/logrotate.d/rsyslog rotating the same
+# files (syslog, mail.*, kern.log, ...). Having both active means the same
+# files get rotated by two independent, differently-tuned configs. Our
+# rpi-syslog config covers the same paths, so disable the stock one.
+- name: Disable distro-default rsyslog logrotate config (superseded by rpi-syslog)
+  ansible.builtin.command:
+    cmd: dpkg-divert --local --rename --divert /etc/logrotate.d/rsyslog.disabled-by-ansible /etc/logrotate.d/rsyslog
+    creates: /etc/logrotate.d/rsyslog.disabled-by-ansible
   when: rsyslog_check.rc == 0
 
