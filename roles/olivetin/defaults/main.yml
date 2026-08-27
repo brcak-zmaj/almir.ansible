@@ -6,7 +6,11 @@
 olivetin_install_method: package
 
 # Version Control
-olivetin_version: latest  # Use 'latest' for latest release, or specific version like 'v3.0.0'
+# 'latest' downloads the newest GitHub release. To pin a specific release,
+# use the exact tag name as published on GitHub — OliveTin's tags are NOT
+# "v"-prefixed (e.g. "3000.19.0", not "v3000.19.0" or "v3.0.0").
+# See: https://github.com/OliveTin/OliveTin/releases
+olivetin_version: latest
 olivetin_docker_version: latest  # Docker image version/tag
 
 # Configuration File Management
@@ -15,10 +19,19 @@ olivetin_docker_version: latest  # Docker image version/tag
 olivetin_config_path: ""  # Empty = use role template, custom path = use your own
 olivetin_config_dir: /etc/OliveTin  # Directory where config file will be placed (package install)
 
+# Directory for OliveTin's `include:` mechanism (see
+# https://docs.olivetin.app/reference/includes.html). The role always
+# creates this directory and references it from the default config template
+# so you (or other automation, e.g. this role's optional Semaphore
+# integration below) can drop in extra config fragments without ever
+# touching the main config file. OliveTin merges `actions:` lists across
+# every file here, so anything you add stays alongside — never replaces —
+# actions defined elsewhere. Ignored when olivetin_config_path is set (a
+# fully custom config file is your responsibility to manage `include:` in).
+olivetin_config_d_enabled: true
+
 # Package Manager Installation (Fedora/Debian)
 olivetin_install_package: true  # Only used when olivetin_install_method == 'package'
-olivetin_package_url_fedora: "https://github.com/OliveTin/OliveTin/releases/latest/download/OliveTin_linux_amd64.rpm"
-olivetin_package_url_debian: "https://github.com/OliveTin/OliveTin/releases/latest/download/OliveTin_linux_amd64.deb"
 
 # Service Configuration (for package install)
 olivetin_service_enabled: true
@@ -42,6 +55,14 @@ olivetin_docker_restart_policy: unless-stopped
 olivetin_docker_user: root  # Required for Docker socket access
 olivetin_docker_pull_image: true
 
+# Mount /var/run/docker.sock into the container. Required for OliveTin
+# actions that control Docker (start/stop/restart other containers) — see
+# https://docs.olivetin.app/action_examples/containers.html. Combined with
+# olivetin_docker_user: root, this gives the container full root-equivalent
+# control of the host via the Docker socket. Set to false if you don't need
+# Docker-controlling actions.
+olivetin_docker_mount_socket: true
+
 # Docker Volume Configuration
 olivetin_docker_config_path: /docker/OliveTin  # Host path for config directory
 olivetin_docker_config_mount: "{{ olivetin_docker_config_path }}:/config"
@@ -54,7 +75,8 @@ olivetin_docker_env: {}
 # USER MANAGEMENT
 # ============================================================================
 # OliveTin local users configuration
-# Passwords will be automatically hashed using bcrypt
+# Passwords will be automatically hashed using Argon2id (the algorithm
+# OliveTin requires for local users: https://docs.olivetin.app/security/local.html)
 # Users only need to provide plaintext passwords - hashing happens automatically
 olivetin_users:
   - username: "admin"
@@ -68,9 +90,16 @@ olivetin_users:
 # Set to false to see password hashing errors during debugging
 olivetin_no_log_passwords: false
 
-# Note: passlib[bcrypt] must be installed on the Ansible control node for password hashing
-# Install with: pip install --user passlib[bcrypt]
-# This is a control node requirement, not a role task
+# Where per-user password hashes are cached on the TARGET host (not the
+# control node — hashing runs on the target so its passlib/argon2 deps,
+# installed by this role, are what matters). This makes re-runs idempotent:
+# an unchanged password reuses its existing hash instead of generating a new
+# salt (and therefore a "changed" config + service restart) every run.
+olivetin_state_dir: /var/lib/olivetin-ansible/state
+
+# Note: python3-passlib and an Argon2 binding (python3-argon2-cffi on
+# RedHat, python3-argon2 on Debian) are installed automatically by this role
+# on the target host — no control-node setup required.
 
 # ============================================================================
 # AUTHENTICATION & ACCESS CONTROL
@@ -105,3 +134,74 @@ olivetin_default_permissions:
 # Log level
 olivetin_log_level: "INFO"
 
+# ============================================================================
+# SEMAPHORE INTEGRATION (optional, disabled by default)
+# ============================================================================
+# Auto-generates OliveTin action buttons from Ansible Semaphore
+# (https://semaphoreui.com) task templates in a given project, kept in sync
+# by a scheduled script (systemd timer) on the target host. Buttons call
+# Semaphore's REST API to start the matching task — nothing more.
+#
+# This is entirely opt-in and additive: when enabled, the generated actions
+# are written to their own file under config.d (see olivetin_config_d_enabled
+# above), so anything you define yourself in the main config or your own
+# config.d files is never touched or overwritten.
+#
+# Secret handling: this role never reads environment variables, vault files,
+# or any secret store directly — it stays agnostic of how you manage
+# secrets. Pass olivetin_semaphore_api_token in from your playbook however
+# you normally handle secrets (lookup('env', ...), Ansible Vault, etc).
+olivetin_semaphore_integration_enabled: false
+
+# Semaphore instance to query, e.g. "http://192.168.1.10:3000". No trailing
+# slash. Required when olivetin_semaphore_integration_enabled is true.
+olivetin_semaphore_url: ""
+
+# Semaphore API Bearer token (Semaphore UI: your user menu -> API Tokens).
+# Required when enabled. Supply this from your playbook, not by editing this
+# role's defaults. Never printed in Ansible output regardless of
+# olivetin_no_log_passwords (always no_log'd).
+olivetin_semaphore_api_token: ""
+
+# Semaphore project ID to scrape templates from. Required when enabled.
+olivetin_semaphore_project_id: ""
+
+# Template IDs to exclude from becoming buttons. Empty list means every
+# template currently in the project gets a button — review your project's
+# templates (Terraform destroys, cluster patching, anything destructive)
+# before enabling this with an empty blocklist.
+olivetin_semaphore_blocklist_ids: []
+
+# ACL name(s) applied to every generated Semaphore action (must already
+# exist in olivetin_access_control_lists). Empty list = no ACL restriction,
+# falls back to olivetin_default_permissions. Since these buttons can
+# trigger real infrastructure changes, restricting them to an admin-only ACL
+# is strongly recommended.
+olivetin_semaphore_action_acl:
+  - "admins"
+
+# Require a confirmation click before a Semaphore action actually runs
+# (OliveTin's built-in confirmation argument type).
+olivetin_semaphore_action_confirm: true
+
+# Where the scraper script is installed. Defaults alongside the OliveTin
+# config directory (package or docker, whichever olivetin_install_method
+# is). Override to place it wherever you'd like.
+olivetin_semaphore_scraper_script_path: ""  # Empty = auto-derive next to the config dir
+
+# Jinja2 template used to render the scraper script. Override with your own
+# path if you want different filtering/rendering behavior than the default.
+olivetin_semaphore_scraper_template: "semaphore-scraper.sh.j2"
+
+# Generated OliveTin actions file. Empty = auto-derive as
+# "<config.d dir>/50-semaphore-actions.yaml". Only relevant when
+# olivetin_config_d_enabled is true (required for the Semaphore integration
+# to have anywhere safe to write).
+olivetin_semaphore_scraper_output_file: ""
+
+# How often the systemd timer re-syncs, in systemd OnUnitActiveSec= syntax
+# (e.g. "5min", "1h", "30s").
+olivetin_semaphore_scraper_interval: "5min"
+
+# jq is required by the scraper script and installed automatically when the
+# integration is enabled.

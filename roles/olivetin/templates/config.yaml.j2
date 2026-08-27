@@ -7,6 +7,14 @@
 
 logLevel: "{{ olivetin_log_level | default('INFO') }}"
 
+{% if olivetin_config_d_enabled | default(true) | bool %}
+# Merges actions/etc from every file in config.d/ — see
+# https://docs.olivetin.app/reference/includes.html. Anything dropped there
+# (by you, or by this role's optional Semaphore integration) is added
+# alongside what's defined here, never overwriting it.
+include: config.d
+{% endif %}
+
 {% if olivetin_auth_require_guests_to_login | default(false) | bool %}
 authRequireGuestsToLogin: true
 {% endif %}

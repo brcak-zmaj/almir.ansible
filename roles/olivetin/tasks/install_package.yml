@@ -1,15 +1,62 @@
 ---
 # Package Manager Installation Tasks
+#
+# Release asset naming (github.com/OliveTin/OliveTin/releases):
+#   latest: .../releases/latest/download/OliveTin_linux_<arch>.<ext>
+#   pinned: .../releases/download/<tag>/OliveTin_linux_<arch>.<ext>
+# Version tags are NOT "v"-prefixed (e.g. "3000.19.0", not "v3000.19.0").
 
-- name: Set OliveTin package facts based on OS family
+- name: Map ansible_architecture to OliveTin release asset architecture
+  ansible.builtin.set_fact:
+    olivetin_release_arch: >-
+      {{
+        {
+          'x86_64': 'amd64',
+          'aarch64': 'arm64',
+          'armv5l': 'armv5',
+          'armv6l': 'armv6',
+          'armv7l': 'armv7',
+          'riscv64': 'riscv64',
+        }[ansible_facts['architecture']] | default(ansible_facts['architecture'], true)
+      }}
+
+- name: Set OliveTin package facts based on OS family and version pin
   ansible.builtin.set_fact:
     olivetin_package:
       url: >-
-        {{ olivetin_package_url_fedora if ansible_os_family == 'RedHat'
-           else olivetin_package_url_debian }}
+        {{
+          'https://github.com/OliveTin/OliveTin/releases/'
+          ~ ('latest/download' if olivetin_version == 'latest' else 'download/' ~ olivetin_version)
+          ~ '/OliveTin_linux_' ~ olivetin_release_arch ~ '.'
+          ~ ('rpm' if ansible_facts['os_family'] == 'RedHat' else 'deb')
+        }}
       path: >-
-        {{ '/tmp/OliveTin_linux_amd64.rpm' if ansible_os_family == 'RedHat'
-           else '/tmp/OliveTin_linux_amd64.deb' }}
+        {{
+          '/tmp/OliveTin_linux_' ~ olivetin_release_arch ~ '.'
+          ~ ('rpm' if ansible_facts['os_family'] == 'RedHat' else 'deb')
+        }}
+
+# Skip the download/reinstall cycle entirely when a specific version is
+# pinned and already installed — avoids unnecessary work (and, historically,
+# an unconditional service stop — see below) on every re-run. Always
+# proceeds when olivetin_version is 'latest', since there's no cheap local
+# way to know whether upstream's "latest" has moved on.
+#
+# The package's actual name is lowercase "olivetin" (verified via `dpkg -l`
+# — NOT "OliveTin", despite the systemd service/binary/release asset
+# filenames all using that capitalization).
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+  when: olivetin_version != 'latest'
+
+- name: Determine if the pinned version is already installed
+  ansible.builtin.set_fact:
+    olivetin_already_at_desired_version: >-
+      {{
+        olivetin_version != 'latest'
+        and 'olivetin' in ansible_facts.packages
+        and olivetin_version == ansible_facts.packages['olivetin'][0].version
+      }}
 
 - name: Download OliveTin package
   ansible.builtin.get_url:
@@ -17,23 +64,54 @@
     dest: "{{ olivetin_package.path }}"
     mode: '0644'
   become: true
+  when: not olivetin_already_at_desired_version
 
-- name: Install or upgrade OliveTin package
+- name: Install or upgrade OliveTin package (RedHat)
   ansible.builtin.package:
     name: "{{ olivetin_package.path }}"
     state: present
   become: true
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - not olivetin_already_at_desired_version
   register: olivetin_package_install
+
+# ansible.builtin.package/apt's `name:` does not reliably install a local
+# .deb by path — apt looks it up as a package NAME in its cache instead
+# (confirmed: "No package matching '<path>' is available" on Ubuntu 24.04).
+# The apt module's dedicated `deb:` parameter is required for local files.
+- name: Install or upgrade OliveTin package (Debian)
+  ansible.builtin.apt:
+    deb: "{{ olivetin_package.path }}"
+    state: present
+  become: true
+  when:
+    - ansible_facts['os_family'] == 'Debian'
+    - not olivetin_already_at_desired_version
+  register: olivetin_package_install_deb
 
 - name: Remove downloaded package file
   ansible.builtin.file:
     path: "{{ olivetin_package.path }}"
     state: absent
   become: true
+  when: not olivetin_already_at_desired_version
 
-- name: Enable OliveTin service
+# Only manage the enabled/disabled state here — NOT the running state.
+# Unconditionally forcing state: stopped on every run (the original
+# behavior) meant every single playbook re-run stopped a possibly-already-
+# running OliveTin only for start_service.yml to start it straight back up
+# again: a needless restart (brief downtime) even when nothing changed.
+# start_service.yml is the sole authority on desired running state; config
+# changes trigger a restart via the handlers, which is the correct signal.
+- name: Set OliveTin service enabled/disabled state
+  # daemon_reload guards against a stale systemd unit cache immediately
+  # after a fresh package install (observed reliably when uninstall and
+  # reinstall run back-to-back in quick succession, e.g. teardown/recreate
+  # automation: "Device or resource busy" loading the just-(re)installed
+  # unit file). Cheap no-op when not needed.
   ansible.builtin.systemd:
     name: OliveTin
     enabled: "{{ olivetin_service_enabled }}"
-    state: stopped
+    daemon_reload: true
   become: true

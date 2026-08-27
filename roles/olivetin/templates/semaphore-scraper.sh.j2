@@ -1,0 +1,88 @@
+#!/bin/bash
+# Managed by Ansible — role: brcak_zmaj.almir_ansible.olivetin
+#
+# Regenerates {{ olivetin_semaphore_scraper_output_file_resolved }} from
+# Semaphore project {{ olivetin_semaphore_project_id }}'s task templates.
+# Writes ONLY this one file — never touches your own OliveTin config or any
+# other file under config.d.
+#
+# Do not edit by hand — re-run the olivetin role, or override
+# olivetin_semaphore_scraper_template with your own Jinja2 template, to
+# change this script's behavior.
+#
+# Requires SEMAPHORE_API_TOKEN in the environment (systemd sources it from
+# {{ olivetin_semaphore_scraper_env_file }} via EnvironmentFile=).
+set -euo pipefail
+
+SEMAPHORE_URL="{{ olivetin_semaphore_url }}"
+PROJECT_ID="{{ olivetin_semaphore_project_id }}"
+OUTPUT_FILE="{{ olivetin_semaphore_scraper_output_file_resolved }}"
+BLOCKLIST_JSON='{{ olivetin_semaphore_blocklist_ids | to_json }}'
+ACL_JSON='{{ olivetin_semaphore_action_acl | to_json }}'
+CONFIRM={{ 'true' if olivetin_semaphore_action_confirm | bool else 'false' }}
+
+if [ -z "${SEMAPHORE_API_TOKEN:-}" ]; then
+    echo "ERROR: SEMAPHORE_API_TOKEN is not set (expected from {{ olivetin_semaphore_scraper_env_file }})" >&2
+    exit 1
+fi
+
+RAW_FILE="$(mktemp)"
+TMP_FILE="$(mktemp)"
+trap 'rm -f "$RAW_FILE" "$TMP_FILE"' EXIT
+
+HTTP_STATUS="$(curl -sS -o "$RAW_FILE" -w '%{http_code}' \
+    -H "Authorization: Bearer ${SEMAPHORE_API_TOKEN}" \
+    "${SEMAPHORE_URL}/api/project/${PROJECT_ID}/templates")" || {
+    echo "ERROR: curl failed to reach ${SEMAPHORE_URL}" >&2
+    exit 1
+}
+
+if [ "$HTTP_STATUS" != "200" ]; then
+    echo "ERROR: Semaphore API returned HTTP ${HTTP_STATUS}" >&2
+    cat "$RAW_FILE" >&2
+    exit 1
+fi
+
+if ! jq empty "$RAW_FILE" 2>/dev/null; then
+    echo "ERROR: Semaphore API response was not valid JSON" >&2
+    exit 1
+fi
+
+# Output is plain JSON, which is valid YAML (YAML is a formal superset of
+# JSON) — OliveTin's config.d loader reads it the same as hand-written YAML.
+jq \
+    --argjson blocklist "$BLOCKLIST_JSON" \
+    --argjson acl "$ACL_JSON" \
+    --argjson confirm "$CONFIRM" \
+    --arg semurl "$SEMAPHORE_URL" \
+    --arg project "$PROJECT_ID" \
+    '{
+        actions: [
+            .[]
+            | select(.id as $id | ($blocklist | index($id)) == null)
+            | {
+                title: ("Semaphore: " + .name),
+                shell: (
+                    "curl -sS -X POST "
+                    + ($semurl + "/api/project/" + $project + "/tasks" | @sh)
+                    + " -H \"Authorization: Bearer $SEMAPHORE_API_TOKEN\""
+                    + " -H \"Content-Type: application/json\" -d "
+                    + ({template_id: .id} | tojson | @sh)
+                ),
+                timeout: 10
+            }
+            + (if ($acl | length) > 0 then {acl: $acl} else {} end)
+            + (if $confirm then {arguments: [{type: "confirmation", title: "Run this Semaphore template?"}]} else {} end)
+        ]
+    }' "$RAW_FILE" > "$TMP_FILE"
+
+if ! jq empty "$TMP_FILE" 2>/dev/null; then
+    echo "ERROR: generated output failed JSON validation, not writing ${OUTPUT_FILE}" >&2
+    exit 1
+fi
+
+ACTION_COUNT="$(jq '.actions | length' "$TMP_FILE")"
+mkdir -p "$(dirname "$OUTPUT_FILE")"
+mv "$TMP_FILE" "$OUTPUT_FILE"
+chmod 0644 "$OUTPUT_FILE"
+echo "OK: wrote ${ACTION_COUNT} action(s) to ${OUTPUT_FILE}"

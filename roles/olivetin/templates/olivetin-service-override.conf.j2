@@ -1,0 +1,7 @@
+# Managed by Ansible — role: brcak_zmaj.almir_ansible.olivetin
+# Drop-in (not an edit of the vendor unit, so it survives package upgrades):
+# gives OliveTin's own process — and therefore any action it shells out to —
+# access to SEMAPHORE_API_TOKEN, so Semaphore-triggering buttons work at
+# click-time without the token being written into the actions config itself.
+[Service]
+EnvironmentFile={{ olivetin_semaphore_scraper_env_file }}

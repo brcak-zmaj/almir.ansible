@@ -1,15 +1,63 @@
 ---
+# Hashes user passwords with Argon2id (OliveTin's required algorithm — see
+# https://docs.olivetin.app/security/local.html) and builds the user list
+# consumed by config.yaml.j2.
+#
+# Idempotency: naively re-hashing every run would produce a different salt
+# each time, so the rendered config would "change" (and restart OliveTin) on
+# every single playbook run even when nothing changed. Instead each user's
+# hash is cached in olivetin_state_dir; on the next run the plaintext is
+# verified against the cached hash with argon2.verify() and only re-hashed
+# if the password actually changed.
+#
+# The plaintext password is passed via stdin (the `stdin` command param),
+# never as a command-line argument — argv is visible to any local user via
+# `ps aux` for the process's lifetime, stdin is not.
 
-- name: Hash user passwords using Python/passlib with Argon2id
-  ansible.builtin.command:
-    cmd: python3 -c "from passlib.hash import argon2; ph = argon2.using(); print(ph.hash('{{ item.password }}'))"
-  register: password_hash_results
-  loop: "{{ olivetin_users }}"
+- name: Ensure OliveTin password-hash state directory exists
+  ansible.builtin.file:
+    path: "{{ olivetin_state_dir }}"
+    state: directory
+    mode: '0700'
+    owner: root
+    group: root
+  become: true
   when: olivetin_users | length > 0
-  no_log: "{{ olivetin_no_log_passwords | bool }}"
+
+- name: Hash user passwords using Argon2id (idempotent)
+  ansible.builtin.command:
+    # NOTE: this must be a literal block (|), not folded (>-) — folded
+    # scalars fold same-indentation newlines into spaces, which destroys
+    # the indentation this Python code depends on for its if/with blocks.
+    cmd: |-
+      python3 -c "
+      import sys, os
+      from passlib.hash import argon2
+      password = sys.stdin.read()
+      if password.endswith(chr(10)):
+          password = password[:-1]
+      state_file = sys.argv[1]
+      if os.path.exists(state_file):
+          existing = open(state_file).read().strip()
+          if existing and argon2.verify(password, existing):
+              print('UNCHANGED:' + existing)
+              sys.exit(0)
+      new_hash = argon2.hash(password)
+      with open(state_file, 'w') as f:
+          f.write(new_hash)
+      print('CHANGED:' + new_hash)
+      " "{{ olivetin_state_dir }}/{{ item.username }}.hash"
+    stdin: "{{ item.password }}"
+  become: true
+  register: olivetin_password_hash_results
+  loop: "{{ olivetin_users }}"
   loop_control:
     label: "{{ item.username }}"
-  changed_when: false
+  when: olivetin_users | length > 0
+  no_log: "{{ olivetin_no_log_passwords | bool }}"
+  changed_when: >-
+    olivetin_password_hash_results.stdout is defined
+    and olivetin_password_hash_results.stdout.startswith('CHANGED:')
 
 - name: Build OliveTin users list with hashed passwords
   ansible.builtin.set_fact:
@@ -18,8 +66,8 @@
     user_with_hash:
       username: "{{ item.0.username }}"
       usergroup: "{{ item.0.usergroup | default('') }}"
-      password_hash: "{{ item.1.stdout }}"
-  loop: "{{ olivetin_users | zip(password_hash_results.results) | list }}"
+      password_hash: "{{ item.1.stdout.split(':', 1)[1] }}"
+  loop: "{{ olivetin_users | zip(olivetin_password_hash_results.results) | list }}"
   when: olivetin_users | length > 0
   no_log: "{{ olivetin_no_log_passwords | bool }}"
   loop_control:

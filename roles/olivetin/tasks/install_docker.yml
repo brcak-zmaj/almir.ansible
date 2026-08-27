@@ -23,9 +23,10 @@
     ports:
       - "{{ olivetin_docker_port }}:1337"
     env: "{{ olivetin_docker_env }}"
-    volumes:
-      - "{{ olivetin_docker_config_mount }}"
-      - "{{ olivetin_docker_sock_mount }}"
+    volumes: >-
+      {{
+        [olivetin_docker_config_mount]
+        + ([olivetin_docker_sock_mount] if olivetin_docker_mount_socket | bool else [])
+      }}
     networks:
       - name: "{{ olivetin_docker_network_name }}"
-

@@ -1,0 +1,12 @@
+# Managed by Ansible — role: brcak_zmaj.almir_ansible.olivetin
+[Unit]
+Description=Run the OliveTin Semaphore scraper periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec={{ olivetin_semaphore_scraper_interval }}
+Unit=olivetin-semaphore-scraper.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

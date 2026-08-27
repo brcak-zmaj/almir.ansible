@@ -31,3 +31,9 @@
 - name: Start OliveTin service
   ansible.builtin.include_tasks: start_service.yml
   when: not olivetin_uninstall
+
+- name: Include optional Semaphore integration
+  ansible.builtin.include_tasks: semaphore_integration.yml
+  when:
+    - not olivetin_uninstall
+    - olivetin_semaphore_integration_enabled | bool

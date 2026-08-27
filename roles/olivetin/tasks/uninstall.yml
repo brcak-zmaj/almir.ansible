@@ -11,12 +11,19 @@
   when: olivetin_install_method == 'package'
 
 - name: Remove OliveTin package (RPM)
-  ansible.builtin.command:
-    cmd: rpm -e OliveTin
+  # Package name is lowercase "olivetin" — confirmed for the .deb via
+  # `dpkg -l` (NOT "OliveTin", despite that capitalization being used for
+  # the systemd service/binary/release asset filenames); the .rpm is built
+  # by the same release pipeline so almost certainly shares the same
+  # lowercase package name, though this specific path hasn't been tested
+  # against an actual RedHat host.
+  ansible.builtin.package:
+    name: olivetin
+    state: absent
   become: true
   when:
     - olivetin_install_method == 'package'
-    - ansible_os_family == 'RedHat'
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Remove OliveTin package (DEB)
   ansible.builtin.apt:
@@ -28,7 +35,7 @@
   become: true
   when:
     - olivetin_install_method == 'package'
-    - ansible_os_family == 'Debian'
+    - ansible_facts['os_family'] == 'Debian'
 
 - name: Remove OliveTin config directory (package)
   ansible.builtin.file:
@@ -50,3 +57,35 @@
   become: true
   when: olivetin_install_method == 'docker'
 
+# Semaphore integration cleanup (no-op if it was never enabled — file/systemd
+# module tasks are naturally idempotent against absent state).
+- name: Stop and disable Semaphore scraper timer
+  ansible.builtin.systemd:
+    name: olivetin-semaphore-scraper.timer
+    enabled: false
+    state: stopped
+  become: true
+  failed_when: false
+
+- name: Remove Semaphore scraper systemd units and drop-in
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  become: true
+  loop:
+    - /etc/systemd/system/olivetin-semaphore-scraper.timer
+    - /etc/systemd/system/olivetin-semaphore-scraper.service
+    - /etc/systemd/system/OliveTin.service.d/semaphore-integration.conf
+  register: olivetin_semaphore_units_removed
+
+- name: Reload systemd daemon after removing Semaphore integration units
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  when: olivetin_semaphore_units_removed.results | selectattr('changed') | list | length > 0
+
+# The scraper script and secret env file (default paths) live inside
+# olivetin_config_dir / olivetin_docker_config_path, already removed above
+# — nothing further to do here unless a custom
+# olivetin_semaphore_scraper_script_path was used, which is the caller's
+# own responsibility to clean up.

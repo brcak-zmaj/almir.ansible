@@ -1,0 +1,147 @@
+---
+# Optional Semaphore integration — see defaults/main.yml for all
+# olivetin_semaphore_* variables. Deploys:
+#   1. A root-only secret env file holding the Semaphore API token.
+#   2. A systemd drop-in on OliveTin's own service so its actions (which run
+#      as child processes of OliveTin) inherit that token at click-time.
+#   3. The scraper script (rendered from a Jinja2 template — override
+#      olivetin_semaphore_scraper_template for custom behavior).
+#   4. A systemd service+timer that runs the scraper on a schedule.
+# The scraper writes only its own file under config.d, so it never touches
+# actions/dashboards/ACLs you define yourself.
+
+- name: Assert required Semaphore integration variables are set
+  ansible.builtin.assert:
+    that:
+      - olivetin_semaphore_url | length > 0
+      - olivetin_semaphore_api_token | length > 0
+      - olivetin_semaphore_project_id | length > 0
+      - olivetin_config_d_enabled | bool
+    fail_msg: >-
+      olivetin_semaphore_integration_enabled is true but olivetin_semaphore_url,
+      olivetin_semaphore_api_token, olivetin_semaphore_project_id must all be
+      non-empty, and olivetin_config_d_enabled must be true (the scraper needs
+      config.d to write its actions file into).
+  no_log: true
+
+- name: Resolve Semaphore scraper script path
+  ansible.builtin.set_fact:
+    olivetin_semaphore_scraper_script_path_resolved: >-
+      {{
+        olivetin_semaphore_scraper_script_path
+        if (olivetin_semaphore_scraper_script_path | length > 0)
+        else (olivetin_active_config_dir + '/semaphore-scraper.sh')
+      }}
+
+- name: Resolve Semaphore scraper output file path
+  ansible.builtin.set_fact:
+    olivetin_semaphore_scraper_output_file_resolved: >-
+      {{
+        olivetin_semaphore_scraper_output_file
+        if (olivetin_semaphore_scraper_output_file | length > 0)
+        else (olivetin_config_d_dir + '/50-semaphore-actions.yaml')
+      }}
+
+- name: Resolve Semaphore scraper secret env file path
+  ansible.builtin.set_fact:
+    olivetin_semaphore_scraper_env_file: "{{ olivetin_active_config_dir }}/.semaphore-scraper.env"
+
+- name: Install jq (required by the scraper script)
+  ansible.builtin.package:
+    name: jq
+    state: present
+  become: true
+
+- name: Deploy Semaphore API token env file
+  ansible.builtin.template:
+    src: semaphore-scraper.env.j2
+    dest: "{{ olivetin_semaphore_scraper_env_file }}"
+    mode: '0600'
+    owner: root
+    group: root
+  become: true
+  no_log: true
+  notify:
+    - Restart olivetin service
+    - Restart olivetin container
+
+- name: Deploy Semaphore scraper script
+  ansible.builtin.template:
+    src: "{{ olivetin_semaphore_scraper_template }}"
+    dest: "{{ olivetin_semaphore_scraper_script_path_resolved }}"
+    mode: '0750'
+    owner: root
+    group: root
+  become: true
+
+- name: Ensure OliveTin systemd drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/OliveTin.service.d
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+  when: olivetin_install_method == 'package'
+
+- name: Deploy systemd drop-in so OliveTin's own actions can reach the Semaphore token
+  ansible.builtin.template:
+    src: olivetin-service-override.conf.j2
+    dest: /etc/systemd/system/OliveTin.service.d/semaphore-integration.conf
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  when: olivetin_install_method == 'package'
+  notify:
+    - Reload systemd daemon
+    - Restart olivetin service
+
+- name: Add Semaphore token env file to the OliveTin Docker container
+  ansible.builtin.set_fact:
+    olivetin_docker_env: "{{ olivetin_docker_env | combine({'SEMAPHORE_API_TOKEN': olivetin_semaphore_api_token}) }}"
+  when: olivetin_install_method == 'docker'
+  no_log: true
+
+- name: Deploy Semaphore scraper systemd service unit
+  ansible.builtin.template:
+    src: olivetin-semaphore-scraper.service.j2
+    dest: /etc/systemd/system/olivetin-semaphore-scraper.service
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  notify: Reload systemd daemon
+
+- name: Deploy Semaphore scraper systemd timer unit
+  ansible.builtin.template:
+    src: olivetin-semaphore-scraper.timer.j2
+    dest: /etc/systemd/system/olivetin-semaphore-scraper.timer
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  register: olivetin_scraper_timer_deployed
+  notify: Reload systemd daemon
+
+- name: Flush handlers so the timer unit and OliveTin restart are in place before first run
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Semaphore scraper timer
+  ansible.builtin.systemd:
+    name: olivetin-semaphore-scraper.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+
+- name: Run Semaphore scraper once now so actions exist immediately
+  ansible.builtin.command:
+    cmd: "{{ olivetin_semaphore_scraper_script_path_resolved }}"
+  become: true
+  environment:
+    SEMAPHORE_API_TOKEN: "{{ olivetin_semaphore_api_token }}"
+  register: olivetin_scraper_first_run
+  changed_when: "'OK:' in olivetin_scraper_first_run.stdout"
+  failed_when: olivetin_scraper_first_run.rc != 0
+  no_log: true

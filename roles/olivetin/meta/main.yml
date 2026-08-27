@@ -4,7 +4,7 @@ galaxy_info:
   author: almir
   description: "Install and configure OliveTin (package or docker)"
   company: brcak_zmaj
-  license: MIT
+  license: GPL-3.0-or-later
   min_ansible_version: "2.9"
   platforms:
     - name: Fedora

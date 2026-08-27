@@ -5,16 +5,22 @@
   ansible.builtin.set_fact:
     olivetin_use_role_config: "{{ (olivetin_config_path | length) == 0 }}"
 
+- name: Determine config directory in use (package or Docker)
+  ansible.builtin.set_fact:
+    olivetin_active_config_dir: >-
+      {{ olivetin_docker_config_path if olivetin_install_method == 'docker' else olivetin_config_dir }}
+
 - name: Determine config file path
   ansible.builtin.set_fact:
     olivetin_config_file: >-
       {{
         olivetin_config_path if (olivetin_config_path | length > 0)
-        else (
-          (olivetin_docker_config_path + '/config.yaml') if olivetin_install_method == 'docker'
-          else (olivetin_config_dir + '/config.yaml')
-        )
+        else (olivetin_active_config_dir + '/config.yaml')
       }}
+
+- name: Determine config.d directory path
+  ansible.builtin.set_fact:
+    olivetin_config_d_dir: "{{ olivetin_active_config_dir }}/config.d"
 
 - name: Ensure config directory exists (package install)
   ansible.builtin.file:
@@ -36,6 +42,18 @@
   become: true
   when: olivetin_install_method == 'docker'
 
+- name: Ensure config.d directory exists
+  ansible.builtin.file:
+    path: "{{ olivetin_config_d_dir }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+  when:
+    - olivetin_config_d_enabled | bool
+    - olivetin_use_role_config | bool
+
 - name: Deploy config file from template
   ansible.builtin.template:
     src: config.yaml.j2
@@ -46,7 +64,7 @@
   become: true
   when: olivetin_use_role_config | bool
   notify:
-    - restart olivetin service
-    - restart olivetin container
+    - Restart olivetin service
+    - Restart olivetin container
   tags:
     - update_config

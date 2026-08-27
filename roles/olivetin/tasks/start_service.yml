@@ -12,4 +12,3 @@
     name: "{{ olivetin_docker_container_name }}"
     state: started
   when: olivetin_install_method == 'docker'
-
