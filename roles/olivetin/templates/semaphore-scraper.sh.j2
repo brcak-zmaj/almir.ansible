@@ -10,8 +10,16 @@
 # olivetin_semaphore_scraper_template with your own Jinja2 template, to
 # change this script's behavior.
 #
+{% if olivetin_semaphore_creds_available %}
+# Token supplied via systemd's encrypted credential mechanism
+# (LoadCredentialEncrypted=) — read from $CREDENTIALS_DIRECTORY, set
+# automatically by systemd for services using it. Falls back to a plain
+# SEMAPHORE_API_TOKEN env var when run outside systemd (e.g. Ansible's
+# one-off bootstrap run right after deploy).
+{% else %}
 # Requires SEMAPHORE_API_TOKEN in the environment (systemd sources it from
-# {{ olivetin_semaphore_scraper_env_file }} via EnvironmentFile=).
+# {{ olivetin_semaphore_token_env_file }} via EnvironmentFile=).
+{% endif %}
 set -euo pipefail
 
 SEMAPHORE_URL="{{ olivetin_semaphore_url }}"
@@ -21,8 +29,14 @@ BLOCKLIST_JSON='{{ olivetin_semaphore_blocklist_ids | to_json }}'
 ACL_JSON='{{ olivetin_semaphore_action_acl | to_json }}'
 CONFIRM={{ 'true' if olivetin_semaphore_action_confirm | bool else 'false' }}
 
+{% if olivetin_semaphore_creds_available %}
+if [ -z "${SEMAPHORE_API_TOKEN:-}" ] && [ -n "${CREDENTIALS_DIRECTORY:-}" ] && [ -f "${CREDENTIALS_DIRECTORY}/semaphore_api_token" ]; then
+    SEMAPHORE_API_TOKEN="$(cat "${CREDENTIALS_DIRECTORY}/semaphore_api_token")"
+fi
+{% endif %}
+
 if [ -z "${SEMAPHORE_API_TOKEN:-}" ]; then
-    echo "ERROR: SEMAPHORE_API_TOKEN is not set (expected from {{ olivetin_semaphore_scraper_env_file }})" >&2
+    echo "ERROR: SEMAPHORE_API_TOKEN could not be resolved" >&2
     exit 1
 fi
 
@@ -50,12 +64,25 @@ fi
 
 # Output is plain JSON, which is valid YAML (YAML is a formal superset of
 # JSON) — OliveTin's config.d loader reads it the same as hand-written YAML.
+#
+# Token retrieval at click-time: OliveTin's own process gets the token the
+# same way this script does (see olivetin-service-override.conf.j2) — via
+# $CREDENTIALS_DIRECTORY (encrypted credential) or a plain env var
+# (fallback). Embed whichever expression matches how OliveTin itself will
+# have the token available when it runs this shell command.
+{% if olivetin_semaphore_creds_available %}
+TOKEN_SHELL_EXPR='$(cat "$CREDENTIALS_DIRECTORY/semaphore_api_token")'
+{% else %}
+TOKEN_SHELL_EXPR='$SEMAPHORE_API_TOKEN'
+{% endif %}
+
 jq \
     --argjson blocklist "$BLOCKLIST_JSON" \
     --argjson acl "$ACL_JSON" \
     --argjson confirm "$CONFIRM" \
     --arg semurl "$SEMAPHORE_URL" \
     --arg project "$PROJECT_ID" \
+    --arg tokenexpr "$TOKEN_SHELL_EXPR" \
     '{
         actions: [
             .[]
@@ -65,7 +92,7 @@ jq \
                 shell: (
                     "curl -sS -X POST "
                     + ($semurl + "/api/project/" + $project + "/tasks" | @sh)
-                    + " -H \"Authorization: Bearer $SEMAPHORE_API_TOKEN\""
+                    + " -H \"Authorization: Bearer " + $tokenexpr + "\""
                     + " -H \"Content-Type: application/json\" -d "
                     + ({template_id: .id} | tojson | @sh)
                 ),

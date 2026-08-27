@@ -156,14 +156,29 @@ Key variables (all in `defaults/main.yml`, prefixed `olivetin_semaphore_`):
 | `olivetin_semaphore_scraper_output_file` | `""` (auto) | Generated actions file — defaults to `config.d/50-semaphore-actions.yaml` |
 | `olivetin_semaphore_scraper_template` | `semaphore-scraper.sh.j2` | Override with your own Jinja2 template for different scraping/filtering logic |
 
-**Security model:** the token is written once to a root-only (`0600`) env
-file, never into the generated actions file itself. Both OliveTin's own
-service (via a systemd drop-in, so button clicks at run-time can reach
-Semaphore) and the scraper service source that same file via
-`EnvironmentFile=`. Review `templates/semaphore-scraper.sh.j2` before
-enabling this against a Semaphore project with destructive templates
-(Terraform destroys, cluster patching, etc.) — the blocklist is your
-responsibility to populate.
+**Security model:** the token is never written into the generated actions
+file itself, and is protected at rest using the strongest mechanism your
+host's systemd supports, auto-detected — nothing to configure:
+
+- **systemd >= 250** (Debian 12+/Ubuntu 22.04+/Fedora all current releases):
+  the token is encrypted with `systemd-creds` — TPM2-sealed when the host has
+  a working TPM, host-key-bound otherwise — and passed to both OliveTin's own
+  service (via a systemd drop-in, so button clicks at run-time can reach
+  Semaphore) and the scraper service via `LoadCredentialEncrypted=`. The
+  on-disk `.cred` file is ciphertext; even root reading it directly gets
+  nothing usable without `systemd-creds decrypt` and the host's own key.
+- **Older systemd**: falls back to a root-only (`0600`) plaintext env file,
+  shared via `EnvironmentFile=`. Still reasonably safe (single file,
+  root-only, never written into the actions config) but not encrypted at
+  rest — a role warning is emitted at deploy time when this path is taken.
+
+Review `templates/semaphore-scraper.sh.j2` before enabling this against a
+Semaphore project with destructive templates (Terraform destroys, cluster
+patching, etc.) — the blocklist is your responsibility to populate. Docker
+installs always use the plain-env-var path regardless of systemd version —
+systemd credentials only apply to systemd-managed services, and Docker has
+no equivalent built-in mechanism (the token is visible via `docker inspect`
+in that mode).
 
 Disabling the role (`olivetin_uninstall: true`) also removes the scraper's
 systemd units and the Docker-service drop-in.

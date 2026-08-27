@@ -6,5 +6,9 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-EnvironmentFile={{ olivetin_semaphore_scraper_env_file }}
+{% if olivetin_semaphore_creds_available %}
+LoadCredentialEncrypted=semaphore_api_token:{{ olivetin_semaphore_token_cred_file }}
+{% else %}
+EnvironmentFile={{ olivetin_semaphore_token_env_file }}
+{% endif %}
 ExecStart={{ olivetin_semaphore_scraper_script_path_resolved }}

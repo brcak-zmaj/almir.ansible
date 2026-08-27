@@ -1,14 +1,23 @@
 ---
 # Optional Semaphore integration — see defaults/main.yml for all
 # olivetin_semaphore_* variables. Deploys:
-#   1. A root-only secret env file holding the Semaphore API token.
+#   1. The Semaphore API token, protected at rest — see below.
 #   2. A systemd drop-in on OliveTin's own service so its actions (which run
-#      as child processes of OliveTin) inherit that token at click-time.
+#      as child processes of OliveTin) can reach the token at click-time.
 #   3. The scraper script (rendered from a Jinja2 template — override
 #      olivetin_semaphore_scraper_template for custom behavior).
 #   4. A systemd service+timer that runs the scraper on a schedule.
 # The scraper writes only its own file under config.d, so it never touches
 # actions/dashboards/ACLs you define yourself.
+#
+# Token protection: prefers systemd's built-in encrypted credentials
+# (LoadCredentialEncrypted=, systemd-creds — TPM2-sealed when a TPM is
+# present, host-key-bound otherwise; either way the token is never plaintext
+# on disk). Requires systemd >= 250 (Debian 12+/Ubuntu 22.04+/Fedora all
+# current releases). Falls back to a root-only (0600) plaintext
+# EnvironmentFile= on older systemd, which is still reasonably safe (single
+# file, root-only, never written into the actions config itself) but not as
+# strong. Auto-detected — nothing to configure.
 
 - name: Assert required Semaphore integration variables are set
   ansible.builtin.assert:
@@ -42,9 +51,22 @@
         else (olivetin_config_d_dir + '/50-semaphore-actions.yaml')
       }}
 
-- name: Resolve Semaphore scraper secret env file path
+- name: Resolve Semaphore token storage path
   ansible.builtin.set_fact:
-    olivetin_semaphore_scraper_env_file: "{{ olivetin_active_config_dir }}/.semaphore-scraper.env"
+    olivetin_semaphore_token_file: "{{ olivetin_active_config_dir }}/.semaphore-api-token"
+
+- name: Check whether systemd-creds is usable on this host
+  # Present since systemd 250, the same release LoadCredentialEncrypted= was
+  # introduced in — a version check would be more indirect than just trying
+  # the binary that has to exist either way.
+  ansible.builtin.command: systemd-creds --version
+  register: olivetin_systemd_creds_check
+  changed_when: false
+  failed_when: false
+
+- name: Determine Semaphore token protection mode
+  ansible.builtin.set_fact:
+    olivetin_semaphore_creds_available: "{{ olivetin_systemd_creds_check.rc == 0 }}"
 
 - name: Install jq (required by the scraper script)
   ansible.builtin.package:
@@ -52,18 +74,104 @@
     state: present
   become: true
 
-- name: Deploy Semaphore API token env file
+# --- Encrypted credential path (systemd-creds available) --------------------
+
+- name: Set encrypted credential file path
+  ansible.builtin.set_fact:
+    olivetin_semaphore_token_cred_file: "{{ olivetin_semaphore_token_file }}.cred"
+  when: olivetin_semaphore_creds_available
+
+- name: Check for an existing encrypted Semaphore token credential
+  ansible.builtin.stat:
+    path: "{{ olivetin_semaphore_token_cred_file }}"
+  register: olivetin_existing_token_cred
+  when: olivetin_semaphore_creds_available
+
+- name: Decrypt existing credential to check whether the token actually changed
+  ansible.builtin.command:
+    cmd: "systemd-creds decrypt --name=semaphore_api_token {{ olivetin_semaphore_token_cred_file }} -"
+  register: olivetin_existing_token_plaintext
+  changed_when: false
+  failed_when: false
+  no_log: true
+  when:
+    - olivetin_semaphore_creds_available
+    - olivetin_existing_token_cred.stat.exists
+
+- name: Encrypt Semaphore API token as a systemd credential
+  # Piped via stdin, never as a command-line argument (argv is visible via
+  # `ps aux` for the process's lifetime; stdin is not) — same reasoning as
+  # the Argon2id password hashing in users.yml.
+  ansible.builtin.command:
+    cmd: "systemd-creds encrypt --name=semaphore_api_token - {{ olivetin_semaphore_token_cred_file }}"
+    stdin: "{{ olivetin_semaphore_api_token }}"
+  become: true
+  no_log: true
+  changed_when: true
+  when:
+    - olivetin_semaphore_creds_available
+    - >-
+      not olivetin_existing_token_cred.stat.exists
+      or olivetin_existing_token_plaintext.stdout != olivetin_semaphore_api_token
+  notify:
+    - Restart olivetin service
+
+- name: Restrict encrypted credential file permissions
+  ansible.builtin.file:
+    path: "{{ olivetin_semaphore_token_cred_file }}"
+    mode: '0600'
+    owner: root
+    group: root
+  become: true
+  when: olivetin_semaphore_creds_available
+
+- name: Remove any leftover plaintext token file from a previous fallback-mode run
+  ansible.builtin.file:
+    path: "{{ olivetin_semaphore_token_file }}.env"
+    state: absent
+  become: true
+  when: olivetin_semaphore_creds_available
+
+# --- Plaintext env-file fallback (systemd-creds unavailable) ----------------
+
+- name: Set fallback plaintext env file path
+  ansible.builtin.set_fact:
+    olivetin_semaphore_token_env_file: "{{ olivetin_semaphore_token_file }}.env"
+  when: not olivetin_semaphore_creds_available
+
+- name: Remove any leftover encrypted credential from a previous systemd-creds-mode run
+  ansible.builtin.file:
+    path: "{{ olivetin_semaphore_token_file }}.cred"
+    state: absent
+  become: true
+  when: not olivetin_semaphore_creds_available
+
+- name: Warn that the Semaphore token is falling back to plaintext-at-rest storage
+  ansible.builtin.debug:
+    msg: >-
+      systemd-creds is unavailable on this host (systemd < 250) — the
+      Semaphore API token will be stored as root-only (0600) plaintext at
+      {{ olivetin_semaphore_token_env_file }} instead of an encrypted systemd
+      credential. Still reasonably safe (single file, root-only, never
+      written into the actions config), but upgrading systemd would allow
+      the stronger, encrypted-at-rest option.
+  when: not olivetin_semaphore_creds_available
+
+- name: Deploy Semaphore API token env file (fallback)
   ansible.builtin.template:
     src: semaphore-scraper.env.j2
-    dest: "{{ olivetin_semaphore_scraper_env_file }}"
+    dest: "{{ olivetin_semaphore_token_env_file }}"
     mode: '0600'
     owner: root
     group: root
   become: true
   no_log: true
+  when: not olivetin_semaphore_creds_available
   notify:
     - Restart olivetin service
     - Restart olivetin container
+
+# --- Common ------------------------------------------------------------------
 
 - name: Deploy Semaphore scraper script
   ansible.builtin.template:
@@ -98,6 +206,9 @@
     - Restart olivetin service
 
 - name: Add Semaphore token env file to the OliveTin Docker container
+  # systemd credentials only apply to systemd-managed services — Docker has
+  # no equivalent built-in mechanism, so container installs always get the
+  # token as a plain environment variable (visible via `docker inspect`).
   ansible.builtin.set_fact:
     olivetin_docker_env: "{{ olivetin_docker_env | combine({'SEMAPHORE_API_TOKEN': olivetin_semaphore_api_token}) }}"
   when: olivetin_install_method == 'docker'
@@ -135,12 +246,29 @@
     daemon_reload: true
   become: true
 
+- name: Decrypt Semaphore token for the immediate bootstrap run
+  # The systemd timer's own runs get the token via LoadCredentialEncrypted=/
+  # EnvironmentFile= automatically; this one-off run is invoked directly by
+  # Ansible (not systemd), so it has no $CREDENTIALS_DIRECTORY of its own.
+  ansible.builtin.command:
+    cmd: "systemd-creds decrypt --name=semaphore_api_token {{ olivetin_semaphore_token_cred_file }} -"
+  become: true
+  register: olivetin_bootstrap_token
+  no_log: true
+  changed_when: false
+  when: olivetin_semaphore_creds_available
+
 - name: Run Semaphore scraper once now so actions exist immediately
   ansible.builtin.command:
     cmd: "{{ olivetin_semaphore_scraper_script_path_resolved }}"
   become: true
   environment:
-    SEMAPHORE_API_TOKEN: "{{ olivetin_semaphore_api_token }}"
+    SEMAPHORE_API_TOKEN: >-
+      {{
+        olivetin_bootstrap_token.stdout
+        if olivetin_semaphore_creds_available
+        else olivetin_semaphore_api_token
+      }}
   register: olivetin_scraper_first_run
   changed_when: "'OK:' in olivetin_scraper_first_run.stdout"
   failed_when: olivetin_scraper_first_run.rc != 0
