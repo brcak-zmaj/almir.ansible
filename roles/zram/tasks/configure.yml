@@ -67,10 +67,17 @@
   tags: zram
 
 - name: Check for zram module in kernel modules
+  # recurse must be true -- the zram driver has lived in a drivers/block/zram/
+  # subdirectory (not directly under drivers/block/) since it left staging,
+  # so a non-recursive search here always misses it on any modern kernel
+  # (confirmed on pve-01's Proxmox kernel 2026-08-31: this false negative
+  # caused the role to then try installing linux-modules-extra-<kernel>,
+  # a Debian/Ubuntu split-kernel-package name that doesn't exist for
+  # Proxmox's custom pve-kernel packaging, hard-failing the whole task).
   ansible.builtin.find:
     paths: "/lib/modules/{{ ansible_kernel }}/kernel/drivers/block"
     patterns: "zram.ko*"
-    recurse: false
+    recurse: true
   register: zram_module_file
   when: not zram_module_loaded.stat.exists
   tags: zram
